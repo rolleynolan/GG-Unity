@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
 
 public class ScheduleUI : MonoBehaviour
 {
@@ -11,34 +15,43 @@ public class ScheduleUI : MonoBehaviour
 
     void OnEnable()
     {
-        PopulateFakeSchedule();
+        StartCoroutine(LoadRealSchedule());
     }
 
-    void PopulateFakeSchedule()
+    IEnumerator LoadRealSchedule()
     {
         foreach (Transform child in contentParent)
-        {
             Destroy(child.gameObject);
+
+        string path = Path.Combine(Application.streamingAssetsPath, "schedule_by_team.json");
+        UnityWebRequest request = UnityWebRequest.Get(path);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Failed to load schedule: " + request.error);
+            yield break;
         }
 
-        List<string> fakeSchedule = new List<string>
-        {
-            "Week 1: vs TBD",
-            "Week 2: @ TBD",
-            "Week 3: vs TBD",
-            "Week 4: @ TBD",
-            "Week 5: vs TBD",
-            "Week 6: @ TBD",
-            "Week 7: vs TBD",
-            "Week 8: @ TBD",
-            "Week 9: vs TBD",
-            "Week 10: @ TBD"
-        };
+        string json = request.downloadHandler.text;
+        JObject root = JObject.Parse(json);
+        string team = PlayerPrefs.GetString("selected_team", "BUF");
 
-        foreach (string week in fakeSchedule)
+        if (!root.ContainsKey(team))
         {
+            Debug.LogError("Team not found in schedule JSON: " + team);
+            yield break;
+        }
+
+        foreach (var game in root[team])
+        {
+            int week = (int)game["week"];
+            string opponent = (string)game["opponent"];
+            bool home = (bool)game["home"];
+            string label = $"Week {week}: {(home ? "vs" : "@")} {opponent}";
+
             GameObject row = Instantiate(weekRowPrefab, contentParent);
-            row.transform.Find("WeekText").GetComponent<Text>().text = week;
+            row.transform.Find("WeekText").GetComponent<Text>().text = label;
         }
     }
 
