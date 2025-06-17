@@ -9,6 +9,8 @@ public class DashboardUI : MonoBehaviour
     public Text phaseText;
     public Text opponentText;
     public Text recordText;
+    public GameObject dashboardPanel;
+    public GameObject rosterPanel;
 
     void Start()
     {
@@ -27,7 +29,10 @@ public class DashboardUI : MonoBehaviour
 
     public void OnViewRosterPressed()
     {
-        Debug.Log("View Roster pressed");
+        if (dashboardPanel != null)
+            dashboardPanel.SetActive(false);
+        if (rosterPanel != null)
+            rosterPanel.SetActive(true);
     }
 
     public void OnViewDepthChartPressed()
