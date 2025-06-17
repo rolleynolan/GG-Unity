@@ -3,22 +3,22 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuUI : MonoBehaviour
 {
-    public void OnNewGameClicked()
+    public void OnNewGamePressed()
     {
-        // Load GM selection scene or show a panel
+        SceneManager.LoadScene("NewGameSetup");
     }
 
-    public void OnLoadGameClicked()
+    public void OnLoadGamePressed()
     {
-        // Load save selection logic (to be implemented)
+        Debug.Log("Load Game pressed");
     }
 
-    public void OnSettingsClicked()
+    public void OnSettingsPressed()
     {
-        // Show settings panel (future)
+        Debug.Log("Settings opened");
     }
 
-    public void OnExitClicked()
+    public void OnExitGamePressed()
     {
         Application.Quit();
     }
