@@ -10,7 +10,7 @@ public class MainMenuUI : MonoBehaviour
 
     public void OnLoadGamePressed()
     {
-        Debug.Log("Load Game pressed");
+        SceneManager.LoadScene("TeamSelection");
     }
 
     public void OnSettingsPressed()
