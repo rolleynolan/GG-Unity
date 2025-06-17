@@ -11,6 +11,7 @@ public class DashboardUI : MonoBehaviour
     public Text recordText;
     public GameObject dashboardPanel;
     public GameObject rosterPanel;
+    public GameObject schedulePanel;
 
     void Start()
     {
@@ -42,7 +43,10 @@ public class DashboardUI : MonoBehaviour
 
     public void OnViewSchedulePressed()
     {
-        Debug.Log("View Schedule pressed");
+        if (dashboardPanel != null)
+            dashboardPanel.SetActive(false);
+        if (schedulePanel != null)
+            schedulePanel.SetActive(true);
     }
 
     public void OnSimWeekPressed()
