@@ -1,23 +1,56 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
+using TMPro;
+
+// This script dynamically loads team data from teams.json, instantiates a
+// TeamRowUI prefab for each team, wires up click events, and tracks the
+// selected team for the next scene.
+
+[System.Serializable]
+public class TeamJson
+{
+    public string city;
+    public string name;
+    public string abbreviation;
+    public string conference;
+}
+
+[System.Serializable]
+public class TeamDataList
+{
+    public List<TeamJson> teams;
+}
+
+[System.Serializable]
+public class TeamData
+{
+    public string abbreviation;
+    public string teamName;
+    public string conference;
+    public Sprite logo;
+}
 
 public class TeamSelectionUI : MonoBehaviour
 {
-    public GameObject teamRowPrefab;
-    public Transform contentParent;
+    public GameObject teamRowPrefab;         // Prefab representing a team row
+    public Transform contentParent;          // Parent for instantiated rows
     public Button confirmButton;
 
     private string selectedAbbreviation = "";
 
-    private void Start()
+    void Start()
     {
-        confirmButton.interactable = false;
+        if (confirmButton != null)
+        {
+            confirmButton.interactable = false;
+        }
         PopulateTeams();
     }
 
-    private void PopulateTeams()
+    void PopulateTeams()
     {
+        if (teamRowPrefab == null || contentParent == null) return;
+
         TextAsset json = Resources.Load<TextAsset>("teams");
         if (json == null)
         {
@@ -31,10 +64,16 @@ public class TeamSelectionUI : MonoBehaviour
         {
             GameObject row = Instantiate(teamRowPrefab, contentParent);
             TeamRowUI ui = row.GetComponent<TeamRowUI>();
+            if (ui == null) continue;
 
             Sprite logo = Resources.Load<Sprite>($"teamsprites/{team.abbreviation}");
-
-            TeamDataUI uiData = new TeamDataUI($"{team.city} {team.name}", team.conference, team.abbreviation, logo);
+            TeamData uiData = new TeamData
+            {
+                teamName = $"{team.city} {team.name}",
+                conference = team.conference,
+                abbreviation = team.abbreviation,
+                logo = logo
+            };
             ui.SetData(uiData);
 
             ui.OnRowClicked = () =>
@@ -50,7 +89,9 @@ public class TeamSelectionUI : MonoBehaviour
     public void OnConfirmPressed()
     {
         if (string.IsNullOrEmpty(selectedAbbreviation)) return;
-        SceneManager.LoadScene("GameWorld");
+
+        PlayerPrefs.SetString("selected_team", selectedAbbreviation);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("GameWorld");
     }
 
     public void OnBackPressed()
