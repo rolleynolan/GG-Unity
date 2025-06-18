@@ -3,6 +3,25 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+// This script dynamically loads team data from teams.json, instantiates a
+// TeamRowUI prefab for each team, wires up click events, and tracks the
+// selected team for the next scene.
+
+[System.Serializable]
+public class TeamJson
+{
+    public string city;
+    public string name;
+    public string abbreviation;
+    public string conference;
+}
+
+[System.Serializable]
+public class TeamDataList
+{
+    public List<TeamJson> teams;
+}
+
 [System.Serializable]
 public class TeamData
 {
@@ -14,13 +33,11 @@ public class TeamData
 
 public class TeamSelectionUI : MonoBehaviour
 {
-    public GameObject teamRowPrefab;         // Assign the prefab from UI
-    public Transform teamRowParent;          // Assign the Content object from ScrollView
+    public GameObject teamRowPrefab;         // Prefab representing a team row
+    public Transform contentParent;          // Parent for instantiated rows
     public Button confirmButton;
 
-    public List<TeamData> allTeams;          // Populate in Inspector or from JSON later
-
-    private string selectedTeam = "";
+    private string selectedAbbreviation = "";
 
     void Start()
     {
@@ -28,40 +45,53 @@ public class TeamSelectionUI : MonoBehaviour
         {
             confirmButton.interactable = false;
         }
-        GenerateTeamRows();
+        PopulateTeams();
     }
 
-    void GenerateTeamRows()
+    void PopulateTeams()
     {
-        if (teamRowPrefab == null || teamRowParent == null) return;
+        if (teamRowPrefab == null || contentParent == null) return;
 
-        foreach (var team in allTeams)
+        TextAsset json = Resources.Load<TextAsset>("teams");
+        if (json == null)
         {
-            GameObject row = Instantiate(teamRowPrefab, teamRowParent);
-            TeamRowUI rowUI = row.GetComponent<TeamRowUI>();
-            if (rowUI != null)
-            {
-                rowUI.SetData(team);
-                rowUI.OnRowClicked = () => OnTeamSelected(team);
-            }
+            Debug.LogError("teams.json not found in Resources folder.");
+            return;
         }
-    }
 
-    void OnTeamSelected(TeamData team)
-    {
-        selectedTeam = team.abbreviation;
-        Debug.Log("Selected Team: " + selectedTeam);
-        if (confirmButton != null)
+        TeamDataList dataList = JsonUtility.FromJson<TeamDataList>("{\"teams\":" + json.text + "}");
+
+        foreach (var team in dataList.teams)
         {
-            confirmButton.interactable = true;
+            GameObject row = Instantiate(teamRowPrefab, contentParent);
+            TeamRowUI ui = row.GetComponent<TeamRowUI>();
+            if (ui == null) continue;
+
+            Sprite logo = Resources.Load<Sprite>($"teamsprites/{team.abbreviation}");
+            TeamData uiData = new TeamData
+            {
+                teamName = $"{team.city} {team.name}",
+                conference = team.conference,
+                abbreviation = team.abbreviation,
+                logo = logo
+            };
+            ui.SetData(uiData);
+
+            ui.OnRowClicked = () =>
+            {
+                selectedAbbreviation = team.abbreviation;
+                PlayerPrefs.SetString("selected_team", selectedAbbreviation);
+                confirmButton.interactable = true;
+                Debug.Log("Selected Team: " + selectedAbbreviation);
+            };
         }
     }
 
     public void OnConfirmPressed()
     {
-        if (string.IsNullOrEmpty(selectedTeam)) return;
+        if (string.IsNullOrEmpty(selectedAbbreviation)) return;
 
-        PlayerPrefs.SetString("selected_team", selectedTeam);
+        PlayerPrefs.SetString("selected_team", selectedAbbreviation);
         UnityEngine.SceneManagement.SceneManager.LoadScene("GameWorld");
     }
 
