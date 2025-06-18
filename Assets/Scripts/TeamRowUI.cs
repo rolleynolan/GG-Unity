@@ -17,7 +17,7 @@ public class TeamRowUI : MonoBehaviour, IPointerClickHandler
         if (data == null) return;
         if (logoImage != null) logoImage.sprite = data.logo;
         if (nameText != null) nameText.text = data.teamName;
-        if (conferenceText != null) conferenceText.text = data.conference;
+        if (conferenceText != null) conferenceText.text = data.teamConference;
         teamAbbreviation = data.abbreviation;
     }
 
