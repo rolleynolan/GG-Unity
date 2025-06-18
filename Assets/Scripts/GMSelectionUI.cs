@@ -5,7 +5,7 @@ public class GMSelectionUI : MonoBehaviour
 {
     public void OnCreateNewGMPressed()
     {
-        SceneManager.LoadScene("TeamSelection");
+        SceneManager.LoadScene("GMCreator");
     }
 
     public void OnUseExistingGMPressed()
