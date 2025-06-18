@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 // TeamRowUI prefab for each team, wires up click events, and tracks the
 // selected team for the next scene.
 
-
 public class TeamSelectionUI : MonoBehaviour
 {
     public GameObject teamRowPrefab;         // Prefab representing a team row
