@@ -7,6 +7,21 @@ using UnityEngine.SceneManagement;
 // TeamRowUI prefab for each team, wires up click events, and tracks the
 // selected team for the next scene.
 
+[System.Serializable]
+public class TeamData
+{
+    public string city;
+    public string name;
+    public string conference;
+    public string abbreviation;
+}
+
+[System.Serializable]
+public class TeamDataList
+{
+    public TeamData[] teams;
+}
+
 public class TeamSelectionUI : MonoBehaviour
 {
     public GameObject teamRowPrefab;         // Prefab representing a team row
@@ -44,7 +59,7 @@ public class TeamSelectionUI : MonoBehaviour
             if (ui == null) continue;
 
             Sprite logo = Resources.Load<Sprite>($"teamsprites/{team.abbreviation}");
-            TeamDataUI uiData = new TeamDataUI
+            TeamRowUI.TeamDataUI uiData = new TeamRowUI.TeamDataUI
             {
                 teamName = $"{team.city} {team.name}",
                 teamConference = team.conference,
