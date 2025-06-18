@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -97,6 +96,6 @@ public class TeamSelectionUI : MonoBehaviour
 
     public void OnBackPressed()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("NewGameSetup");
+        SceneManager.LoadScene("NewGameSetup");
     }
 }
