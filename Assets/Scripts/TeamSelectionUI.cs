@@ -1,12 +1,36 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 // This script dynamically loads team data from teams.json, instantiates a
 // TeamRowUI prefab for each team, wires up click events, and tracks the
 // selected team for the next scene.
 
+[System.Serializable]
+public class TeamJson
+{
+    public string city;
+    public string name;
+    public string abbreviation;
+    public string conference;
+}
+
+[System.Serializable]
+public class TeamDataList
+{
+    public List<TeamJson> teams;
+}
+
+[System.Serializable]
+public class TeamData
+{
+    public string teamName;
+    public string teamConference;
+    public string abbreviation;
+    public Sprite logo;
+}
 
 public class TeamSelectionUI : MonoBehaviour
 {
@@ -45,12 +69,14 @@ public class TeamSelectionUI : MonoBehaviour
             if (ui == null) continue;
 
             Sprite logo = Resources.Load<Sprite>($"teamsprites/{team.abbreviation}");
-            TeamDataUI uiData = new TeamDataUI(
-                $"{team.city} {team.name}",
-                team.conference,
-                team.abbreviation,
-                logo
-            );
+            // Map TeamData to TeamRowUI.TeamDataUI
+            var uiData = new TeamRowUI.TeamDataUI
+            {
+                teamName = $"{team.city} {team.name}",
+                teamConference = team.conference,
+                abbreviation = team.abbreviation,
+                logo = logo
+            };
             ui.SetData(uiData);
 
             ui.OnRowClicked = () =>

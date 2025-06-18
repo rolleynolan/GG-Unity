@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-[Serializable]
-public class TeamData
+public class TeamID
 {
     public string city;
     public string name;
@@ -12,8 +11,4 @@ public class TeamData
     public string id;
 }
 
-[Serializable]
-public class TeamDataList
-{
-    public List<TeamData> teams;
-}
+

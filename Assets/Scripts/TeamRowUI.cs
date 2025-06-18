@@ -12,14 +12,23 @@ public class TeamRowUI : MonoBehaviour, IPointerClickHandler
     public string teamAbbreviation;
     public System.Action OnRowClicked;
 
-    public void SetData(TeamDataUI data)
+    // Make sure to define TeamDataUI in your project, for example:
+    public class TeamDataUI
     {
-        if (data == null) return;
-        if (logoImage != null) logoImage.sprite = data.logo;
-        if (nameText != null) nameText.text = data.teamName;
-        if (conferenceText != null) conferenceText.text = data.conference;
-        teamAbbreviation = data.abbreviation;
+        public string teamName;
+        public string teamConference;
+        public string abbreviation;
+        public Sprite logo;
     }
+    
+        public void SetData(TeamDataUI data)
+        {
+            if (data == null) return;
+            if (logoImage != null) logoImage.sprite = data.logo;
+            if (nameText != null) nameText.text = data.teamName;
+            if (conferenceText != null) conferenceText.text = data.teamConference;
+            teamAbbreviation = data.abbreviation;
+        }
 
     public void OnPointerClick(PointerEventData eventData)
     {
