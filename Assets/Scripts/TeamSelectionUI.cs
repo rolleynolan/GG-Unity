@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [System.Serializable]
-public class TeamData
+public class TeamDataUI
 {
     public string abbreviation;
     public string teamName;
@@ -18,7 +18,7 @@ public class TeamSelectionUI : MonoBehaviour
     public Transform teamRowParent;          // Assign the Content object from ScrollView
     public Button confirmButton;
 
-    public List<TeamData> allTeams;          // Populate in Inspector or from JSON later
+    public List<TeamDataUI> allTeams;          // Populate in Inspector or from JSON later
 
     private string selectedTeam = "";
 
@@ -47,7 +47,7 @@ public class TeamSelectionUI : MonoBehaviour
         }
     }
 
-    void OnTeamSelected(TeamData team)
+    void OnTeamSelected(TeamDataUI team)
     {
         selectedTeam = team.abbreviation;
         Debug.Log("Selected Team: " + selectedTeam);

@@ -12,7 +12,7 @@ public class TeamRowUI : MonoBehaviour, IPointerClickHandler
     public string teamAbbreviation;
     public System.Action OnRowClicked;
 
-    public void SetData(TeamData data)
+    public void SetData(TeamDataUI data)
     {
         if (data == null) return;
         if (logoImage != null) logoImage.sprite = data.logo;
