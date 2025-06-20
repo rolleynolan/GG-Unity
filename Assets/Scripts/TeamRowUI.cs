@@ -12,27 +12,54 @@ public class TeamRowUI : MonoBehaviour, IPointerClickHandler
     public string teamAbbreviation;
     public System.Action OnRowClicked;
 
-    // Make sure to define TeamDataUI in your project, for example:
-    public class TeamDataUI
-    {
-        // Example fields for TeamDataUI
-        public Sprite logo;
-        public string teamName;
-        public string teamConference;
-        public string abbreviation;
-    }
+    // Data for populating the row. Defined in TeamDataUI.cs
 
     public void SetData(TeamDataUI data)
     {
-        if (data == null) return;
-        if (logoImage != null) logoImage.sprite = data.logo;
-        if (nameText != null) nameText.text = data.teamName;
-        if (conferenceText != null) conferenceText.text = data.teamConference;
+        if (data == null)
+        {
+            Debug.LogWarning("TeamRowUI.SetData called with null data!");
+            return;
+        }
+
+        Debug.Log($"Applying Team Data: {data.teamName}, {data.teamConference}, {data.abbreviation}");
+
+        if (logoImage != null)
+        {
+            logoImage.sprite = data.logo;
+            Debug.Log($"Logo assigned: {data.logo}");
+        }
+        else
+        {
+            Debug.LogWarning("Logo Image reference is missing on TeamRowUI.");
+        }
+
+        if (nameText != null)
+        {
+            nameText.text = data.teamName;
+            Debug.Log($"Name text set: {data.teamName}");
+        }
+        else
+        {
+            Debug.LogWarning("Name Text reference is missing on TeamRowUI.");
+        }
+
+        if (conferenceText != null)
+        {
+            conferenceText.text = data.teamConference;
+            Debug.Log($"Conference text set: {data.teamConference}");
+        }
+        else
+        {
+            Debug.LogWarning("Conference Text reference is missing on TeamRowUI.");
+        }
+
         teamAbbreviation = data.abbreviation;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        Debug.Log($"TeamRowUI clicked: {teamAbbreviation}");
         OnRowClicked?.Invoke();
     }
 }
