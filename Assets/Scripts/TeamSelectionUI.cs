@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using System.IO;
 
 // This script dynamically loads team data from teams.json, instantiates a
 // TeamRowUI prefab for each team, wires up click events, and tracks the
@@ -28,7 +30,12 @@ public class TeamSelectionUI : MonoBehaviour
     public Transform contentParent;          // Parent for instantiated rows
     public Button confirmButton;
 
+    [Header("Roster Preview")]
+    public GameObject playerRowPrefab;
+    public Transform rosterContent;
+
     private string selectedAbbreviation = "";
+    private Dictionary<string, TeamInfo> teamsByAbbrev;
 
     void Start()
     {
@@ -36,6 +43,7 @@ public class TeamSelectionUI : MonoBehaviour
         {
             confirmButton.interactable = false;
         }
+        LoadLeagueState();
         PopulateTeams();
     }
 
@@ -77,6 +85,7 @@ public class TeamSelectionUI : MonoBehaviour
                 PlayerPrefs.SetString("selected_team", selectedAbbreviation);
                 confirmButton.interactable = true;
                 Debug.Log("Selected Team: " + selectedAbbreviation);
+                PopulateRoster(selectedAbbreviation);
             };
         }
     }
@@ -92,5 +101,45 @@ public class TeamSelectionUI : MonoBehaviour
     public void OnBackPressed()
     {
         SceneManager.LoadScene("NewGameSetup");
+    }
+
+    void LoadLeagueState()
+    {
+        var path = Path.Combine(Application.dataPath, "..", "save", "league_state.json");
+        if (!File.Exists(path))
+        {
+            Debug.LogWarning("league_state.json not found at " + path);
+            return;
+        }
+        string json = File.ReadAllText(path);
+        LeagueState state = JsonUtility.FromJson<LeagueState>(json);
+        teamsByAbbrev = new Dictionary<string, TeamInfo>();
+        if (state != null && state.teams != null)
+        {
+            foreach (var t in state.teams)
+            {
+                teamsByAbbrev[t.abbreviation] = t;
+            }
+        }
+    }
+
+    void PopulateRoster(string abbreviation)
+    {
+        if (rosterContent == null || playerRowPrefab == null || teamsByAbbrev == null)
+            return;
+        foreach (Transform child in rosterContent)
+        {
+            Destroy(child.gameObject);
+        }
+        if (teamsByAbbrev.TryGetValue(abbreviation, out var team) && team.roster != null)
+        {
+            foreach (var player in team.roster)
+            {
+                var rowObj = Instantiate(playerRowPrefab, rosterContent);
+                var row = rowObj.GetComponent<PlayerRow>();
+                if (row != null)
+                    row.SetData(player);
+            }
+        }
     }
 }

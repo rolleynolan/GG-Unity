@@ -18,3 +18,6 @@ UserSettings/
 *.svd
 *.db
 *.opendb
+save/
+__pycache__/
+*.pyc
