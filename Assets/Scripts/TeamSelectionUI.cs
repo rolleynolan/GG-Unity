@@ -41,6 +41,8 @@ public class TeamSelectionUI : MonoBehaviour
 
     void PopulateTeams()
     {
+        Debug.Log("Attempting to load teams.json...");
+
         if (teamRowPrefab == null || contentParent == null) return;
 
         TextAsset json = Resources.Load<TextAsset>("teams");
@@ -49,7 +51,8 @@ public class TeamSelectionUI : MonoBehaviour
             Debug.LogError("teams.json not found in Resources folder.");
             return;
         }
-
+        Debug.Log("teams.json loaded successfully.");
+        Debug.Log("JSON Content: " + json.text);
         TeamDataList dataList = JsonUtility.FromJson<TeamDataList>("{\"teams\":" + json.text + "}");
 
         foreach (var team in dataList.teams)
