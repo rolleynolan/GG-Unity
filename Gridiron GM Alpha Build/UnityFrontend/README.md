@@ -9,6 +9,7 @@ This folder contains a simple Unity UI scaffold for Gridiron GM.
 - Allows the user to create or select a GM profile.
 - Lets the player choose a team from a dropdown list.
 - Selecting a team now shows a scrollable roster with key player info.
+- The Team Selection screen also previews each roster when a team is clicked.
 - A `Simulate Week` button executes `python scripts/run_weekly_simulation.py` and refreshes the data.
 
 ## Usage
