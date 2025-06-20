@@ -62,7 +62,7 @@ public class TeamSelectionUI : MonoBehaviour
             if (ui == null) continue;
 
             Sprite logo = Resources.Load<Sprite>($"teamsprites/{team.abbreviation}");
-            TeamRowUI.TeamDataUI uiData = new TeamRowUI.TeamDataUI
+            TeamDataUI uiData = new TeamDataUI
             {
                 teamName = $"{team.city} {team.name}",
                 teamConference = team.conference,
