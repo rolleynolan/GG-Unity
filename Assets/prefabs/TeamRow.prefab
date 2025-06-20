@@ -264,9 +264,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32fd81e565b1a164b9b27d3f17dc8467, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logoImage: {fileID: 0}
-  nameText: {fileID: 0}
-  conferenceText: {fileID: 0}
+  logoImage: {fileID: 2066392291632843872}
+  nameText: {fileID: 8436826697955408626}
+  conferenceText: {fileID: 134775940823328123}
   teamAbbreviation: 
 --- !u!114 &7923731118198394440
 MonoBehaviour:

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 // This script dynamically loads team data from teams.json, instantiates a
 // TeamRowUI prefab for each team, wires up click events, and tracks the
@@ -54,6 +55,7 @@ public class TeamSelectionUI : MonoBehaviour
         Debug.Log("teams.json loaded successfully.");
         Debug.Log("JSON Content: " + json.text);
         TeamDataList dataList = JsonUtility.FromJson<TeamDataList>("{\"teams\":" + json.text + "}");
+        dataList.teams = dataList.teams.OrderBy(t => t.city + t.name).ToArray();
 
         foreach (var team in dataList.teams)
         {
