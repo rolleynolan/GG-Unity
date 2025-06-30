@@ -15,14 +15,8 @@ public class MainMenuController : MonoBehaviour
 
     [Header("League Settings")]
     public Dropdown teamDropdown;
-    public Text weekText;
-    public Text resultsText;
     public Button simulateWeekButton;
     public TMP_Text simStatusText;
-
-    [Header("Results UI")]
-    public GameObject gameResultRowPrefab;
-    public Transform resultsContent;
 
     [Header("Roster UI")]
     public GameObject playerRowPrefab;
@@ -41,15 +35,7 @@ public class MainMenuController : MonoBehaviour
             teamDropdown.onValueChanged.AddListener(delegate { OnTeamSelected(); });
         if (leagueState != null)
         {
-            UpdateUI();
             OnTeamSelected();
-        }
-        else
-        {
-            if (weekText != null)
-                weekText.text = "Week N/A";
-            if (resultsText != null)
-                resultsText.text = "No league data.";
         }
 
         if (createGmButton != null)
@@ -62,20 +48,19 @@ public class MainMenuController : MonoBehaviour
     {
         if (!File.Exists(leagueStatePath))
         {
-            UnityEngine.Debug.LogError("league_state.json not found at " + leagueStatePath);
+            Debug.LogError($"League state file not found at {leagueStatePath}");
             return;
         }
-        string json = File.ReadAllText(leagueStatePath);
-        leagueState = JsonUtility.FromJson<LeagueState>(json);
 
-        UnityEngine.Debug.Log("Current Week: " + leagueState.week);
-        if (leagueState.results_by_week != null && leagueState.results_by_week.TryGetValue("1", out var week1))
+        try
         {
-            for (int i = 0; i < Math.Min(3, week1.Count); i++)
-            {
-                var res = week1[i];
-                UnityEngine.Debug.Log($"{res.away} {res.away_score} @ {res.home} {res.home_score}");
-            }
+            string json = File.ReadAllText(leagueStatePath);
+            leagueState = JsonUtility.FromJson<LeagueStateWrapper>($"{{\"leagueState\":{json}}}").leagueState;
+            Debug.Log($"Loaded league state with {leagueState.teams.Count} teams and {leagueState.free_agents.Count} free agents.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse league state: {ex.Message}");
         }
     }
 
@@ -86,7 +71,7 @@ public class MainMenuController : MonoBehaviour
         var options = new List<string>();
         foreach (var team in leagueState.teams)
         {
-            options.Add($"{team.abbreviation} - {team.name}");
+            options.Add(team.team);
         }
         teamDropdown.AddOptions(options);
     }
@@ -107,64 +92,6 @@ public class MainMenuController : MonoBehaviour
         gmDropdown.AddOptions(options);
     }
 
-    void UpdateUI()
-    {
-        if (leagueState == null) return;
-        if (weekText != null)
-            weekText.text = "Week " + leagueState.week;
-        if (resultsText != null)
-        {
-            if (leagueState.results_by_week != null && leagueState.results_by_week.TryGetValue(leagueState.week.ToString(), out var results))
-            {
-                var lines = new List<string>();
-                foreach (var res in results)
-                {
-                    lines.Add($"{res.away} {res.away_score} @ {res.home} {res.home_score}");
-                }
-                resultsText.text = string.Join("\n", lines);
-            }
-            else
-            {
-                resultsText.text = "No results yet.";
-            }
-        }
-    }
-
-    void PopulateGameResults()
-    {
-        if (resultsContent == null || gameResultRowPrefab == null || leagueState == null)
-            return;
-
-        foreach (Transform child in resultsContent)
-        {
-            Destroy(child.gameObject);
-        }
-
-        if (leagueState.results_by_week != null &&
-            leagueState.results_by_week.TryGetValue(leagueState.week.ToString(), out var games))
-        {
-            foreach (var game in games)
-            {
-                var rowObj = Instantiate(gameResultRowPrefab, resultsContent);
-                var row = rowObj.GetComponent<GameResultRow>();
-                if (row != null)
-                {
-                    row.SetData(game);
-                }
-                else
-                {
-                    var texts = rowObj.GetComponentsInChildren<TMP_Text>();
-                    if (texts.Length >= 4)
-                    {
-                        texts[0].text = game.home;
-                        texts[1].text = game.away;
-                        texts[2].text = game.home_score.ToString();
-                        texts[3].text = game.away_score.ToString();
-                    }
-                }
-            }
-        }
-    }
 
     void OnTeamSelected()
     {
@@ -174,7 +101,7 @@ public class MainMenuController : MonoBehaviour
         PopulateTeamRoster(team);
     }
 
-    void PopulateTeamRoster(TeamInfo selectedTeam)
+    void PopulateTeamRoster(TeamRosterEntry selectedTeam)
     {
         if (selectedTeam == null || rosterContent == null || playerRowPrefab == null)
             return;
@@ -184,9 +111,9 @@ public class MainMenuController : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        if (selectedTeam.roster != null)
+        if (selectedTeam.players != null)
         {
-            foreach (var player in selectedTeam.roster)
+            foreach (var player in selectedTeam.players)
             {
                 var rowObj = Instantiate(playerRowPrefab, rosterContent);
                 var row = rowObj.GetComponent<PlayerRow>();
@@ -249,8 +176,6 @@ public class MainMenuController : MonoBehaviour
         }
 
         LoadLeagueState();
-        UpdateUI();
-        PopulateGameResults();
         OnTeamSelected();
     }
 }

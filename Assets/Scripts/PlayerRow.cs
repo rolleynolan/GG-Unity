@@ -5,21 +5,16 @@ public class PlayerRow : MonoBehaviour
 {
     public TMP_Text nameText;
     public TMP_Text positionText;
-    public TMP_Text ageText;
+    public TMP_Text collegeText;
     public TMP_Text overallText;
-    public TMP_Text contractText;
 
-    public void SetData(PlayerInfo info)
+    public void SetData(PlayerData data)
     {
-        if (info == null) return;
-        if (nameText != null) nameText.text = info.name;
-        if (positionText != null) positionText.text = info.position;
-        if (ageText != null) ageText.text = info.age.ToString();
-        if (overallText != null) overallText.text = info.overall.ToString();
-        if (contractText != null)
-        {
-            int years = info.contract != null ? info.contract.years_left : 0;
-            contractText.text = years.ToString();
-        }
+        if (data == null) return;
+
+        if (nameText != null) nameText.text = data.name;
+        if (positionText != null) positionText.text = data.position;
+        if (collegeText != null) collegeText.text = data.college;
+        if (overallText != null) overallText.text = data.overall.ToString();
     }
 }
