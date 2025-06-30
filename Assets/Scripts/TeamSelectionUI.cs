@@ -45,6 +45,7 @@ public class TeamSelectionUI : MonoBehaviour
     [Header("Roster Preview")]
     public GameObject playerRowPrefab;
     public Transform rosterContent;
+    public Transform rosterContentParent;
 
     private string selectedAbbreviation = "";
     private Dictionary<string, TeamInfo> teamsByAbbrev;
@@ -176,6 +177,38 @@ public class TeamSelectionUI : MonoBehaviour
                 if (row != null)
                     row.SetData(player);
             }
+        }
+    }
+
+    public void DisplayRosterForTeam(string abbreviation)
+    {
+        if (rosterContentParent == null || playerRowPrefab == null)
+            return;
+
+        foreach (Transform child in rosterContentParent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (rosters == null || !rosters.ContainsKey(abbreviation))
+        {
+            Debug.LogWarning($"Roster for {abbreviation} not found.");
+            return;
+        }
+
+        foreach (var player in rosters[abbreviation])
+        {
+            var rowObj = Instantiate(playerRowPrefab, rosterContentParent);
+
+            var nameText = rowObj.transform.Find("NameText")?.GetComponent<TextMeshProUGUI>();
+            var posText = rowObj.transform.Find("PosText")?.GetComponent<TextMeshProUGUI>();
+            var numText = rowObj.transform.Find("NumText")?.GetComponent<TextMeshProUGUI>();
+            var ovrText = rowObj.transform.Find("OvrText")?.GetComponent<TextMeshProUGUI>();
+
+            if (nameText != null) nameText.text = player.name;
+            if (posText != null) posText.text = player.position;
+            if (numText != null) numText.text = player.jersey_number.ToString();
+            if (ovrText != null) ovrText.text = player.overall.ToString();
         }
     }
 }
