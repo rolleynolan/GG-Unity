@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
 
 
 // This script dynamically loads team data from teams.json, instantiates a
@@ -26,6 +27,15 @@ public class TeamDataList
     public TeamData[] teams;
 }
 
+[System.Serializable]
+public class PlayerData
+{
+    public string name;
+    public string position;
+    public int jersey_number;
+    public int overall;
+}
+
 public class TeamSelectionUI : MonoBehaviour
 {
     public GameObject teamRowPrefab;         // Prefab representing a team row
@@ -38,6 +48,7 @@ public class TeamSelectionUI : MonoBehaviour
 
     private string selectedAbbreviation = "";
     private Dictionary<string, TeamInfo> teamsByAbbrev;
+    private Dictionary<string, List<PlayerData>> rosters;
 
     void Start()
     {
@@ -123,6 +134,28 @@ public class TeamSelectionUI : MonoBehaviour
             {
                 teamsByAbbrev[t.abbreviation] = t;
             }
+        }
+    }
+
+    void LoadRosters()
+    {
+        string path = Path.Combine(Application.persistentDataPath, "rosters.json");
+        if (!File.Exists(path))
+        {
+            Debug.LogError("rosters.json not found at " + path);
+            rosters = null;
+            return;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(path);
+            rosters = JsonConvert.DeserializeObject<Dictionary<string, List<PlayerData>>>(json);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Failed to parse rosters.json: " + ex.Message);
+            rosters = null;
         }
     }
 
