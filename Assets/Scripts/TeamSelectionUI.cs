@@ -28,7 +28,7 @@ public class TeamDataList
 }
 
 [System.Serializable]
-public class PlayerData
+public class SelectionPlayerData
 {
     public string name;
     public string position;
@@ -48,8 +48,8 @@ public class TeamSelectionUI : MonoBehaviour
     public Transform rosterContentParent;
 
     private string selectedAbbreviation = "";
-    private Dictionary<string, TeamInfo> teamsByAbbrev;
-    private Dictionary<string, List<PlayerData>> rosters;
+    private Dictionary<string, TeamRosterEntry> teamsByAbbrev;
+    private Dictionary<string, List<SelectionPlayerData>> rosters;
 
     void Start()
     {
@@ -127,13 +127,13 @@ public class TeamSelectionUI : MonoBehaviour
             return;
         }
         string json = File.ReadAllText(path);
-        LeagueState state = JsonUtility.FromJson<LeagueState>(json);
-        teamsByAbbrev = new Dictionary<string, TeamInfo>();
+        LeagueState state = JsonUtility.FromJson<LeagueStateWrapper>($"{{\"leagueState\":{json}}}").leagueState;
+        teamsByAbbrev = new Dictionary<string, TeamRosterEntry>();
         if (state != null && state.teams != null)
         {
             foreach (var t in state.teams)
             {
-                teamsByAbbrev[t.abbreviation] = t;
+                teamsByAbbrev[t.team] = t;
             }
         }
     }
@@ -151,7 +151,7 @@ public class TeamSelectionUI : MonoBehaviour
         try
         {
             string json = File.ReadAllText(path);
-            rosters = JsonConvert.DeserializeObject<Dictionary<string, List<PlayerData>>>(json);
+            rosters = JsonConvert.DeserializeObject<Dictionary<string, List<SelectionPlayerData>>>(json);
         }
         catch (System.Exception ex)
         {
@@ -168,9 +168,9 @@ public class TeamSelectionUI : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        if (teamsByAbbrev.TryGetValue(abbreviation, out var team) && team.roster != null)
+        if (teamsByAbbrev.TryGetValue(abbreviation, out var team) && team.players != null)
         {
-            foreach (var player in team.roster)
+            foreach (var player in team.players)
             {
                 var rowObj = Instantiate(playerRowPrefab, rosterContent);
                 var row = rowObj.GetComponent<PlayerRow>();

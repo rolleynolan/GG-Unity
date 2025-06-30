@@ -2,44 +2,30 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public class ContractInfo
-{
-    public int years_left;
-}
-
-[Serializable]
-public class PlayerInfo
+public class PlayerData
 {
     public string name;
     public string position;
-    public int age;
+    public string college;
     public int overall;
-    public ContractInfo contract;
 }
 
 [Serializable]
-public class TeamInfo
+public class TeamRosterEntry
 {
-    public string name;
-    public string abbreviation;
-    public List<PlayerInfo> roster;
-}
-
-[Serializable]
-public class GameResult
-{
-    public string home;
-    public string away;
-    public int home_score;
-    public int away_score;
-    public int home_yards;
-    public int away_yards;
+    public string team;
+    public List<PlayerData> players;
 }
 
 [Serializable]
 public class LeagueState
 {
-    public int week;
-    public Dictionary<string, List<GameResult>> results_by_week;
-    public List<TeamInfo> teams;
+    public List<TeamRosterEntry> teams;
+    public List<PlayerData> free_agents;
+}
+
+[Serializable]
+public class LeagueStateWrapper
+{
+    public LeagueState leagueState;
 }
