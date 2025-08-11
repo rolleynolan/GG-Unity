@@ -82,6 +82,13 @@ namespace GridironGM.UI.TeamSelection
                     Debug.LogError("[RosterPanelUI] PlayerRowUI missing on prefab. Add the script to the prefab root.");
                     continue;
                 }
+                var rt = content as RectTransform;
+                if (rt)
+                {
+                    Canvas.ForceUpdateCanvases();
+                    UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+                }
+
 
                 row.Set(p);
                 rendered++;

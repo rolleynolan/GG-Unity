@@ -20,10 +20,10 @@ namespace GridironGM.UI.TeamSelection
             if (!nameText || !posText || !ovrText)
                 TryAutoWireOrCreate();
 
-                #if UNITY_EDITOR
-                var names = string.Join(", ", GetComponentsInChildren<TMPro.TMP_Text>(true).Select(t => t.name));
-                Debug.Log($"[PlayerRowUI] Children TMPs: {names}. name:{(nameText?nameText.name:"null")} pos:{(posText?posText.name:"null")} ovr:{(ovrText?ovrText.name:"null")} age:{(ageText?ageText.name:"null")}");
-                #endif
+#if UNITY_EDITOR
+            var names = string.Join(", ", GetComponentsInChildren<TMPro.TMP_Text>(true).Select(t => t.name));
+            Debug.Log($"[PlayerRowUI] Children TMPs: {names}. name:{(nameText ? nameText.name : "null")} pos:{(posText ? posText.name : "null")} ovr:{(ovrText ? ovrText.name : "null")} age:{(ageText ? ageText.name : "null")}");
+#endif
 
 
             if (!nameText || !posText || !ovrText)
@@ -33,9 +33,13 @@ namespace GridironGM.UI.TeamSelection
             }
 
             nameText.text = $"{p.first} {p.last}";
-            posText.text  = p.pos;
-            ovrText.text  = p.ovr.ToString();
+            posText.text = p.pos;
+            ovrText.text = p.ovr.ToString();
             if (ageText) ageText.text = p.age > 0 ? p.age.ToString() : "";
+            
+            var self = transform as RectTransform;
+            if (self) UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(self);
+
         }
 
         private void TryAutoWireOrCreate()
