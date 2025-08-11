@@ -20,6 +20,8 @@ namespace GridironGM
         }
 
         public string SelectedTeamAbbr { get; set; } = "";
+        public string SelectedTeamCity { get; set; } = "";
+        public string SelectedTeamName { get; set; } = "";
 
         private void Awake()
         {
