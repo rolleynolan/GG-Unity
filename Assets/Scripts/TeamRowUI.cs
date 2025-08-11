@@ -2,7 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using GridironGM.Data;
 
+namespace GridironGM.UI
+{
 public class TeamRowUI : MonoBehaviour, IPointerClickHandler
 {
     public Image logoImage;
@@ -12,8 +15,7 @@ public class TeamRowUI : MonoBehaviour, IPointerClickHandler
     public string teamAbbreviation;
     public System.Action OnRowClicked;
 
-    // Data for populating the row. Defined in TeamDataUI.cs
-
+    // Existing method kept for backward compatibility
     public void SetData(TeamDataUI data)
     {
         if (data == null)
@@ -22,39 +24,41 @@ public class TeamRowUI : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        Debug.Log($"Applying Team Data: {data.teamName}, {data.teamConference}, {data.abbreviation}");
-
         if (logoImage != null)
         {
             logoImage.sprite = data.logo;
-            Debug.Log($"Logo assigned: {data.logo}");
-        }
-        else
-        {
-            Debug.LogWarning("Logo Image reference is missing on TeamRowUI.");
         }
 
         if (nameText != null)
         {
             nameText.text = data.teamName;
-            Debug.Log($"Name text set: {data.teamName}");
-        }
-        else
-        {
-            Debug.LogWarning("Name Text reference is missing on TeamRowUI.");
         }
 
         if (conferenceText != null)
         {
             conferenceText.text = data.teamConference;
-            Debug.Log($"Conference text set: {data.teamConference}");
-        }
-        else
-        {
-            Debug.LogWarning("Conference Text reference is missing on TeamRowUI.");
         }
 
         teamAbbreviation = data.abbreviation;
+    }
+
+    // New API for setting data from TeamData model
+    public void Set(TeamData data, System.Action onClick)
+    {
+        if (data == null) return;
+
+        if (nameText != null)
+        {
+            nameText.text = $"{data.city} {data.name}";
+        }
+
+        if (conferenceText != null)
+        {
+            conferenceText.text = data.conference;
+        }
+
+        teamAbbreviation = data.abbreviation;
+        OnRowClicked = onClick;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -62,4 +66,5 @@ public class TeamRowUI : MonoBehaviour, IPointerClickHandler
         Debug.Log($"TeamRowUI clicked: {teamAbbreviation}");
         OnRowClicked?.Invoke();
     }
+}
 }

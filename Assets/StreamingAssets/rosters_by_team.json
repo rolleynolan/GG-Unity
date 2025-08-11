@@ -1,0 +1,14 @@
+{
+  "ARI": [
+    {"id":1, "first":"Kyler", "last":"Murray", "pos":"QB", "ovr":85, "age":26},
+    {"id":2, "first":"James", "last":"Conner", "pos":"RB", "ovr":82, "age":28}
+  ],
+  "BUF": [
+    {"id":1, "first":"Josh", "last":"Allen", "pos":"QB", "ovr":92, "age":27},
+    {"id":2, "first":"Stefon", "last":"Diggs", "pos":"WR", "ovr":95, "age":29}
+  ],
+  "CHI": [
+    {"id":1, "first":"Justin", "last":"Fields", "pos":"QB", "ovr":80, "age":25},
+    {"id":2, "first":"DJ", "last":"Moore", "pos":"WR", "ovr":88, "age":26}
+  ]
+}
