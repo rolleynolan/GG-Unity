@@ -55,7 +55,7 @@ namespace GridironGM.UI.TeamSelection
             Debug.Log($"[TeamSelectionUI] Spawned {teams.Count} teams.");
         }
 
-        private void AddTeamRow(GridironGM.Data.TeamData t)
+        private void AddTeamRow(GridironGM.Data.TeamData team)
         {
             if (!teamListContent || !teamRowPrefab)
             {
@@ -64,14 +64,15 @@ namespace GridironGM.UI.TeamSelection
             }
 
             var rowGO = Instantiate(teamRowPrefab, teamListContent);
-            var row = rowGO.GetComponent<TeamRowUI>();
-            if (!row)
+            var rowUI = rowGO.GetComponent<TeamRowUI>();
+            if (rowUI == null)
             {
-                Debug.LogError("[TeamSelectionUI] TeamRowUI missing on teamRowPrefab.");
-                return;
+                Debug.LogError("[TeamSelection] teamRowPrefab is missing TeamRowUI.");
             }
-
-            row.Init(t, OnRowClicked);
+            else
+            {
+                rowUI.Init(team, OnRowClicked);
+            }
         }
 
         private void OnRowClicked(TeamRowUI row)
