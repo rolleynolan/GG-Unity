@@ -2,58 +2,106 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using GridironGM.Data;
+using Debug = UnityEngine.Debug;
 
-namespace GridironGM.UI
+namespace GridironGM.UI.TeamSelection
 {
     public class RosterPanelUI : MonoBehaviour
     {
-        [SerializeField] private Transform content;
-        [SerializeField] private PlayerRowUI playerRowPrefab;
-        [SerializeField] private TMP_Text messageText;
+        [Header("Wiring")]
+        [SerializeField] private Transform content;            // ScrollView Content
+        [SerializeField] private GameObject playerRowPrefab;   // Prefab with PlayerRowUI
+        [SerializeField] private TMP_Text messageText;         // Optional "No data" label
 
-        private RosterByTeam rosters;
+        [Header("Behavior")]
+        [SerializeField] private bool loadSelectedOnEnable = false;
+
+        private Dictionary<string, List<GridironGM.Data.PlayerData>> rosters;
 
         private void Awake()
         {
-            rosters = JsonLoader.LoadFromStreamingAssets<RosterByTeam>("rosters_by_team.json");
-            if (rosters == null)
+            TryAutoWire();
+            LoadRostersOnce();
+        }
+
+        private void OnEnable()
+        {
+            if (loadSelectedOnEnable && GridironGM.GameState.Instance != null)
             {
-                Debug.LogError("rosters_by_team.json missing or invalid");
-            }
-            else
-            {
-                Debug.Log($"Loaded rosters for {rosters.Count} teams");
+                var abbr = GridironGM.GameState.Instance.SelectedTeamAbbr;
+                if (!string.IsNullOrEmpty(abbr))
+                    ShowRosterForTeam(abbr);
             }
         }
 
         public void ShowRosterForTeam(string abbr)
         {
-            foreach (Transform child in content)
+            if (content == null || playerRowPrefab == null)
             {
-                Destroy(child.gameObject);
-            }
-
-            if (rosters == null || !rosters.TryGetValue(abbr, out var list) || list == null || list.Count == 0)
-            {
-                if (messageText != null)
-                {
-                    messageText.text = $"No roster data for {abbr}";
-                    messageText.gameObject.SetActive(true);
-                }
-                Debug.LogWarning($"No roster data for {abbr}");
+                Debug.LogError("[RosterPanelUI] Missing content or playerRowPrefab.");
                 return;
             }
 
-            messageText?.gameObject.SetActive(false);
+            // Clear old rows
+            for (int i = content.childCount - 1; i >= 0; i--)
+                Destroy(content.GetChild(i).gameObject);
 
-            foreach (PlayerData p in list.OrderBy(pl => pl.pos).ThenByDescending(pl => pl.ovr))
+            if (rosters == null || !rosters.TryGetValue(abbr, out var list) || list == null || list.Count == 0)
             {
-                var row = Instantiate(playerRowPrefab, content);
+                if (messageText) messageText.text = $"No roster data for {abbr}";
+                return;
+            }
+
+            if (messageText) messageText.text = "";
+
+            foreach (var p in list
+                .OrderBy(pl => pl.pos)
+                .ThenByDescending(pl => pl.ovr))
+            {
+                var go = Instantiate(playerRowPrefab, content);
+                var row = go.GetComponent<PlayerRowUI>();
+                if (!row)
+                {
+                    Debug.LogError("[RosterPanelUI] PlayerRowUI missing on prefab.");
+                    continue;
+                }
                 row.Set(p);
             }
 
-            Debug.Log($"{abbr} roster count: {list.Count}");
+            Debug.Log($"[RosterPanelUI] Rendered {list.Count} players for {abbr}.");
+        }
+
+        private void LoadRostersOnce()
+        {
+            if (rosters != null) return;
+
+            try
+            {
+                // Expecting GridironGM.Data.RosterByTeam : Dictionary<string, List<PlayerData>>
+                rosters = GridironGM.Data.JsonLoader.LoadFromStreamingAssets<GridironGM.Data.RosterByTeam>("rosters_by_team.json");
+                if (rosters == null)
+                    Debug.LogWarning("[RosterPanelUI] rosters_by_team.json not found or empty.");
+                else
+                    Debug.Log($"[RosterPanelUI] Loaded roster map for {rosters.Count} teams.");
+            }
+            catch (System.SystemException ex)
+            {
+                Debug.LogError($"[RosterPanelUI] Failed to load rosters: {ex.Message}");
+            }
+        }
+
+        private void TryAutoWire()
+        {
+            if (!content)
+            {
+                var tf = transform.Find("Viewport/Content") ?? transform.Find("Content");
+                if (tf) content = tf;
+            }
+            if (!messageText)
+            {
+                var msg = transform.Find("MessageText")?.GetComponent<TMP_Text>();
+                if (msg) messageText = msg;
+            }
         }
     }
 }
