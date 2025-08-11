@@ -4,15 +4,13 @@ using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using GridironGM.Data;
 
 public static class BuildTeamLogoDatabase
 {
     [MenuItem("GridironGM/Build Team Logo DB")]
     public static void BuildDB()
     {
-        // Support either folder name
-        var inputFolders = new[] { "Assets/TeamSprites", "Assets/teamsprites" };
+        var inputFolders = new[] { "Assets/TeamSprites", "Assets/teamsprites" }; // handle either casing
         const string resourcesPath = "Assets/Resources";
         const string assetPath     = "Assets/Resources/TeamLogoDB.asset";
 
@@ -29,6 +27,7 @@ public static class BuildTeamLogoDatabase
             return s.ToUpperInvariant();
         }
 
+        // Pull an abbreviation from filename (ATL.png, atl_logo.png, ATL-Logo@2x.png, etc.)
         var re = new Regex(@"([A-Za-z]{2,4})", RegexOptions.Compiled);
 
         foreach (var guid in spriteGuids)
@@ -60,4 +59,3 @@ public static class BuildTeamLogoDatabase
     }
 }
 #endif
-

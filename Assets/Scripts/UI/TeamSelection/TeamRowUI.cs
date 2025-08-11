@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -46,16 +47,10 @@ public class TeamRowUI : MonoBehaviour
 
         if (logoImage == null)
         {
-            // try find an Image named "Logo" first
+            // Prefer a child explicitly named "Logo"
             foreach (var img in GetComponentsInChildren<Image>(true))
             {
-                if (img.name.ToLower() == "logo") { logoImage = img; break; }
-            }
-            if (logoImage == null)
-            {
-                // heuristic: pick an Image child that is not the background
-                var imgs = GetComponentsInChildren<Image>(true);
-                if (imgs.Length > 1) logoImage = imgs[1];
+                if (img.name.Equals("Logo", System.StringComparison.OrdinalIgnoreCase)) { logoImage = img; break; }
             }
         }
 
@@ -77,16 +72,22 @@ public class TeamRowUI : MonoBehaviour
         if (label != null) label.text = $"{team.city} {team.name} ({team.abbreviation})"; 
         else Debug.LogWarning($"[TeamRowUI] No TMP_Text found on '{name}'");
 
-        var sprite = TeamLogoDatabase.Instance != null ? TeamLogoDatabase.Instance.Get(team.abbreviation) : null;
-        if (logoImage != null)
-        {
-            logoImage.sprite = sprite;
-            logoImage.enabled = sprite != null;
-            logoImage.preserveAspect = true;
-        }
+        var db = TeamLogoDatabase.Instance;
+        if (db == null) { Debug.LogError("[TeamRowUI] Logo DB not loaded."); }
         else
         {
-            Debug.LogWarning($"[TeamRowUI] No logoImage assigned on '{name}'.");
+            var sprite = db.Get(team.abbreviation);
+            if (logoImage != null)
+            {
+                logoImage.sprite = sprite;
+                logoImage.enabled = sprite != null;
+                logoImage.preserveAspect = true;
+                Debug.Log($"[TeamRowUI] Logo '{team.abbreviation}' -> {(sprite != null ? sprite.name : "null")}");
+            }
+            else
+            {
+                Debug.LogWarning($"[TeamRowUI] No logoImage assigned on '{name}'. Add an Image named 'Logo' to the prefab.");
+            }
         }
 
         if (button != null)
