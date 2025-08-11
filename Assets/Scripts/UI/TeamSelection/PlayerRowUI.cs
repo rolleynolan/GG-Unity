@@ -20,6 +20,12 @@ namespace GridironGM.UI.TeamSelection
             if (!nameText || !posText || !ovrText)
                 TryAutoWireOrCreate();
 
+                #if UNITY_EDITOR
+                var names = string.Join(", ", GetComponentsInChildren<TMPro.TMP_Text>(true).Select(t => t.name));
+                Debug.Log($"[PlayerRowUI] Children TMPs: {names}. name:{(nameText?nameText.name:"null")} pos:{(posText?posText.name:"null")} ovr:{(ovrText?ovrText.name:"null")} age:{(ageText?ageText.name:"null")}");
+                #endif
+
+
             if (!nameText || !posText || !ovrText)
             {
                 Debug.LogError("[PlayerRowUI] Missing TMP fields even after auto-wire. Check prefab children or assign in Inspector.");
