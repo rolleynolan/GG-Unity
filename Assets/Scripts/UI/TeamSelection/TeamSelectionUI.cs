@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using GridironGM;
 using GridironGM.Data;
 
 namespace GridironGM.UI
@@ -16,8 +17,6 @@ namespace GridironGM.UI
         [SerializeField] private TMP_Text errorText;
         [SerializeField] private RosterPanelUI rosterPanel;
 
-        private string selectedAbbreviation;
-
         private void Start()
         {
             if (confirmButton != null)
@@ -28,11 +27,7 @@ namespace GridironGM.UI
             {
                 errorText.gameObject.SetActive(false);
             }
-            LoadTeams();
-        }
 
-        private void LoadTeams()
-        {
             List<TeamData> teams = JsonLoader.LoadFromStreamingAssets<List<TeamData>>("teams.json");
             if (teams == null || teams.Count == 0)
             {
@@ -57,18 +52,17 @@ namespace GridironGM.UI
 
         private void OnTeamClicked(TeamData team)
         {
-            selectedAbbreviation = team.abbreviation;
+            GameState.Instance.SelectedTeamAbbr = team.abbreviation;
+            Debug.Log($"Team clicked: {team.abbreviation}");
             if (confirmButton != null)
             {
                 confirmButton.interactable = true;
             }
-            rosterPanel?.ShowRosterForTeam(selectedAbbreviation);
+            rosterPanel?.ShowRosterForTeam(team.abbreviation);
         }
 
         public void OnConfirm()
         {
-            if (string.IsNullOrEmpty(selectedAbbreviation)) return;
-            GameState.Instance.SelectedTeamAbbr = selectedAbbreviation;
             SceneManager.LoadScene("NewGameSetup");
         }
 
