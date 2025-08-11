@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
+// Remove this definition if TeamLogoEntry is already defined elsewhere in your project.
+// If TeamLogoEntry is defined in another file (e.g., TeamLogoDatabase.cs), use that definition and remove this one.
+
 public static class BuildTeamLogoDatabase
 {
     [MenuItem("GridironGM/Build Team Logo DB")]
