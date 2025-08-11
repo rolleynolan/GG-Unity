@@ -1,41 +1,49 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
+using TMPro;
+using GridironGM.Data;
 
-namespace GridironGM.UI.TeamSelection
+public class TeamRowUI : MonoBehaviour
 {
-    public class TeamRowUI : MonoBehaviour
+    [Header("Wiring")]
+    [SerializeField] private Button button;                // Button on row root
+    [SerializeField] private Image background;             // Background Image
+    [SerializeField] private TMP_Text label;               // Optional label
+    [SerializeField] private GameObject selectedHighlight; // Optional child (border/check)
+
+    [Header("Colors")]
+    [SerializeField] private Color normalColor = new Color(0.14f, 0.14f, 0.14f, 1f);   // #242424
+    [SerializeField] private Color selectedColor = new Color(0.22f, 0.32f, 0.52f, 1f); // #385284
+
+    public TeamData Team { get; private set; }
+    public System.Action<TeamRowUI> OnClicked;
+
+    public void Init(TeamData team, System.Action<TeamRowUI> onClicked)
     {
-        [SerializeField] private TMP_Text nameText;
-        [SerializeField] private TMP_Text conferenceText;
-        [SerializeField] private Image logoImage;
+        Team = team;
+        OnClicked = onClicked;
 
-        private string abbr;
+        if (label != null)
+            label.text = $"{team.city} {team.name} ({team.abbreviation})";
 
-        public void Set(GridironGM.Data.TeamData data, System.Action onClick)
+        if (button == null)
+            button = GetComponent<Button>();
+
+        if (button != null)
         {
-            abbr = data.abbreviation;
-            if (nameText)       nameText.text = $"{data.city} {data.name}";
-            if (conferenceText) conferenceText.text = data.conference;
-
-            var sprite = Resources.Load<Sprite>($"TeamSprites/{abbr}") ?? Resources.Load<Sprite>("TeamSprites/Generic");
-            if (logoImage)
-            {
-                logoImage.sprite  = sprite;
-                logoImage.enabled = sprite != null;
-            }
-
-            // Robust button hookup
-            var btn = GetComponent<Button>() ?? GetComponentInChildren<Button>(true);
-            if (!btn)
-            {
-                Debug.LogError("[TeamRowUI] Button missing on prefab. Add Image (Raycast ON) + Button on root.");
-                return;
-            }
-
-            btn.onClick.RemoveAllListeners();
-            if (onClick != null) btn.onClick.AddListener(() => onClick());
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => OnClicked?.Invoke(this));
         }
+
+        SetSelected(false);
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        if (background != null)
+            background.color = isSelected ? selectedColor : normalColor;
+
+        if (selectedHighlight != null)
+            selectedHighlight.SetActive(isSelected);
     }
 }
