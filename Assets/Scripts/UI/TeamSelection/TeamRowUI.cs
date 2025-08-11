@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using GridironGM.Data;
+using GridironGM.UI; // Ensure LogoResolver is in this namespace or update as needed
 
 public class TeamRowUI : MonoBehaviour
 {
@@ -73,7 +74,7 @@ public class TeamRowUI : MonoBehaviour
         else Debug.LogWarning($"[TeamRowUI] No TMP_Text found on '{name}'");
 
         // Load team logo
-        var sprite = LogoResolver.Get(team.abbreviation);
+        var sprite = Resources.Load<Sprite>($"Logos/{team.abbreviation}");
         if (logoImage != null)
         {
             logoImage.sprite = sprite;
