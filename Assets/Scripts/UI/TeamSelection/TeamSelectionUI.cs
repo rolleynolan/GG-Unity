@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -24,14 +23,19 @@ namespace GridironGM.UI.TeamSelection
 
         private void Awake()
         {
-            // If confirm button is wired, start disabled
             if (confirmButton) confirmButton.interactable = false;
         }
+
+        // (Remove duplicate declarations and keep only one set above)
 
         [System.Obsolete]
         private void Start()
         {
+            // 1) Ensure data exists
             GridironGM.Boot.RosterBootstrapper.EnsureRostersExist(playersPerTeam: 12);
+
+            // 2) Reload panel’s in-memory data (it may have loaded too early in Awake)
+            if (rosterPanel) rosterPanel.ReloadRosters();
 
             TryAutoWire();
 
@@ -73,21 +77,12 @@ namespace GridironGM.UI.TeamSelection
         {
             if (team == null) { Debug.LogError("[TeamSelectionUI] Null team"); return; }
 
-            // Save selection if GameState exists
-            if (GridironGM.GameState.Instance != null)
-            {
-                GridironGM.GameState.Instance.SelectedTeamAbbr = team.abbreviation;
-            }
-            else
-            {
-                Debug.LogWarning("[TeamSelectionUI] GameState.Instance is null; selection not persisted.");
-            }
 
-            // Enable confirm button if wired
+            // Save selection if GameState exists (or will autospawn)
+            GridironGM.GameState.Instance.SelectedTeamAbbr = team.abbreviation;
+
             if (confirmButton) confirmButton.interactable = true;
-
-            // Show roster on right if wired
-            if (rosterPanel) rosterPanel.ShowRosterForTeam(team.abbreviation);
+            if (rosterPanel)   rosterPanel.ShowRosterForTeam(team.abbreviation);
 
             Debug.Log($"[TeamSelectionUI] Selected {team.abbreviation}");
         }
@@ -101,10 +96,9 @@ namespace GridironGM.UI.TeamSelection
                 return;
             }
 
-            SceneManager.LoadScene("NewGameSetup"); // or whatever your next scene is
+            SceneManager.LoadScene("NewGameSetup"); // adjust as needed
         }
 
-        [System.Obsolete]
         private void TryAutoWire()
         {
             if (!teamListContent)
@@ -114,7 +108,7 @@ namespace GridironGM.UI.TeamSelection
                 teamListContent = tf;
             }
             if (!rosterPanel)
-                rosterPanel = FindObjectOfType<RosterPanelUI>(true);
+                rosterPanel = FindFirstObjectByType<RosterPanelUI>();
         }
     }
 }
