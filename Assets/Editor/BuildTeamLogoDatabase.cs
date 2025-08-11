@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using GridironGM.Data;
@@ -10,29 +11,43 @@ public static class BuildTeamLogoDatabase
     [MenuItem("GridironGM/Build Team Logo DB")]
     public static void BuildDB()
     {
-        const string inputFolder = "Assets/teamsprites";
-        const string resourcesFolder = "Assets/Resources";
-        const string assetPath = "Assets/Resources/TeamLogoDB.asset";
+        // Support either folder name
+        var inputFolders = new[] { "Assets/TeamSprites", "Assets/teamsprites" };
+        const string resourcesPath = "Assets/Resources";
+        const string assetPath     = "Assets/Resources/TeamLogoDB.asset";
 
-        if (!Directory.Exists(resourcesFolder))
-            Directory.CreateDirectory(resourcesFolder);
+        if (!Directory.Exists(resourcesPath))
+            Directory.CreateDirectory(resourcesPath);
 
-        var guids = AssetDatabase.FindAssets("t:Sprite", new[] { inputFolder });
+        var spriteGuids = AssetDatabase.FindAssets("t:Sprite", inputFolders);
         var list = new List<TeamLogoEntry>();
 
-        foreach (var guid in guids)
+        string Norm(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return "";
+            s = s.Trim().Replace("_", "").Replace("-", "").Replace(" ", "");
+            return s.ToUpperInvariant();
+        }
+
+        var re = new Regex(@"([A-Za-z]{2,4})", RegexOptions.Compiled);
+
+        foreach (var guid in spriteGuids)
         {
             var path = AssetDatabase.GUIDToAssetPath(guid);
             var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
             if (sprite == null) continue;
 
-            var file = Path.GetFileNameWithoutExtension(path); // e.g., ATL
-            if (string.IsNullOrEmpty(file)) continue;
+            var file = Path.GetFileNameWithoutExtension(path);
+            var m = re.Match(file);
+            if (!m.Success) continue;
 
-            list.Add(new TeamLogoEntry { abbreviation = file, sprite = sprite });
+            var abbr = Norm(m.Groups[1].Value);
+            if (string.IsNullOrEmpty(abbr)) continue;
+
+            list.Add(new TeamLogoEntry { abbreviation = abbr, sprite = sprite });
         }
 
-        TeamLogoDatabase db = AssetDatabase.LoadAssetAtPath<TeamLogoDatabase>(assetPath);
+        var db = AssetDatabase.LoadAssetAtPath<TeamLogoDatabase>(assetPath);
         if (db == null)
         {
             db = ScriptableObject.CreateInstance<TeamLogoDatabase>();
@@ -41,7 +56,8 @@ public static class BuildTeamLogoDatabase
 
         db.SetEntries(list);
         AssetDatabase.SaveAssets();
-        Debug.Log($"[LogoDB] Built with {list.Count} entries -> {assetPath}");
+        Debug.Log($"[LogoDB] Built with {list.Count} entries from {string.Join(", ", inputFolders)} -> {assetPath}");
     }
 }
 #endif
+
