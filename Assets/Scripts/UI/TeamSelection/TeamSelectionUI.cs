@@ -1,83 +1,110 @@
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using GridironGM;
-using GridironGM.Data;
-using GridironGM.UI.TeamSelection;
+using Debug = UnityEngine.Debug;
 
-namespace GridironGM.UI
+namespace GridironGM.UI.TeamSelection
 {
     public class TeamSelectionUI : MonoBehaviour
     {
-        [SerializeField] private Transform teamListContent;
-        [SerializeField] private TeamRowUI teamRowPrefab;
-        [SerializeField] private Button confirmButton;
-        [SerializeField] private TMP_Text errorText;
-        [SerializeField] private RosterPanelUI rosterPanel;
+        [Header("Left list")]
+        [SerializeField] private Transform teamListContent;   // LeftPanel/Viewport/Content
+        [SerializeField] private GameObject teamRowPrefab;    // TeamRowUI prefab
+
+        [Header("Right panel")]
+        [SerializeField] private RosterPanelUI rosterPanel;   // RightPanel has this
+
+        [Header("Flow")]
+        [SerializeField] private Button confirmButton;        // bottom confirm button (optional)
+
+        private List<GridironGM.Data.TeamData> teams;
+
+        private void Awake()
+        {
+            if (confirmButton) confirmButton.interactable = false;
+        }
 
         private void Start()
         {
-            if (confirmButton != null)
-            {
-                confirmButton.interactable = false;
-            }
-            if (errorText != null)
-            {
-                errorText.gameObject.SetActive(false);
-            }
+            // 1) Ensure data exists
+            GridironGM.Boot.RosterBootstrapper.EnsureRostersExist(playersPerTeam: 12);
 
-            List<TeamData> teams = JsonLoader.LoadFromStreamingAssets<List<TeamData>>("teams.json");
+            // 2) Reload panel’s in-memory data (it may have loaded too early in Awake)
+            if (rosterPanel) rosterPanel.ReloadRosters();
+
+            TryAutoWire();
+
+            teams = GridironGM.Data.JsonLoader
+                .LoadFromStreamingAssets<List<GridironGM.Data.TeamData>>("teams.json");
+
             if (teams == null || teams.Count == 0)
             {
-                Debug.LogError("teams.json missing or empty");
-                ShowError("Failed to load team data");
+                Debug.LogError("[TeamSelectionUI] teams.json missing or empty.");
                 return;
             }
 
-            Debug.Log($"Loaded {teams.Count} teams");
+            foreach (var t in teams.OrderBy(t => (t.city + " " + t.name)))
+                AddTeamRow(t);
 
-            foreach (Transform child in teamListContent)
-            {
-                Destroy(child.gameObject);
-            }
-
-            foreach (TeamData team in teams.OrderBy(t => t.city).ThenBy(t => t.name))
-            {
-                TeamRowUI row = Instantiate(teamRowPrefab, teamListContent);
-                row.Set(team, () => OnTeamClicked(team));
-            }
+            Debug.Log($"[TeamSelectionUI] Spawned {teams.Count} teams.");
         }
 
-        private void OnTeamClicked(TeamData team)
+        private void AddTeamRow(GridironGM.Data.TeamData t)
         {
-            GameState.Instance.SelectedTeamAbbr = team.abbreviation;
-            Debug.Log($"Team clicked: {team.abbreviation}");
-            if (confirmButton != null)
+            if (!teamListContent || !teamRowPrefab)
             {
-                confirmButton.interactable = true;
+                Debug.LogError("[TeamSelectionUI] teamListContent or teamRowPrefab not assigned.");
+                return;
             }
-            rosterPanel?.ShowRosterForTeam(team.abbreviation);
+
+            var go  = Instantiate(teamRowPrefab, teamListContent);
+            var row = go.GetComponent<TeamRowUI>();
+            if (!row)
+            {
+                Debug.LogError("[TeamSelectionUI] TeamRowUI missing on teamRowPrefab.");
+                return;
+            }
+
+            row.Set(t, () => OnTeamClicked(t));
+        }
+
+        private void OnTeamClicked(GridironGM.Data.TeamData team)
+        {
+            if (team == null) { Debug.LogError("[TeamSelectionUI] Null team"); return; }
+
+            // Save selection if GameState exists (or will autospawn)
+            GridironGM.GameState.Instance.SelectedTeamAbbr = team.abbreviation;
+
+            if (confirmButton) confirmButton.interactable = true;
+            if (rosterPanel)   rosterPanel.ShowRosterForTeam(team.abbreviation);
+
+            Debug.Log($"[TeamSelectionUI] Selected {team.abbreviation}");
         }
 
         public void OnConfirm()
         {
-            SceneManager.LoadScene("NewGameSetup");
+            var abbr = GridironGM.GameState.Instance?.SelectedTeamAbbr;
+            if (string.IsNullOrEmpty(abbr))
+            {
+                Debug.LogWarning("[TeamSelectionUI] No team selected.");
+                return;
+            }
+
+            SceneManager.LoadScene("NewGameSetup"); // adjust as needed
         }
 
-        private void ShowError(string message)
+        private void TryAutoWire()
         {
-            if (errorText != null)
+            if (!teamListContent)
             {
-                errorText.text = message;
-                errorText.gameObject.SetActive(true);
+                var tf = transform.root.Find("Canvas/LeftPanel/Viewport/Content");
+                if (!tf) tf = GameObject.Find("LeftPanel/Viewport/Content")?.transform;
+                teamListContent = tf;
             }
-            if (confirmButton != null)
-            {
-                confirmButton.interactable = false;
-            }
+            if (!rosterPanel)
+                rosterPanel = FindObjectOfType<RosterPanelUI>(true);
         }
     }
 }
