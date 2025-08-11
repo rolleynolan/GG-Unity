@@ -1,14 +1,3138 @@
 {
-  "ARI": [
-    {"id":1, "first":"Kyler", "last":"Murray", "pos":"QB", "ovr":85, "age":26},
-    {"id":2, "first":"James", "last":"Conner", "pos":"RB", "ovr":82, "age":28}
+  "CHI": [
+    {
+      "id": 1,
+      "first": "Jordan",
+      "last": "Moore",
+      "pos": "QB",
+      "ovr": 75,
+      "age": 23
+    },
+    {
+      "id": 2,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "RB",
+      "ovr": 78,
+      "age": 34
+    },
+    {
+      "id": 3,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 75,
+      "age": 25
+    },
+    {
+      "id": 4,
+      "first": "Devin",
+      "last": "Smith",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 22
+    },
+    {
+      "id": 5,
+      "first": "Devin",
+      "last": "Smith",
+      "pos": "TE",
+      "ovr": 76,
+      "age": 34
+    },
+    {
+      "id": 6,
+      "first": "Micah",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 70,
+      "age": 33
+    },
+    {
+      "id": 7,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "DL",
+      "ovr": 73,
+      "age": 28
+    },
+    {
+      "id": 8,
+      "first": "Devin",
+      "last": "Davis",
+      "pos": "LB",
+      "ovr": 74,
+      "age": 33
+    },
+    {
+      "id": 9,
+      "first": "Taylor",
+      "last": "Davis",
+      "pos": "CB",
+      "ovr": 79,
+      "age": 28
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "S",
+      "ovr": 70,
+      "age": 29
+    },
+    {
+      "id": 11,
+      "first": "Alex",
+      "last": "Jones",
+      "pos": "K",
+      "ovr": 75,
+      "age": 24
+    },
+    {
+      "id": 12,
+      "first": "Chris",
+      "last": "Williams",
+      "pos": "P",
+      "ovr": 74,
+      "age": 24
+    }
+  ],
+  "DAL": [
+    {
+      "id": 1,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "QB",
+      "ovr": 81,
+      "age": 34
+    },
+    {
+      "id": 2,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "RB",
+      "ovr": 72,
+      "age": 33
+    },
+    {
+      "id": 3,
+      "first": "Chris",
+      "last": "Williams",
+      "pos": "WR",
+      "ovr": 72,
+      "age": 24
+    },
+    {
+      "id": 4,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 33
+    },
+    {
+      "id": 5,
+      "first": "Jordan",
+      "last": "Johnson",
+      "pos": "TE",
+      "ovr": 72,
+      "age": 30
+    },
+    {
+      "id": 6,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "OL",
+      "ovr": 71,
+      "age": 23
+    },
+    {
+      "id": 7,
+      "first": "Alex",
+      "last": "Brown",
+      "pos": "DL",
+      "ovr": 71,
+      "age": 31
+    },
+    {
+      "id": 8,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "LB",
+      "ovr": 73,
+      "age": 26
+    },
+    {
+      "id": 9,
+      "first": "Jordan",
+      "last": "Moore",
+      "pos": "CB",
+      "ovr": 71,
+      "age": 22
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "S",
+      "ovr": 66,
+      "age": 28
+    },
+    {
+      "id": 11,
+      "first": "Casey",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 71,
+      "age": 23
+    },
+    {
+      "id": 12,
+      "first": "Casey",
+      "last": "Smith",
+      "pos": "P",
+      "ovr": 68,
+      "age": 34
+    }
+  ],
+  "MIA": [
+    {
+      "id": 1,
+      "first": "Alex",
+      "last": "Johnson",
+      "pos": "QB",
+      "ovr": 81,
+      "age": 29
+    },
+    {
+      "id": 2,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "RB",
+      "ovr": 78,
+      "age": 34
+    },
+    {
+      "id": 3,
+      "first": "Jalen",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 75,
+      "age": 27
+    },
+    {
+      "id": 4,
+      "first": "Casey",
+      "last": "Miller",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 29
+    },
+    {
+      "id": 5,
+      "first": "Chris",
+      "last": "Williams",
+      "pos": "TE",
+      "ovr": 77,
+      "age": 30
+    },
+    {
+      "id": 6,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 70,
+      "age": 27
+    },
+    {
+      "id": 7,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "DL",
+      "ovr": 68,
+      "age": 25
+    },
+    {
+      "id": 8,
+      "first": "Micah",
+      "last": "Davis",
+      "pos": "LB",
+      "ovr": 71,
+      "age": 24
+    },
+    {
+      "id": 9,
+      "first": "Taylor",
+      "last": "Johnson",
+      "pos": "CB",
+      "ovr": 70,
+      "age": 22
+    },
+    {
+      "id": 10,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "S",
+      "ovr": 68,
+      "age": 23
+    },
+    {
+      "id": 11,
+      "first": "Taylor",
+      "last": "Davis",
+      "pos": "K",
+      "ovr": 67,
+      "age": 31
+    },
+    {
+      "id": 12,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "P",
+      "ovr": 73,
+      "age": 32
+    }
+  ],
+  "NY": [
+    {
+      "id": 1,
+      "first": "Taylor",
+      "last": "Davis",
+      "pos": "QB",
+      "ovr": 79,
+      "age": 31
+    },
+    {
+      "id": 2,
+      "first": "Casey",
+      "last": "Williams",
+      "pos": "RB",
+      "ovr": 77,
+      "age": 23
+    },
+    {
+      "id": 3,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 72,
+      "age": 22
+    },
+    {
+      "id": 4,
+      "first": "Alex",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 74,
+      "age": 27
+    },
+    {
+      "id": 5,
+      "first": "Jordan",
+      "last": "Davis",
+      "pos": "TE",
+      "ovr": 71,
+      "age": 34
+    },
+    {
+      "id": 6,
+      "first": "Taylor",
+      "last": "Miller",
+      "pos": "OL",
+      "ovr": 66,
+      "age": 26
+    },
+    {
+      "id": 7,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "DL",
+      "ovr": 65,
+      "age": 33
+    },
+    {
+      "id": 8,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "LB",
+      "ovr": 75,
+      "age": 31
+    },
+    {
+      "id": 9,
+      "first": "Devin",
+      "last": "Miller",
+      "pos": "CB",
+      "ovr": 79,
+      "age": 30
+    },
+    {
+      "id": 10,
+      "first": "Micah",
+      "last": "Smith",
+      "pos": "S",
+      "ovr": 73,
+      "age": 26
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 70,
+      "age": 23
+    },
+    {
+      "id": 12,
+      "first": "Micah",
+      "last": "Miller",
+      "pos": "P",
+      "ovr": 68,
+      "age": 22
+    }
+  ],
+  "SF": [
+    {
+      "id": 1,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "QB",
+      "ovr": 80,
+      "age": 24
+    },
+    {
+      "id": 2,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "RB",
+      "ovr": 73,
+      "age": 29
+    },
+    {
+      "id": 3,
+      "first": "Jalen",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 74,
+      "age": 30
+    },
+    {
+      "id": 4,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 31
+    },
+    {
+      "id": 5,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "TE",
+      "ovr": 75,
+      "age": 25
+    },
+    {
+      "id": 6,
+      "first": "Casey",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 71,
+      "age": 24
+    },
+    {
+      "id": 7,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "DL",
+      "ovr": 65,
+      "age": 25
+    },
+    {
+      "id": 8,
+      "first": "Taylor",
+      "last": "Moore",
+      "pos": "LB",
+      "ovr": 66,
+      "age": 24
+    },
+    {
+      "id": 9,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "CB",
+      "ovr": 78,
+      "age": 29
+    },
+    {
+      "id": 10,
+      "first": "Alex",
+      "last": "Williams",
+      "pos": "S",
+      "ovr": 69,
+      "age": 27
+    },
+    {
+      "id": 11,
+      "first": "Casey",
+      "last": "Johnson",
+      "pos": "K",
+      "ovr": 73,
+      "age": 29
+    },
+    {
+      "id": 12,
+      "first": "Chris",
+      "last": "Davis",
+      "pos": "P",
+      "ovr": 72,
+      "age": 34
+    }
+  ],
+  "TEN": [
+    {
+      "id": 1,
+      "first": "Casey",
+      "last": "Smith",
+      "pos": "QB",
+      "ovr": 80,
+      "age": 32
+    },
+    {
+      "id": 2,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "RB",
+      "ovr": 74,
+      "age": 25
+    },
+    {
+      "id": 3,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 77,
+      "age": 24
+    },
+    {
+      "id": 4,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "WR",
+      "ovr": 74,
+      "age": 33
+    },
+    {
+      "id": 5,
+      "first": "Alex",
+      "last": "Brown",
+      "pos": "TE",
+      "ovr": 68,
+      "age": 31
+    },
+    {
+      "id": 6,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "OL",
+      "ovr": 72,
+      "age": 29
+    },
+    {
+      "id": 7,
+      "first": "Micah",
+      "last": "Smith",
+      "pos": "DL",
+      "ovr": 66,
+      "age": 23
+    },
+    {
+      "id": 8,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "LB",
+      "ovr": 71,
+      "age": 27
+    },
+    {
+      "id": 9,
+      "first": "Jordan",
+      "last": "Williams",
+      "pos": "CB",
+      "ovr": 69,
+      "age": 28
+    },
+    {
+      "id": 10,
+      "first": "Taylor",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 71,
+      "age": 27
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 69,
+      "age": 29
+    },
+    {
+      "id": 12,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "P",
+      "ovr": 72,
+      "age": 34
+    }
+  ],
+  "LV": [
+    {
+      "id": 1,
+      "first": "Micah",
+      "last": "Moore",
+      "pos": "QB",
+      "ovr": 78,
+      "age": 27
+    },
+    {
+      "id": 2,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "RB",
+      "ovr": 78,
+      "age": 34
+    },
+    {
+      "id": 3,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 80,
+      "age": 24
+    },
+    {
+      "id": 4,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 74,
+      "age": 22
+    },
+    {
+      "id": 5,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "TE",
+      "ovr": 75,
+      "age": 30
+    },
+    {
+      "id": 6,
+      "first": "Casey",
+      "last": "Miller",
+      "pos": "OL",
+      "ovr": 71,
+      "age": 30
+    },
+    {
+      "id": 7,
+      "first": "Devin",
+      "last": "Smith",
+      "pos": "DL",
+      "ovr": 67,
+      "age": 27
+    },
+    {
+      "id": 8,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "LB",
+      "ovr": 69,
+      "age": 30
+    },
+    {
+      "id": 9,
+      "first": "Casey",
+      "last": "Johnson",
+      "pos": "CB",
+      "ovr": 79,
+      "age": 22
+    },
+    {
+      "id": 10,
+      "first": "Chris",
+      "last": "Smith",
+      "pos": "S",
+      "ovr": 70,
+      "age": 28
+    },
+    {
+      "id": 11,
+      "first": "Casey",
+      "last": "Williams",
+      "pos": "K",
+      "ovr": 69,
+      "age": 24
+    },
+    {
+      "id": 12,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "P",
+      "ovr": 70,
+      "age": 23
+    }
+  ],
+  "ATL": [
+    {
+      "id": 1,
+      "first": "Casey",
+      "last": "Smith",
+      "pos": "QB",
+      "ovr": 80,
+      "age": 34
+    },
+    {
+      "id": 2,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "RB",
+      "ovr": 78,
+      "age": 27
+    },
+    {
+      "id": 3,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "WR",
+      "ovr": 81,
+      "age": 24
+    },
+    {
+      "id": 4,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 72,
+      "age": 22
+    },
+    {
+      "id": 5,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "TE",
+      "ovr": 73,
+      "age": 31
+    },
+    {
+      "id": 6,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "OL",
+      "ovr": 69,
+      "age": 31
+    },
+    {
+      "id": 7,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "DL",
+      "ovr": 69,
+      "age": 22
+    },
+    {
+      "id": 8,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "LB",
+      "ovr": 66,
+      "age": 23
+    },
+    {
+      "id": 9,
+      "first": "Jordan",
+      "last": "Williams",
+      "pos": "CB",
+      "ovr": 70,
+      "age": 28
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 66,
+      "age": 29
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 72,
+      "age": 33
+    },
+    {
+      "id": 12,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "P",
+      "ovr": 73,
+      "age": 31
+    }
+  ],
+  "BOS": [
+    {
+      "id": 1,
+      "first": "Devin",
+      "last": "Miller",
+      "pos": "QB",
+      "ovr": 78,
+      "age": 26
+    },
+    {
+      "id": 2,
+      "first": "Micah",
+      "last": "Moore",
+      "pos": "RB",
+      "ovr": 77,
+      "age": 34
+    },
+    {
+      "id": 3,
+      "first": "Casey",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 73,
+      "age": 25
+    },
+    {
+      "id": 4,
+      "first": "Jalen",
+      "last": "Miller",
+      "pos": "WR",
+      "ovr": 71,
+      "age": 34
+    },
+    {
+      "id": 5,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "TE",
+      "ovr": 77,
+      "age": 29
+    },
+    {
+      "id": 6,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "OL",
+      "ovr": 72,
+      "age": 26
+    },
+    {
+      "id": 7,
+      "first": "Casey",
+      "last": "Jones",
+      "pos": "DL",
+      "ovr": 69,
+      "age": 32
+    },
+    {
+      "id": 8,
+      "first": "Taylor",
+      "last": "Davis",
+      "pos": "LB",
+      "ovr": 70,
+      "age": 28
+    },
+    {
+      "id": 9,
+      "first": "Micah",
+      "last": "Miller",
+      "pos": "CB",
+      "ovr": 69,
+      "age": 34
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Johnson",
+      "pos": "S",
+      "ovr": 67,
+      "age": 27
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "K",
+      "ovr": 71,
+      "age": 27
+    },
+    {
+      "id": 12,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "P",
+      "ovr": 75,
+      "age": 27
+    }
+  ],
+  "HOU": [
+    {
+      "id": 1,
+      "first": "Jordan",
+      "last": "Johnson",
+      "pos": "QB",
+      "ovr": 75,
+      "age": 26
+    },
+    {
+      "id": 2,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "RB",
+      "ovr": 73,
+      "age": 27
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "WR",
+      "ovr": 74,
+      "age": 33
+    },
+    {
+      "id": 4,
+      "first": "Taylor",
+      "last": "Miller",
+      "pos": "WR",
+      "ovr": 75,
+      "age": 25
+    },
+    {
+      "id": 5,
+      "first": "Devin",
+      "last": "Smith",
+      "pos": "TE",
+      "ovr": 75,
+      "age": 33
+    },
+    {
+      "id": 6,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "OL",
+      "ovr": 65,
+      "age": 33
+    },
+    {
+      "id": 7,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "DL",
+      "ovr": 67,
+      "age": 24
+    },
+    {
+      "id": 8,
+      "first": "Micah",
+      "last": "Moore",
+      "pos": "LB",
+      "ovr": 66,
+      "age": 23
+    },
+    {
+      "id": 9,
+      "first": "Taylor",
+      "last": "Johnson",
+      "pos": "CB",
+      "ovr": 71,
+      "age": 33
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Davis",
+      "pos": "S",
+      "ovr": 66,
+      "age": 25
+    },
+    {
+      "id": 11,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 68,
+      "age": 31
+    },
+    {
+      "id": 12,
+      "first": "Devin",
+      "last": "Brown",
+      "pos": "P",
+      "ovr": 65,
+      "age": 26
+    }
+  ],
+  "LA": [
+    {
+      "id": 1,
+      "first": "Chris",
+      "last": "Smith",
+      "pos": "QB",
+      "ovr": 83,
+      "age": 26
+    },
+    {
+      "id": 2,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "RB",
+      "ovr": 75,
+      "age": 28
+    },
+    {
+      "id": 3,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 32
+    },
+    {
+      "id": 4,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 75,
+      "age": 26
+    },
+    {
+      "id": 5,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "TE",
+      "ovr": 77,
+      "age": 28
+    },
+    {
+      "id": 6,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "OL",
+      "ovr": 74,
+      "age": 25
+    },
+    {
+      "id": 7,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "DL",
+      "ovr": 71,
+      "age": 24
+    },
+    {
+      "id": 8,
+      "first": "Taylor",
+      "last": "Moore",
+      "pos": "LB",
+      "ovr": 70,
+      "age": 26
+    },
+    {
+      "id": 9,
+      "first": "Taylor",
+      "last": "Miller",
+      "pos": "CB",
+      "ovr": 73,
+      "age": 29
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "S",
+      "ovr": 75,
+      "age": 33
+    },
+    {
+      "id": 11,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 67,
+      "age": 22
+    },
+    {
+      "id": 12,
+      "first": "Chris",
+      "last": "Smith",
+      "pos": "P",
+      "ovr": 68,
+      "age": 22
+    }
+  ],
+  "PHI": [
+    {
+      "id": 1,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "QB",
+      "ovr": 81,
+      "age": 23
+    },
+    {
+      "id": 2,
+      "first": "Taylor",
+      "last": "Davis",
+      "pos": "RB",
+      "ovr": 75,
+      "age": 25
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Williams",
+      "pos": "WR",
+      "ovr": 78,
+      "age": 30
+    },
+    {
+      "id": 4,
+      "first": "Devin",
+      "last": "Williams",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 26
+    },
+    {
+      "id": 5,
+      "first": "Devin",
+      "last": "Miller",
+      "pos": "TE",
+      "ovr": 70,
+      "age": 23
+    },
+    {
+      "id": 6,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 75,
+      "age": 24
+    },
+    {
+      "id": 7,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "DL",
+      "ovr": 66,
+      "age": 34
+    },
+    {
+      "id": 8,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "LB",
+      "ovr": 74,
+      "age": 26
+    },
+    {
+      "id": 9,
+      "first": "Casey",
+      "last": "Brown",
+      "pos": "CB",
+      "ovr": 79,
+      "age": 31
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "S",
+      "ovr": 75,
+      "age": 34
+    },
+    {
+      "id": 11,
+      "first": "Alex",
+      "last": "Johnson",
+      "pos": "K",
+      "ovr": 66,
+      "age": 31
+    },
+    {
+      "id": 12,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "P",
+      "ovr": 69,
+      "age": 34
+    }
+  ],
+  "PHX": [
+    {
+      "id": 1,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "QB",
+      "ovr": 74,
+      "age": 34
+    },
+    {
+      "id": 2,
+      "first": "Alex",
+      "last": "Jones",
+      "pos": "RB",
+      "ovr": 71,
+      "age": 26
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 25
+    },
+    {
+      "id": 4,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 81,
+      "age": 29
+    },
+    {
+      "id": 5,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "TE",
+      "ovr": 72,
+      "age": 34
+    },
+    {
+      "id": 6,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "OL",
+      "ovr": 73,
+      "age": 28
+    },
+    {
+      "id": 7,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "DL",
+      "ovr": 73,
+      "age": 31
+    },
+    {
+      "id": 8,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "LB",
+      "ovr": 65,
+      "age": 23
+    },
+    {
+      "id": 9,
+      "first": "Jalen",
+      "last": "Moore",
+      "pos": "CB",
+      "ovr": 79,
+      "age": 27
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 69,
+      "age": 22
+    },
+    {
+      "id": 11,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "K",
+      "ovr": 71,
+      "age": 34
+    },
+    {
+      "id": 12,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "P",
+      "ovr": 71,
+      "age": 31
+    }
+  ],
+  "DET": [
+    {
+      "id": 1,
+      "first": "Devin",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 73,
+      "age": 31
+    },
+    {
+      "id": 2,
+      "first": "Alex",
+      "last": "Davis",
+      "pos": "RB",
+      "ovr": 74,
+      "age": 22
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Williams",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 29
+    },
+    {
+      "id": 4,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "WR",
+      "ovr": 78,
+      "age": 33
+    },
+    {
+      "id": 5,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "TE",
+      "ovr": 73,
+      "age": 24
+    },
+    {
+      "id": 6,
+      "first": "Micah",
+      "last": "Williams",
+      "pos": "OL",
+      "ovr": 74,
+      "age": 32
+    },
+    {
+      "id": 7,
+      "first": "Taylor",
+      "last": "Miller",
+      "pos": "DL",
+      "ovr": 71,
+      "age": 32
+    },
+    {
+      "id": 8,
+      "first": "Devin",
+      "last": "Smith",
+      "pos": "LB",
+      "ovr": 75,
+      "age": 32
+    },
+    {
+      "id": 9,
+      "first": "Chris",
+      "last": "Brown",
+      "pos": "CB",
+      "ovr": 75,
+      "age": 23
+    },
+    {
+      "id": 10,
+      "first": "Jalen",
+      "last": "Moore",
+      "pos": "S",
+      "ovr": 68,
+      "age": 25
+    },
+    {
+      "id": 11,
+      "first": "Taylor",
+      "last": "Miller",
+      "pos": "K",
+      "ovr": 68,
+      "age": 22
+    },
+    {
+      "id": 12,
+      "first": "Micah",
+      "last": "Davis",
+      "pos": "P",
+      "ovr": 71,
+      "age": 33
+    }
+  ],
+  "SEA": [
+    {
+      "id": 1,
+      "first": "Alex",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 77,
+      "age": 33
+    },
+    {
+      "id": 2,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "RB",
+      "ovr": 69,
+      "age": 30
+    },
+    {
+      "id": 3,
+      "first": "Devin",
+      "last": "Davis",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 26
+    },
+    {
+      "id": 4,
+      "first": "Jalen",
+      "last": "Davis",
+      "pos": "WR",
+      "ovr": 77,
+      "age": 26
+    },
+    {
+      "id": 5,
+      "first": "Micah",
+      "last": "Jones",
+      "pos": "TE",
+      "ovr": 75,
+      "age": 26
+    },
+    {
+      "id": 6,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "OL",
+      "ovr": 73,
+      "age": 25
+    },
+    {
+      "id": 7,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "DL",
+      "ovr": 70,
+      "age": 31
+    },
+    {
+      "id": 8,
+      "first": "Devin",
+      "last": "Davis",
+      "pos": "LB",
+      "ovr": 69,
+      "age": 24
+    },
+    {
+      "id": 9,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "CB",
+      "ovr": 79,
+      "age": 30
+    },
+    {
+      "id": 10,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "S",
+      "ovr": 72,
+      "age": 27
+    },
+    {
+      "id": 11,
+      "first": "Casey",
+      "last": "Smith",
+      "pos": "K",
+      "ovr": 69,
+      "age": 34
+    },
+    {
+      "id": 12,
+      "first": "Jordan",
+      "last": "Moore",
+      "pos": "P",
+      "ovr": 70,
+      "age": 22
+    }
+  ],
+  "DEN": [
+    {
+      "id": 1,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "QB",
+      "ovr": 76,
+      "age": 31
+    },
+    {
+      "id": 2,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "RB",
+      "ovr": 79,
+      "age": 26
+    },
+    {
+      "id": 3,
+      "first": "Micah",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 77,
+      "age": 33
+    },
+    {
+      "id": 4,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 32
+    },
+    {
+      "id": 5,
+      "first": "Jalen",
+      "last": "Moore",
+      "pos": "TE",
+      "ovr": 72,
+      "age": 22
+    },
+    {
+      "id": 6,
+      "first": "Micah",
+      "last": "Williams",
+      "pos": "OL",
+      "ovr": 75,
+      "age": 29
+    },
+    {
+      "id": 7,
+      "first": "Chris",
+      "last": "Miller",
+      "pos": "DL",
+      "ovr": 68,
+      "age": 22
+    },
+    {
+      "id": 8,
+      "first": "Devin",
+      "last": "Williams",
+      "pos": "LB",
+      "ovr": 72,
+      "age": 25
+    },
+    {
+      "id": 9,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "CB",
+      "ovr": 74,
+      "age": 24
+    },
+    {
+      "id": 10,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 67,
+      "age": 28
+    },
+    {
+      "id": 11,
+      "first": "Casey",
+      "last": "Miller",
+      "pos": "K",
+      "ovr": 72,
+      "age": 24
+    },
+    {
+      "id": 12,
+      "first": "Taylor",
+      "last": "Davis",
+      "pos": "P",
+      "ovr": 70,
+      "age": 31
+    }
+  ],
+  "CLE": [
+    {
+      "id": 1,
+      "first": "Casey",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 75,
+      "age": 22
+    },
+    {
+      "id": 2,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "RB",
+      "ovr": 72,
+      "age": 25
+    },
+    {
+      "id": 3,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 78,
+      "age": 29
+    },
+    {
+      "id": 4,
+      "first": "Casey",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 72,
+      "age": 24
+    },
+    {
+      "id": 5,
+      "first": "Devin",
+      "last": "Brown",
+      "pos": "TE",
+      "ovr": 68,
+      "age": 27
+    },
+    {
+      "id": 6,
+      "first": "Jordan",
+      "last": "Moore",
+      "pos": "OL",
+      "ovr": 68,
+      "age": 22
+    },
+    {
+      "id": 7,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "DL",
+      "ovr": 68,
+      "age": 23
+    },
+    {
+      "id": 8,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "LB",
+      "ovr": 65,
+      "age": 24
+    },
+    {
+      "id": 9,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "CB",
+      "ovr": 76,
+      "age": 28
+    },
+    {
+      "id": 10,
+      "first": "Chris",
+      "last": "Johnson",
+      "pos": "S",
+      "ovr": 72,
+      "age": 26
+    },
+    {
+      "id": 11,
+      "first": "Micah",
+      "last": "Davis",
+      "pos": "K",
+      "ovr": 66,
+      "age": 31
+    },
+    {
+      "id": 12,
+      "first": "Taylor",
+      "last": "Williams",
+      "pos": "P",
+      "ovr": 70,
+      "age": 32
+    }
+  ],
+  "ORL": [
+    {
+      "id": 1,
+      "first": "Jalen",
+      "last": "Smith",
+      "pos": "QB",
+      "ovr": 80,
+      "age": 24
+    },
+    {
+      "id": 2,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "RB",
+      "ovr": 78,
+      "age": 23
+    },
+    {
+      "id": 3,
+      "first": "Chris",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 78,
+      "age": 29
+    },
+    {
+      "id": 4,
+      "first": "Jalen",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 71,
+      "age": 25
+    },
+    {
+      "id": 5,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "TE",
+      "ovr": 75,
+      "age": 28
+    },
+    {
+      "id": 6,
+      "first": "Jalen",
+      "last": "Miller",
+      "pos": "OL",
+      "ovr": 71,
+      "age": 33
+    },
+    {
+      "id": 7,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "DL",
+      "ovr": 68,
+      "age": 30
+    },
+    {
+      "id": 8,
+      "first": "Casey",
+      "last": "Williams",
+      "pos": "LB",
+      "ovr": 65,
+      "age": 30
+    },
+    {
+      "id": 9,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "CB",
+      "ovr": 76,
+      "age": 32
+    },
+    {
+      "id": 10,
+      "first": "Jalen",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 69,
+      "age": 31
+    },
+    {
+      "id": 11,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "K",
+      "ovr": 67,
+      "age": 28
+    },
+    {
+      "id": 12,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "P",
+      "ovr": 66,
+      "age": 33
+    }
+  ],
+  "MIN": [
+    {
+      "id": 1,
+      "first": "Devin",
+      "last": "Smith",
+      "pos": "QB",
+      "ovr": 73,
+      "age": 27
+    },
+    {
+      "id": 2,
+      "first": "Micah",
+      "last": "Miller",
+      "pos": "RB",
+      "ovr": 74,
+      "age": 32
+    },
+    {
+      "id": 3,
+      "first": "Devin",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 34
+    },
+    {
+      "id": 4,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "WR",
+      "ovr": 81,
+      "age": 32
+    },
+    {
+      "id": 5,
+      "first": "Casey",
+      "last": "Johnson",
+      "pos": "TE",
+      "ovr": 67,
+      "age": 31
+    },
+    {
+      "id": 6,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 67,
+      "age": 32
+    },
+    {
+      "id": 7,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "DL",
+      "ovr": 73,
+      "age": 31
+    },
+    {
+      "id": 8,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "LB",
+      "ovr": 74,
+      "age": 28
+    },
+    {
+      "id": 9,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "CB",
+      "ovr": 74,
+      "age": 25
+    },
+    {
+      "id": 10,
+      "first": "Micah",
+      "last": "Miller",
+      "pos": "S",
+      "ovr": 74,
+      "age": 28
+    },
+    {
+      "id": 11,
+      "first": "Jordan",
+      "last": "Williams",
+      "pos": "K",
+      "ovr": 74,
+      "age": 24
+    },
+    {
+      "id": 12,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "P",
+      "ovr": 74,
+      "age": 27
+    }
+  ],
+  "BAL": [
+    {
+      "id": 1,
+      "first": "Alex",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 78,
+      "age": 34
+    },
+    {
+      "id": 2,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "RB",
+      "ovr": 72,
+      "age": 34
+    },
+    {
+      "id": 3,
+      "first": "Chris",
+      "last": "Miller",
+      "pos": "WR",
+      "ovr": 74,
+      "age": 32
+    },
+    {
+      "id": 4,
+      "first": "Micah",
+      "last": "Smith",
+      "pos": "WR",
+      "ovr": 75,
+      "age": 32
+    },
+    {
+      "id": 5,
+      "first": "Jalen",
+      "last": "Davis",
+      "pos": "TE",
+      "ovr": 70,
+      "age": 28
+    },
+    {
+      "id": 6,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "OL",
+      "ovr": 67,
+      "age": 27
+    },
+    {
+      "id": 7,
+      "first": "Jordan",
+      "last": "Smith",
+      "pos": "DL",
+      "ovr": 73,
+      "age": 32
+    },
+    {
+      "id": 8,
+      "first": "Chris",
+      "last": "Williams",
+      "pos": "LB",
+      "ovr": 70,
+      "age": 30
+    },
+    {
+      "id": 9,
+      "first": "Casey",
+      "last": "Moore",
+      "pos": "CB",
+      "ovr": 69,
+      "age": 22
+    },
+    {
+      "id": 10,
+      "first": "Alex",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 69,
+      "age": 24
+    },
+    {
+      "id": 11,
+      "first": "Jordan",
+      "last": "Moore",
+      "pos": "K",
+      "ovr": 71,
+      "age": 26
+    },
+    {
+      "id": 12,
+      "first": "Taylor",
+      "last": "Smith",
+      "pos": "P",
+      "ovr": 68,
+      "age": 23
+    }
+  ],
+  "NOR": [
+    {
+      "id": 1,
+      "first": "Chris",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 75,
+      "age": 25
+    },
+    {
+      "id": 2,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "RB",
+      "ovr": 76,
+      "age": 34
+    },
+    {
+      "id": 3,
+      "first": "Jalen",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 28
+    },
+    {
+      "id": 4,
+      "first": "Jalen",
+      "last": "Davis",
+      "pos": "WR",
+      "ovr": 77,
+      "age": 30
+    },
+    {
+      "id": 5,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "TE",
+      "ovr": 74,
+      "age": 32
+    },
+    {
+      "id": 6,
+      "first": "Casey",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 67,
+      "age": 22
+    },
+    {
+      "id": 7,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "DL",
+      "ovr": 69,
+      "age": 24
+    },
+    {
+      "id": 8,
+      "first": "Jordan",
+      "last": "Davis",
+      "pos": "LB",
+      "ovr": 65,
+      "age": 24
+    },
+    {
+      "id": 9,
+      "first": "Devin",
+      "last": "Johnson",
+      "pos": "CB",
+      "ovr": 73,
+      "age": 26
+    },
+    {
+      "id": 10,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "S",
+      "ovr": 69,
+      "age": 31
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "K",
+      "ovr": 75,
+      "age": 29
+    },
+    {
+      "id": 12,
+      "first": "Micah",
+      "last": "Moore",
+      "pos": "P",
+      "ovr": 70,
+      "age": 28
+    }
+  ],
+  "IND": [
+    {
+      "id": 1,
+      "first": "Jordan",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 79,
+      "age": 30
+    },
+    {
+      "id": 2,
+      "first": "Devin",
+      "last": "Johnson",
+      "pos": "RB",
+      "ovr": 73,
+      "age": 22
+    },
+    {
+      "id": 3,
+      "first": "Micah",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 78,
+      "age": 23
+    },
+    {
+      "id": 4,
+      "first": "Micah",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 80,
+      "age": 24
+    },
+    {
+      "id": 5,
+      "first": "Chris",
+      "last": "Brown",
+      "pos": "TE",
+      "ovr": 69,
+      "age": 22
+    },
+    {
+      "id": 6,
+      "first": "Jordan",
+      "last": "Moore",
+      "pos": "OL",
+      "ovr": 74,
+      "age": 29
+    },
+    {
+      "id": 7,
+      "first": "Taylor",
+      "last": "Davis",
+      "pos": "DL",
+      "ovr": 65,
+      "age": 29
+    },
+    {
+      "id": 8,
+      "first": "Casey",
+      "last": "Moore",
+      "pos": "LB",
+      "ovr": 73,
+      "age": 31
+    },
+    {
+      "id": 9,
+      "first": "Jordan",
+      "last": "Williams",
+      "pos": "CB",
+      "ovr": 71,
+      "age": 23
+    },
+    {
+      "id": 10,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "S",
+      "ovr": 74,
+      "age": 32
+    },
+    {
+      "id": 11,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 70,
+      "age": 28
+    },
+    {
+      "id": 12,
+      "first": "Jordan",
+      "last": "Davis",
+      "pos": "P",
+      "ovr": 73,
+      "age": 24
+    }
+  ],
+  "CIN": [
+    {
+      "id": 1,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 79,
+      "age": 30
+    },
+    {
+      "id": 2,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "RB",
+      "ovr": 72,
+      "age": 30
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Miller",
+      "pos": "WR",
+      "ovr": 74,
+      "age": 27
+    },
+    {
+      "id": 4,
+      "first": "Taylor",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 77,
+      "age": 23
+    },
+    {
+      "id": 5,
+      "first": "Jordan",
+      "last": "Davis",
+      "pos": "TE",
+      "ovr": 73,
+      "age": 22
+    },
+    {
+      "id": 6,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "OL",
+      "ovr": 74,
+      "age": 28
+    },
+    {
+      "id": 7,
+      "first": "Devin",
+      "last": "Brown",
+      "pos": "DL",
+      "ovr": 73,
+      "age": 32
+    },
+    {
+      "id": 8,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "LB",
+      "ovr": 65,
+      "age": 22
+    },
+    {
+      "id": 9,
+      "first": "Alex",
+      "last": "Johnson",
+      "pos": "CB",
+      "ovr": 71,
+      "age": 30
+    },
+    {
+      "id": 10,
+      "first": "Jalen",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 65,
+      "age": 22
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Williams",
+      "pos": "K",
+      "ovr": 65,
+      "age": 24
+    },
+    {
+      "id": 12,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "P",
+      "ovr": 68,
+      "age": 27
+    }
+  ],
+  "KC": [
+    {
+      "id": 1,
+      "first": "Jalen",
+      "last": "Miller",
+      "pos": "QB",
+      "ovr": 74,
+      "age": 28
+    },
+    {
+      "id": 2,
+      "first": "Devin",
+      "last": "Smith",
+      "pos": "RB",
+      "ovr": 79,
+      "age": 29
+    },
+    {
+      "id": 3,
+      "first": "Jalen",
+      "last": "Williams",
+      "pos": "WR",
+      "ovr": 80,
+      "age": 24
+    },
+    {
+      "id": 4,
+      "first": "Alex",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 80,
+      "age": 32
+    },
+    {
+      "id": 5,
+      "first": "Casey",
+      "last": "Moore",
+      "pos": "TE",
+      "ovr": 70,
+      "age": 29
+    },
+    {
+      "id": 6,
+      "first": "Micah",
+      "last": "Jones",
+      "pos": "OL",
+      "ovr": 65,
+      "age": 25
+    },
+    {
+      "id": 7,
+      "first": "Jalen",
+      "last": "Davis",
+      "pos": "DL",
+      "ovr": 68,
+      "age": 31
+    },
+    {
+      "id": 8,
+      "first": "Chris",
+      "last": "Brown",
+      "pos": "LB",
+      "ovr": 68,
+      "age": 26
+    },
+    {
+      "id": 9,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "CB",
+      "ovr": 69,
+      "age": 27
+    },
+    {
+      "id": 10,
+      "first": "Micah",
+      "last": "Davis",
+      "pos": "S",
+      "ovr": 68,
+      "age": 26
+    },
+    {
+      "id": 11,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "K",
+      "ovr": 73,
+      "age": 34
+    },
+    {
+      "id": 12,
+      "first": "Casey",
+      "last": "Johnson",
+      "pos": "P",
+      "ovr": 68,
+      "age": 25
+    }
+  ],
+  "CHA": [
+    {
+      "id": 1,
+      "first": "Alex",
+      "last": "Davis",
+      "pos": "QB",
+      "ovr": 74,
+      "age": 32
+    },
+    {
+      "id": 2,
+      "first": "Jordan",
+      "last": "Miller",
+      "pos": "RB",
+      "ovr": 78,
+      "age": 32
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 77,
+      "age": 24
+    },
+    {
+      "id": 4,
+      "first": "Jalen",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 81,
+      "age": 24
+    },
+    {
+      "id": 5,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "TE",
+      "ovr": 67,
+      "age": 26
+    },
+    {
+      "id": 6,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 70,
+      "age": 28
+    },
+    {
+      "id": 7,
+      "first": "Alex",
+      "last": "Smith",
+      "pos": "DL",
+      "ovr": 72,
+      "age": 33
+    },
+    {
+      "id": 8,
+      "first": "Chris",
+      "last": "Smith",
+      "pos": "LB",
+      "ovr": 75,
+      "age": 23
+    },
+    {
+      "id": 9,
+      "first": "Casey",
+      "last": "Jones",
+      "pos": "CB",
+      "ovr": 70,
+      "age": 27
+    },
+    {
+      "id": 10,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "S",
+      "ovr": 68,
+      "age": 27
+    },
+    {
+      "id": 11,
+      "first": "Micah",
+      "last": "Smith",
+      "pos": "K",
+      "ovr": 66,
+      "age": 26
+    },
+    {
+      "id": 12,
+      "first": "Jalen",
+      "last": "Davis",
+      "pos": "P",
+      "ovr": 74,
+      "age": 31
+    }
+  ],
+  "TB": [
+    {
+      "id": 1,
+      "first": "Devin",
+      "last": "Moore",
+      "pos": "QB",
+      "ovr": 75,
+      "age": 31
+    },
+    {
+      "id": 2,
+      "first": "Jalen",
+      "last": "Davis",
+      "pos": "RB",
+      "ovr": 78,
+      "age": 23
+    },
+    {
+      "id": 3,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 80,
+      "age": 22
+    },
+    {
+      "id": 4,
+      "first": "Micah",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 78,
+      "age": 24
+    },
+    {
+      "id": 5,
+      "first": "Alex",
+      "last": "Williams",
+      "pos": "TE",
+      "ovr": 67,
+      "age": 27
+    },
+    {
+      "id": 6,
+      "first": "Jordan",
+      "last": "Davis",
+      "pos": "OL",
+      "ovr": 72,
+      "age": 24
+    },
+    {
+      "id": 7,
+      "first": "Taylor",
+      "last": "Johnson",
+      "pos": "DL",
+      "ovr": 74,
+      "age": 23
+    },
+    {
+      "id": 8,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "LB",
+      "ovr": 70,
+      "age": 33
+    },
+    {
+      "id": 9,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "CB",
+      "ovr": 71,
+      "age": 28
+    },
+    {
+      "id": 10,
+      "first": "Chris",
+      "last": "Smith",
+      "pos": "S",
+      "ovr": 68,
+      "age": 24
+    },
+    {
+      "id": 11,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "K",
+      "ovr": 73,
+      "age": 33
+    },
+    {
+      "id": 12,
+      "first": "Casey",
+      "last": "Moore",
+      "pos": "P",
+      "ovr": 68,
+      "age": 29
+    }
+  ],
+  "PIT": [
+    {
+      "id": 1,
+      "first": "Alex",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 78,
+      "age": 27
+    },
+    {
+      "id": 2,
+      "first": "Micah",
+      "last": "Moore",
+      "pos": "RB",
+      "ovr": 76,
+      "age": 25
+    },
+    {
+      "id": 3,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 23
+    },
+    {
+      "id": 4,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 78,
+      "age": 28
+    },
+    {
+      "id": 5,
+      "first": "Jalen",
+      "last": "Johnson",
+      "pos": "TE",
+      "ovr": 76,
+      "age": 22
+    },
+    {
+      "id": 6,
+      "first": "Chris",
+      "last": "Miller",
+      "pos": "OL",
+      "ovr": 67,
+      "age": 30
+    },
+    {
+      "id": 7,
+      "first": "Jalen",
+      "last": "Miller",
+      "pos": "DL",
+      "ovr": 67,
+      "age": 34
+    },
+    {
+      "id": 8,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "LB",
+      "ovr": 70,
+      "age": 34
+    },
+    {
+      "id": 9,
+      "first": "Jalen",
+      "last": "Smith",
+      "pos": "CB",
+      "ovr": 75,
+      "age": 27
+    },
+    {
+      "id": 10,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "S",
+      "ovr": 73,
+      "age": 31
+    },
+    {
+      "id": 11,
+      "first": "Devin",
+      "last": "Johnson",
+      "pos": "K",
+      "ovr": 70,
+      "age": 34
+    },
+    {
+      "id": 12,
+      "first": "Jordan",
+      "last": "Johnson",
+      "pos": "P",
+      "ovr": 66,
+      "age": 26
+    }
+  ],
+  "WAS": [
+    {
+      "id": 1,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "QB",
+      "ovr": 81,
+      "age": 31
+    },
+    {
+      "id": 2,
+      "first": "Jalen",
+      "last": "Miller",
+      "pos": "RB",
+      "ovr": 77,
+      "age": 25
+    },
+    {
+      "id": 3,
+      "first": "Chris",
+      "last": "Davis",
+      "pos": "WR",
+      "ovr": 73,
+      "age": 25
+    },
+    {
+      "id": 4,
+      "first": "Taylor",
+      "last": "Williams",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 24
+    },
+    {
+      "id": 5,
+      "first": "Chris",
+      "last": "Brown",
+      "pos": "TE",
+      "ovr": 75,
+      "age": 30
+    },
+    {
+      "id": 6,
+      "first": "Chris",
+      "last": "Smith",
+      "pos": "OL",
+      "ovr": 74,
+      "age": 22
+    },
+    {
+      "id": 7,
+      "first": "Devin",
+      "last": "Brown",
+      "pos": "DL",
+      "ovr": 74,
+      "age": 32
+    },
+    {
+      "id": 8,
+      "first": "Jalen",
+      "last": "Miller",
+      "pos": "LB",
+      "ovr": 75,
+      "age": 34
+    },
+    {
+      "id": 9,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "CB",
+      "ovr": 76,
+      "age": 29
+    },
+    {
+      "id": 10,
+      "first": "Casey",
+      "last": "Brown",
+      "pos": "S",
+      "ovr": 70,
+      "age": 22
+    },
+    {
+      "id": 11,
+      "first": "Devin",
+      "last": "Williams",
+      "pos": "K",
+      "ovr": 73,
+      "age": 34
+    },
+    {
+      "id": 12,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "P",
+      "ovr": 71,
+      "age": 28
+    }
+  ],
+  "GB": [
+    {
+      "id": 1,
+      "first": "Taylor",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 78,
+      "age": 25
+    },
+    {
+      "id": 2,
+      "first": "Jordan",
+      "last": "Davis",
+      "pos": "RB",
+      "ovr": 70,
+      "age": 22
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 77,
+      "age": 27
+    },
+    {
+      "id": 4,
+      "first": "Devin",
+      "last": "Brown",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 26
+    },
+    {
+      "id": 5,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "TE",
+      "ovr": 74,
+      "age": 25
+    },
+    {
+      "id": 6,
+      "first": "Micah",
+      "last": "Davis",
+      "pos": "OL",
+      "ovr": 66,
+      "age": 30
+    },
+    {
+      "id": 7,
+      "first": "Casey",
+      "last": "Moore",
+      "pos": "DL",
+      "ovr": 66,
+      "age": 34
+    },
+    {
+      "id": 8,
+      "first": "Taylor",
+      "last": "Brown",
+      "pos": "LB",
+      "ovr": 67,
+      "age": 30
+    },
+    {
+      "id": 9,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "CB",
+      "ovr": 72,
+      "age": 27
+    },
+    {
+      "id": 10,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 70,
+      "age": 23
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Johnson",
+      "pos": "K",
+      "ovr": 67,
+      "age": 26
+    },
+    {
+      "id": 12,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "P",
+      "ovr": 71,
+      "age": 29
+    }
   ],
   "BUF": [
-    {"id":1, "first":"Josh", "last":"Allen", "pos":"QB", "ovr":92, "age":27},
-    {"id":2, "first":"Stefon", "last":"Diggs", "pos":"WR", "ovr":95, "age":29}
+    {
+      "id": 1,
+      "first": "Devin",
+      "last": "Brown",
+      "pos": "QB",
+      "ovr": 73,
+      "age": 29
+    },
+    {
+      "id": 2,
+      "first": "Chris",
+      "last": "Miller",
+      "pos": "RB",
+      "ovr": 73,
+      "age": 28
+    },
+    {
+      "id": 3,
+      "first": "Taylor",
+      "last": "Johnson",
+      "pos": "WR",
+      "ovr": 75,
+      "age": 31
+    },
+    {
+      "id": 4,
+      "first": "Casey",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 76,
+      "age": 27
+    },
+    {
+      "id": 5,
+      "first": "Jalen",
+      "last": "Smith",
+      "pos": "TE",
+      "ovr": 77,
+      "age": 23
+    },
+    {
+      "id": 6,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "OL",
+      "ovr": 70,
+      "age": 25
+    },
+    {
+      "id": 7,
+      "first": "Devin",
+      "last": "Davis",
+      "pos": "DL",
+      "ovr": 71,
+      "age": 27
+    },
+    {
+      "id": 8,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "LB",
+      "ovr": 70,
+      "age": 32
+    },
+    {
+      "id": 9,
+      "first": "Devin",
+      "last": "Davis",
+      "pos": "CB",
+      "ovr": 72,
+      "age": 24
+    },
+    {
+      "id": 10,
+      "first": "Micah",
+      "last": "Miller",
+      "pos": "S",
+      "ovr": 74,
+      "age": 24
+    },
+    {
+      "id": 11,
+      "first": "Chris",
+      "last": "Miller",
+      "pos": "K",
+      "ovr": 67,
+      "age": 22
+    },
+    {
+      "id": 12,
+      "first": "Alex",
+      "last": "Davis",
+      "pos": "P",
+      "ovr": 73,
+      "age": 30
+    }
   ],
-  "CHI": [
-    {"id":1, "first":"Justin", "last":"Fields", "pos":"QB", "ovr":80, "age":25},
-    {"id":2, "first":"DJ", "last":"Moore", "pos":"WR", "ovr":88, "age":26}
+  "SD": [
+    {
+      "id": 1,
+      "first": "Chris",
+      "last": "Williams",
+      "pos": "QB",
+      "ovr": 82,
+      "age": 25
+    },
+    {
+      "id": 2,
+      "first": "Devin",
+      "last": "Miller",
+      "pos": "RB",
+      "ovr": 79,
+      "age": 30
+    },
+    {
+      "id": 3,
+      "first": "Jalen",
+      "last": "Moore",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 26
+    },
+    {
+      "id": 4,
+      "first": "Jordan",
+      "last": "Jones",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 28
+    },
+    {
+      "id": 5,
+      "first": "Devin",
+      "last": "Brown",
+      "pos": "TE",
+      "ovr": 73,
+      "age": 32
+    },
+    {
+      "id": 6,
+      "first": "Alex",
+      "last": "Davis",
+      "pos": "OL",
+      "ovr": 71,
+      "age": 33
+    },
+    {
+      "id": 7,
+      "first": "Devin",
+      "last": "Williams",
+      "pos": "DL",
+      "ovr": 67,
+      "age": 32
+    },
+    {
+      "id": 8,
+      "first": "Jalen",
+      "last": "Moore",
+      "pos": "LB",
+      "ovr": 75,
+      "age": 34
+    },
+    {
+      "id": 9,
+      "first": "Micah",
+      "last": "Johnson",
+      "pos": "CB",
+      "ovr": 72,
+      "age": 22
+    },
+    {
+      "id": 10,
+      "first": "Casey",
+      "last": "Davis",
+      "pos": "S",
+      "ovr": 71,
+      "age": 30
+    },
+    {
+      "id": 11,
+      "first": "Devin",
+      "last": "Jones",
+      "pos": "K",
+      "ovr": 68,
+      "age": 22
+    },
+    {
+      "id": 12,
+      "first": "Alex",
+      "last": "Miller",
+      "pos": "P",
+      "ovr": 70,
+      "age": 33
+    }
+  ],
+  "POR": [
+    {
+      "id": 1,
+      "first": "Chris",
+      "last": "Moore",
+      "pos": "QB",
+      "ovr": 80,
+      "age": 30
+    },
+    {
+      "id": 2,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "RB",
+      "ovr": 77,
+      "age": 32
+    },
+    {
+      "id": 3,
+      "first": "Chris",
+      "last": "Smith",
+      "pos": "WR",
+      "ovr": 73,
+      "age": 28
+    },
+    {
+      "id": 4,
+      "first": "Devin",
+      "last": "Miller",
+      "pos": "WR",
+      "ovr": 79,
+      "age": 26
+    },
+    {
+      "id": 5,
+      "first": "Jalen",
+      "last": "Davis",
+      "pos": "TE",
+      "ovr": 73,
+      "age": 32
+    },
+    {
+      "id": 6,
+      "first": "Alex",
+      "last": "Moore",
+      "pos": "OL",
+      "ovr": 71,
+      "age": 23
+    },
+    {
+      "id": 7,
+      "first": "Micah",
+      "last": "Jones",
+      "pos": "DL",
+      "ovr": 67,
+      "age": 24
+    },
+    {
+      "id": 8,
+      "first": "Jordan",
+      "last": "Brown",
+      "pos": "LB",
+      "ovr": 65,
+      "age": 29
+    },
+    {
+      "id": 9,
+      "first": "Jalen",
+      "last": "Brown",
+      "pos": "CB",
+      "ovr": 77,
+      "age": 22
+    },
+    {
+      "id": 10,
+      "first": "Chris",
+      "last": "Jones",
+      "pos": "S",
+      "ovr": 73,
+      "age": 32
+    },
+    {
+      "id": 11,
+      "first": "Micah",
+      "last": "Smith",
+      "pos": "K",
+      "ovr": 74,
+      "age": 33
+    },
+    {
+      "id": 12,
+      "first": "Devin",
+      "last": "Moore",
+      "pos": "P",
+      "ovr": 70,
+      "age": 28
+    }
   ]
 }

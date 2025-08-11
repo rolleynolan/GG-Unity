@@ -4,9 +4,9 @@ namespace GridironGM
 {
     public class GameState : MonoBehaviour
     {
-        public static GameState Instance { get; private set; }
+        public static GameState Instance;
 
-        public string SelectedTeamAbbr { get; set; }
+        public string SelectedTeamAbbr = "";
 
         private void Awake()
         {
