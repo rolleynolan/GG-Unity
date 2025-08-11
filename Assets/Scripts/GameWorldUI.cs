@@ -1,24 +1,32 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using GridironGM;
 
-public class GameWorldUI : MonoBehaviour
+namespace GridironGM.UI
 {
-    public Text teamText; // Assign in inspector
-
-    void Start()
+    public class GameWorldUI : MonoBehaviour
     {
-        string selectedTeam = PlayerPrefs.GetString("selected_team", "Unknown Team");
-        teamText.text = $"Welcome, GM of {selectedTeam}";
-    }
+        [SerializeField] private Text teamText; // Assign in inspector
 
-    public void OnBackToMenuPressed()
-    {
-        SceneManager.LoadScene("MainMenu");
-    }
+        private void Start()
+        {
+            string selectedTeam = GameState.Instance.SelectedTeamAbbr;
+            if (string.IsNullOrEmpty(selectedTeam))
+            {
+                selectedTeam = "Unknown Team";
+            }
+            teamText.text = $"Welcome, GM of {selectedTeam}";
+        }
 
-    public void OnStartSeasonPressed()
-    {
-        Debug.Log("Start Season pressed (future sim entry point)");
+        public void OnBackToMenuPressed()
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
+
+        public void OnStartSeasonPressed()
+        {
+            Debug.Log("Start Season pressed (future sim entry point)");
+        }
     }
 }

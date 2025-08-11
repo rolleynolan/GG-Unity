@@ -38,10 +38,10 @@ namespace GridironGM.UI
             {
                 if (messageText != null)
                 {
-                    messageText.text = $"No roster data found for {abbr}";
+                    messageText.text = $"No roster data for {abbr}";
                     messageText.gameObject.SetActive(true);
                 }
-                Debug.LogWarning($"No roster data found for {abbr}");
+                Debug.LogWarning($"No roster data for {abbr}");
                 return;
             }
 
