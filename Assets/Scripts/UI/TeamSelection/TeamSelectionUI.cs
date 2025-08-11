@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
-using GridironGM; // Add this if SessionState is in GridironGM namespace
 
 namespace GridironGM.UI.TeamSelection
 {
@@ -23,16 +22,21 @@ namespace GridironGM.UI.TeamSelection
         private List<GridironGM.Data.TeamData> teams;
         private TeamRowUI _currentSelectedRow;
 
-        private void Awake()
+        private void Start()
         {
-            if (confirmButton) confirmButton.interactable = false;
+            if (confirmButton != null) confirmButton.interactable = false;
+
+            if (rosterPanel == null)
+                rosterPanel = UnityEngine.Object.FindFirstObjectByType<RosterPanelUI>();
+
+            PopulateTeams();
         }
 
-        private void Start()
+        private void PopulateTeams()
         {
             // Ensure complete rosters, then refresh the panel's memory, THEN build left list
             GridironGM.Boot.RosterBootstrapper.EnsureRostersExist(playersPerTeam: 12);
-            if (rosterPanel) rosterPanel.ReloadRosters();
+            if (rosterPanel != null) rosterPanel.ReloadRosters();
 
             TryAutoWire();
 
@@ -72,8 +76,7 @@ namespace GridironGM.UI.TeamSelection
 
         private void OnRowClicked(TeamRowUI row)
         {
-            if (_currentSelectedRow == row)
-                return;
+            if (_currentSelectedRow == row) return;
 
             if (_currentSelectedRow != null)
                 _currentSelectedRow.SetSelected(false);
@@ -81,17 +84,22 @@ namespace GridironGM.UI.TeamSelection
             _currentSelectedRow = row;
             _currentSelectedRow.SetSelected(true);
 
-            GridironGM.GameState.Instance.SelectedTeamAbbr = row.Team.abbreviation;
-            try
+            var gs = GridironGM.GameState.Instance;
+            if (gs == null)
             {
-                SessionState.Instance.SetSelectedTeam(row.Team);
+                Debug.LogError("[TeamSelection] GameState.Instance is null. Ensure a GameState exists in a boot scene and is DontDestroyOnLoad.");
             }
-            catch { /* ignore if SessionState not used yet */ }
+            else
+            {
+                gs.SelectedTeamAbbr = row.Team.abbreviation;
+                gs.SelectedTeamCity = row.Team.city;
+                gs.SelectedTeamName = row.Team.name;
+            }
 
-            if (rosterPanel)
+            if (rosterPanel != null)
                 rosterPanel.ShowRosterForTeam(row.Team.abbreviation);
 
-            if (confirmButton)
+            if (confirmButton != null)
                 confirmButton.interactable = true;
 
             Debug.Log($"[TeamSelection] Selected {row.Team.abbreviation}");
@@ -99,14 +107,14 @@ namespace GridironGM.UI.TeamSelection
 
         public void OnConfirm()
         {
-            var abbr = GridironGM.GameState.Instance?.SelectedTeamAbbr;
-            if (string.IsNullOrEmpty(abbr))
+            var gs = GridironGM.GameState.Instance;
+            if (gs == null || string.IsNullOrEmpty(gs.SelectedTeamAbbr))
             {
                 Debug.LogWarning("[TeamSelectionUI] No team selected.");
                 return;
             }
 
-            SceneManager.LoadScene("NewGameSetup");
+            SceneManager.LoadScene("Dashboard");
         }
 
         private void TryAutoWire()
@@ -117,8 +125,6 @@ namespace GridironGM.UI.TeamSelection
                 if (!tf) tf = GameObject.Find("LeftPanel/Viewport/Content")?.transform;
                 teamListContent = tf;
             }
-            if (!rosterPanel)
-                rosterPanel = FindObjectOfType<RosterPanelUI>(true);
         }
     }
 }
