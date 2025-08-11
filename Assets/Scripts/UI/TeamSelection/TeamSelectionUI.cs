@@ -26,15 +26,10 @@ namespace GridironGM.UI.TeamSelection
             if (confirmButton) confirmButton.interactable = false;
         }
 
-        // (Remove duplicate declarations and keep only one set above)
-
-        [System.Obsolete]
         private void Start()
         {
-            // 1) Ensure data exists
+            // Ensure complete rosters, then refresh the panel's memory, THEN build left list
             GridironGM.Boot.RosterBootstrapper.EnsureRostersExist(playersPerTeam: 12);
-
-            // 2) Reload panel’s in-memory data (it may have loaded too early in Awake)
             if (rosterPanel) rosterPanel.ReloadRosters();
 
             TryAutoWire();
@@ -77,8 +72,6 @@ namespace GridironGM.UI.TeamSelection
         {
             if (team == null) { Debug.LogError("[TeamSelectionUI] Null team"); return; }
 
-
-            // Save selection if GameState exists (or will autospawn)
             GridironGM.GameState.Instance.SelectedTeamAbbr = team.abbreviation;
 
             if (confirmButton) confirmButton.interactable = true;
@@ -96,7 +89,7 @@ namespace GridironGM.UI.TeamSelection
                 return;
             }
 
-            SceneManager.LoadScene("NewGameSetup"); // adjust as needed
+            SceneManager.LoadScene("NewGameSetup");
         }
 
         private void TryAutoWire()
@@ -108,7 +101,8 @@ namespace GridironGM.UI.TeamSelection
                 teamListContent = tf;
             }
             if (!rosterPanel)
-                rosterPanel = FindFirstObjectByType<RosterPanelUI>();
+                rosterPanel = FindObjectOfType<RosterPanelUI>(true);
         }
     }
 }
+

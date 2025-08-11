@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 using GridironGM.Data;
 
 namespace GridironGM.UI.TeamSelection
@@ -12,9 +12,13 @@ namespace GridironGM.UI.TeamSelection
     public class RosterPanelUI : MonoBehaviour
     {
         [Header("Wiring")]
-        [SerializeField] private Transform content;          // ScrollView Content
-        [SerializeField] private GameObject playerRowPrefab; // Prefab with PlayerRowUI
-        [SerializeField] private TMP_Text messageText;       // Optional "No data" label
+        [SerializeField] private Transform content;            // ScrollView Content (RightPanel/Viewport/Content)
+        [SerializeField] private GameObject playerRowPrefab;   // Prefab with PlayerRowUI script
+        [SerializeField] private TMP_Text messageText;         // Optional "No data" label
+
+        [Header("Dev")]
+        [Tooltip("If ON, adds a faint background + fixed height to each row so visibility is obvious.")]
+        [SerializeField] private bool forceRowVisible = true;
 
         private RosterByTeam rosters;
 
@@ -24,6 +28,7 @@ namespace GridironGM.UI.TeamSelection
             ReloadRosters(); // load whatever exists at startup
         }
 
+        /// <summary>Re-read rosters_by_team.json into memory.</summary>
         public void ReloadRosters()
         {
             try
@@ -38,6 +43,7 @@ namespace GridironGM.UI.TeamSelection
             }
         }
 
+        /// <summary>Clear and render the selected team's roster.</summary>
         public void ShowRosterForTeam(string abbr)
         {
             if (!content || !playerRowPrefab)
@@ -46,11 +52,11 @@ namespace GridironGM.UI.TeamSelection
                 return;
             }
 
-            // In case the file was generated after Awake()
+            // If the file was generated in Start(), make sure we refresh memory
             if (rosters == null || rosters.Count == 0)
                 ReloadRosters();
 
-            // Clear old rows
+            // Clear old children
             for (int i = content.childCount - 1; i >= 0; i--)
                 Destroy(content.GetChild(i).gameObject);
 
@@ -63,19 +69,45 @@ namespace GridironGM.UI.TeamSelection
                 return;
             }
 
+            int rendered = 0;
             foreach (var p in list.OrderBy(pl => pl.pos).ThenByDescending(pl => pl.ovr))
             {
                 var go = Instantiate(playerRowPrefab, content);
+                go.name = $"{abbr}_{p.pos}_{p.last}_{p.ovr}";
+                if (forceRowVisible) EnsureRowVisible(go);
+
                 var row = go.GetComponent<PlayerRowUI>();
                 if (!row)
                 {
-                    Debug.LogError("[RosterPanelUI] PlayerRowUI missing on prefab.");
+                    Debug.LogError("[RosterPanelUI] PlayerRowUI missing on prefab. Add the script to the prefab root.");
                     continue;
                 }
+
                 row.Set(p);
+                rendered++;
             }
 
-            Debug.Log($"[RosterPanelUI] Rendered {list.Count} players for {abbr}.");
+            Debug.Log($"[RosterPanelUI] Rendered {rendered}/{list.Count} players for {abbr}. Content children now: {content.childCount}");
+        }
+
+        private void EnsureRowVisible(GameObject go)
+        {
+            // Make sure each row has a background and a reasonable height so it actually shows up.
+            var rt = go.GetComponent<RectTransform>();
+            if (rt) rt.sizeDelta = new Vector2(rt.sizeDelta.x, 36f);
+
+            var img = go.GetComponent<Image>();
+            if (!img) img = go.AddComponent<Image>();
+            img.raycastTarget = false;
+            // faint background so you can see rows are there
+            var c = img.color;
+            img.color = new Color(c.r == 0 ? 0.1f : c.r, c.g == 0 ? 0.1f : c.g, c.b == 0 ? 0.1f : c.b, 0.08f);
+
+            // Help layout systems if missing
+            var le = go.GetComponent<LayoutElement>();
+            if (!le) le = go.AddComponent<LayoutElement>();
+            le.minHeight = 32f;
+            le.preferredHeight = 36f;
         }
 
         private void TryAutoWire()
@@ -93,3 +125,4 @@ namespace GridironGM.UI.TeamSelection
         }
     }
 }
+
