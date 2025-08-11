@@ -20,6 +20,7 @@ namespace GridironGM.UI.TeamSelection
         [SerializeField] private Button confirmButton;        // bottom confirm button (optional)
 
         private List<GridironGM.Data.TeamData> teams;
+        private TeamRowUI _currentSelectedRow;
 
         private void Awake()
         {
@@ -57,27 +58,42 @@ namespace GridironGM.UI.TeamSelection
                 return;
             }
 
-            var go  = Instantiate(teamRowPrefab, teamListContent);
-            var row = go.GetComponent<TeamRowUI>();
+            var rowGO = Instantiate(teamRowPrefab, teamListContent);
+            var row = rowGO.GetComponent<TeamRowUI>();
             if (!row)
             {
                 Debug.LogError("[TeamSelectionUI] TeamRowUI missing on teamRowPrefab.");
                 return;
             }
 
-            row.Set(t, () => OnTeamClicked(t));
+            row.Init(t, OnRowClicked);
         }
 
-        private void OnTeamClicked(GridironGM.Data.TeamData team)
+        private void OnRowClicked(TeamRowUI row)
         {
-            if (team == null) { Debug.LogError("[TeamSelectionUI] Null team"); return; }
+            if (_currentSelectedRow == row)
+                return;
 
-            GridironGM.GameState.Instance.SelectedTeamAbbr = team.abbreviation;
+            if (_currentSelectedRow != null)
+                _currentSelectedRow.SetSelected(false);
 
-            if (confirmButton) confirmButton.interactable = true;
-            if (rosterPanel)   rosterPanel.ShowRosterForTeam(team.abbreviation);
+            _currentSelectedRow = row;
+            _currentSelectedRow.SetSelected(true);
 
-            Debug.Log($"[TeamSelectionUI] Selected {team.abbreviation}");
+            GridironGM.GameState.Instance.SelectedTeamAbbr = row.Team.abbreviation;
+            try
+            {
+                SessionState.Instance.SetSelectedTeam(row.Team);
+            }
+            catch { /* ignore if SessionState not used yet */ }
+
+            if (rosterPanel)
+                rosterPanel.ShowRosterForTeam(row.Team.abbreviation);
+
+            if (confirmButton)
+                confirmButton.interactable = true;
+
+            Debug.Log($"[TeamSelection] Selected {row.Team.abbreviation}");
         }
 
         public void OnConfirm()
@@ -105,4 +121,3 @@ namespace GridironGM.UI.TeamSelection
         }
     }
 }
-
