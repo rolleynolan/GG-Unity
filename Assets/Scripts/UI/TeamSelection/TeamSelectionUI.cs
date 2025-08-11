@@ -106,6 +106,7 @@ namespace GridironGM.UI.TeamSelection
             Debug.Log($"[TeamSelection] Selected {row.Team.abbreviation}");
         }
 
+        // Proceed only if a team is selected
         public void OnConfirm()
         {
             var gs = GridironGM.GameState.Instance;
