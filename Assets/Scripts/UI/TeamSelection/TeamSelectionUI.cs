@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
+using GridironGM; // Add this if SessionState is in GridironGM namespace
 
 namespace GridironGM.UI.TeamSelection
 {
