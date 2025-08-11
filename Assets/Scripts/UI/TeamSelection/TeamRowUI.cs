@@ -8,6 +8,7 @@ public class TeamRowUI : MonoBehaviour
     [Header("Wiring (optional)")]
     [SerializeField] private Button button;                // Will auto-find if null
     [SerializeField] private Image background;             // Will auto-find if null
+    [SerializeField] private Image logoImage;              // Will auto-find if null
     [SerializeField] private TMP_Text label;               // Will auto-find if null
     [SerializeField] private GameObject selectedHighlight; // Optional; we disable raycasts
 
@@ -43,6 +44,21 @@ public class TeamRowUI : MonoBehaviour
         if (label == null)
             label = GetComponentInChildren<TMP_Text>(true);
 
+        if (logoImage == null)
+        {
+            // try find an Image named "Logo" first
+            foreach (var img in GetComponentsInChildren<Image>(true))
+            {
+                if (img.name.ToLower() == "logo") { logoImage = img; break; }
+            }
+            if (logoImage == null)
+            {
+                // heuristic: pick an Image child that is not the background
+                var imgs = GetComponentsInChildren<Image>(true);
+                if (imgs.Length > 1) logoImage = imgs[1];
+            }
+        }
+
         // Make sure highlight never blocks clicks
         if (selectedHighlight != null)
         {
@@ -58,8 +74,20 @@ public class TeamRowUI : MonoBehaviour
         Team = team;
         OnClicked = onClicked;
 
-        if (label != null) label.text = $"{team.city} {team.name} ({team.abbreviation})";
+        if (label != null) label.text = $"{team.city} {team.name} ({team.abbreviation})"; 
         else Debug.LogWarning($"[TeamRowUI] No TMP_Text found on '{name}'");
+
+        var sprite = TeamLogoDatabase.Instance != null ? TeamLogoDatabase.Instance.Get(team.abbreviation) : null;
+        if (logoImage != null)
+        {
+            logoImage.sprite = sprite;
+            logoImage.enabled = sprite != null;
+            logoImage.preserveAspect = true;
+        }
+        else
+        {
+            Debug.LogWarning($"[TeamRowUI] No logoImage assigned on '{name}'.");
+        }
 
         if (button != null)
         {
