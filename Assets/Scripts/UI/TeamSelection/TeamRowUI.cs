@@ -47,10 +47,10 @@ public class TeamRowUI : MonoBehaviour
 
         if (logoImage == null)
         {
-            // Prefer a child explicitly named "Logo"
-            foreach (var img in GetComponentsInChildren<Image>(true))
+            foreach (var img in GetComponentsInChildren<UnityEngine.UI.Image>(true))
             {
-                if (img.name.Equals("Logo", System.StringComparison.OrdinalIgnoreCase)) { logoImage = img; break; }
+                if (img.name.Equals("Logo", System.StringComparison.OrdinalIgnoreCase))
+                { logoImage = img; break; }
             }
         }
 
@@ -72,22 +72,18 @@ public class TeamRowUI : MonoBehaviour
         if (label != null) label.text = $"{team.city} {team.name} ({team.abbreviation})"; 
         else Debug.LogWarning($"[TeamRowUI] No TMP_Text found on '{name}'");
 
-        var db = TeamLogoDatabase.Instance;
-        if (db == null) { Debug.LogError("[TeamRowUI] Logo DB not loaded."); }
+        // Load team logo
+        var sprite = LogoResolver.Get(team.abbreviation);
+        if (logoImage != null)
+        {
+            logoImage.sprite = sprite;
+            logoImage.enabled = sprite != null;
+            logoImage.preserveAspect = true;
+            Debug.Log($"[TeamRowUI] Logo '{team.abbreviation}' -> {(sprite ? sprite.name : "null")}");
+        }
         else
         {
-            var sprite = db.Get(team.abbreviation);
-            if (logoImage != null)
-            {
-                logoImage.sprite = sprite;
-                logoImage.enabled = sprite != null;
-                logoImage.preserveAspect = true;
-                Debug.Log($"[TeamRowUI] Logo '{team.abbreviation}' -> {(sprite != null ? sprite.name : "null")}");
-            }
-            else
-            {
-                Debug.LogWarning($"[TeamRowUI] No logoImage assigned on '{name}'. Add an Image named 'Logo' to the prefab.");
-            }
+            Debug.LogWarning($"[TeamRowUI] No logoImage assigned on '{name}'. Add an Image named 'Logo' to the prefab.");
         }
 
         if (button != null)
