@@ -1,81 +1,42 @@
-using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using UnityEngine.EventSystems;
-using GridironGM.Data;
+using Debug = UnityEngine.Debug;
 
-namespace GridironGM.UI
+namespace GridironGM.UI.TeamSelection
 {
-    public class TeamRowUI : MonoBehaviour, IPointerClickHandler
+    public class TeamRowUI : MonoBehaviour
     {
-        [SerializeField] private Image logoImage;
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private TMP_Text conferenceText;
+        [SerializeField] private Image logoImage;
 
-        private string teamAbbreviation;
-        private Action OnRowClicked;
+        private string abbr;
 
-        // Existing method kept for backward compatibility
-        public void SetData(TeamDataUI data)
+        public void Set(GridironGM.Data.TeamData data, System.Action onClick)
         {
-            if (data == null)
+            abbr = data.abbreviation;
+            if (nameText)      nameText.text      = $"{data.city} {data.name}";
+            if (conferenceText) conferenceText.text = data.conference;
+
+            var sprite = Resources.Load<Sprite>($"TeamSprites/{abbr}");
+            if (!sprite)
             {
-                Debug.LogWarning("TeamRowUI.SetData called with null data!");
-                return;
+                Debug.LogWarning($"[TeamRowUI] Missing sprite for {abbr}. Using fallback if available.");
+                sprite = Resources.Load<Sprite>("TeamSprites/Generic");
+            }
+            if (logoImage)
+            {
+                logoImage.sprite  = sprite;
+                logoImage.enabled = sprite != null;
             }
 
-            if (logoImage != null)
+            var btn = GetComponent<UnityEngine.UI.Button>();
+            if (btn != null && onClick != null)
             {
-                logoImage.sprite = data.logo;
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => onClick());
             }
-
-            if (nameText != null)
-            {
-                nameText.text = data.teamName;
-            }
-
-            if (conferenceText != null)
-            {
-                conferenceText.text = data.teamConference;
-            }
-
-            teamAbbreviation = data.abbreviation;
-        }
-
-        // New API for setting data from TeamData model
-        public void Set(TeamData data, Action onClick)
-        {
-            if (data == null) return;
-
-            if (nameText != null)
-            {
-                nameText.text = $"{data.city} {data.name}";
-            }
-
-            if (conferenceText != null)
-            {
-                conferenceText.text = data.conference;
-            }
-
-            if (logoImage != null)
-            {
-                Sprite sprite = Resources.Load<Sprite>($"TeamSprites/{data.abbreviation}");
-                if (sprite == null)
-                {
-                    Debug.LogWarning($"Missing logo sprite for {data.abbreviation}");
-                }
-                logoImage.sprite = sprite;
-            }
-
-            teamAbbreviation = data.abbreviation;
-            OnRowClicked = onClick;
-        }
-
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            Debug.Log($"TeamRowUI clicked: {teamAbbreviation}");
-            OnRowClicked?.Invoke();
         }
     }
 }

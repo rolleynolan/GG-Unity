@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using System.Diagnostics;
+using Diag = System.Diagnostics;
+using Debug = UnityEngine.Debug;
 using System.IO;
 using System;
 
@@ -216,7 +217,7 @@ public class MainMenuController : MonoBehaviour
 
     void RunSimulateWeek()
     {
-        var process = new Process();
+        var process = new Diag.Process();
         process.StartInfo.FileName = "python";
         process.StartInfo.WorkingDirectory = Path.Combine(Application.dataPath, "..", "..");
         process.StartInfo.Arguments = "scripts/run_weekly_simulation.py";
