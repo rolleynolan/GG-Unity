@@ -2,6 +2,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using GridironGM.Data;
 
 namespace GridironGM.UI.TeamSelection
 {
@@ -12,7 +13,13 @@ namespace GridironGM.UI.TeamSelection
         [SerializeField] private TMP_Text ovrText;
         [SerializeField] private TMP_Text ageText; // optional
 
-        public void Set(GridironGM.Data.PlayerData p)
+        public void Set(PlayerData p)
+        {
+            if (p == null) { gameObject.SetActive(false); return; }
+            Set(new PlayerDTO { name = $"{p.first} {p.last}", position = p.pos, ovr = p.ovr, age = p.age });
+        }
+
+        public void Set(PlayerDTO p)
         {
             if (p == null) { gameObject.SetActive(false); return; }
 
@@ -25,18 +32,17 @@ namespace GridironGM.UI.TeamSelection
             Debug.Log($"[PlayerRowUI] Children TMPs: {names}. name:{(nameText ? nameText.name : "null")} pos:{(posText ? posText.name : "null")} ovr:{(ovrText ? ovrText.name : "null")} age:{(ageText ? ageText.name : "null")}");
 #endif
 
-
             if (!nameText || !posText || !ovrText)
             {
                 Debug.LogError("[PlayerRowUI] Missing TMP fields even after auto-wire. Check prefab children or assign in Inspector.");
                 return;
             }
 
-            nameText.text = $"{p.first} {p.last}";
-            posText.text = p.pos;
+            nameText.text = p.name;
+            posText.text = p.position;
             ovrText.text = p.ovr.ToString();
             if (ageText) ageText.text = p.age > 0 ? p.age.ToString() : "";
-            
+
             var self = transform as RectTransform;
             if (self) UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(self);
 
