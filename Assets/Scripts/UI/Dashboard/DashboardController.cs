@@ -41,6 +41,9 @@ namespace GridironGM.UI.Dashboard
         private void Start()
         {
             var gs = GridironGM.GameState.Instance;
+            // Auto-find rosterPanel if unassigned
+            if (rosterPanel == null)
+                rosterPanel = GetComponentInChildren<RosterPanelUI>(true);
             if (gs == null || string.IsNullOrEmpty(gs.SelectedTeamAbbr))
             {
                 Debug.LogError("[Dashboard] Missing team selection. Returning to TeamSelection.");
