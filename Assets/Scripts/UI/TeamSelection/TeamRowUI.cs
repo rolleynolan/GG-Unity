@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using GridironGM.Data;
 
 public class TeamRowUI : MonoBehaviour
 {
@@ -15,7 +14,7 @@ public class TeamRowUI : MonoBehaviour
     [SerializeField] private Color normalColor = new Color(0.14f, 0.14f, 0.14f, 1f);
     [SerializeField] private Color selectedColor = new Color(0.22f, 0.32f, 0.52f, 1f);
 
-    public TeamData Team { get; private set; }
+    public Team Team { get; private set; }
     public System.Action<TeamRowUI> OnClicked;
 
     private void Awake()
@@ -35,7 +34,7 @@ public class TeamRowUI : MonoBehaviour
         if (logoImage != null) logoImage.raycastTarget = false;
     }
 
-    public void Init(TeamData team, System.Action<TeamRowUI> onClicked)
+    public void Init(Team team, System.Action<TeamRowUI> onClicked)
     {
         Team = team;
         OnClicked = onClicked;

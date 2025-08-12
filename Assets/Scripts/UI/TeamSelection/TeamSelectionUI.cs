@@ -19,7 +19,7 @@ namespace GridironGM.UI.TeamSelection
         [Header("Flow")]
         [SerializeField] private Button confirmButton;        // bottom confirm button (optional)
 
-        private List<GridironGM.Data.TeamData> teams;
+        private List<Team> teams;
         private TeamRowUI _currentSelectedRow;
 
         private void Start()
@@ -34,18 +34,13 @@ namespace GridironGM.UI.TeamSelection
 
         private void PopulateTeams()
         {
-            // Ensure complete rosters, then refresh the panel's memory, THEN build left list
-            GridironGM.Boot.RosterBootstrapper.EnsureRostersExist(playersPerTeam: 12);
-            if (rosterPanel != null) rosterPanel.ReloadRosters();
-
             TryAutoWire();
 
-            teams = GridironGM.Data.JsonLoader
-                .LoadFromStreamingAssets<List<GridironGM.Data.TeamData>>("teams.json");
+            teams = LeagueRepository.GetTeams()?.ToList();
 
             if (teams == null || teams.Count == 0)
             {
-                Debug.LogError("[TeamSelectionUI] teams.json missing or empty.");
+                Debug.LogError("[TeamSelectionUI] No teams found.");
                 return;
             }
 
@@ -55,7 +50,7 @@ namespace GridironGM.UI.TeamSelection
             Debug.Log($"[TeamSelectionUI] Spawned {teams.Count} teams.");
         }
 
-        private void AddTeamRow(GridironGM.Data.TeamData team)
+        private void AddTeamRow(Team team)
         {
             if (!teamListContent || !teamRowPrefab)
             {
@@ -85,20 +80,10 @@ namespace GridironGM.UI.TeamSelection
             _currentSelectedRow = row;
             _currentSelectedRow.SetSelected(true);
 
-            var gs = GridironGM.GameState.Instance;
-            if (gs == null)
-            {
-                Debug.LogError("[TeamSelection] GameState.Instance is null. Ensure a GameState exists in a boot scene and is DontDestroyOnLoad.");
-            }
-            else
-            {
-                gs.SelectedTeamAbbr = row.Team.abbreviation;
-                gs.SelectedTeamCity = row.Team.city;
-                gs.SelectedTeamName = row.Team.name;
-            }
+            GameSession.SelectedTeamAbbr = row.Team.abbreviation;
 
             if (rosterPanel != null)
-                rosterPanel.ShowRosterForTeam(row.Team.abbreviation);
+                rosterPanel.SetTeam(row.Team.abbreviation);
 
             if (confirmButton != null)
                 confirmButton.interactable = true;
@@ -109,8 +94,7 @@ namespace GridironGM.UI.TeamSelection
         // Proceed only if a team is selected
         public void OnConfirm()
         {
-            var gs = GridironGM.GameState.Instance;
-            if (gs == null || string.IsNullOrEmpty(gs.SelectedTeamAbbr))
+            if (string.IsNullOrEmpty(GameSession.SelectedTeamAbbr))
             {
                 Debug.LogWarning("[TeamSelectionUI] No team selected.");
                 return;
