@@ -1,27 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 
 public static class LeagueRepository
 {
-    // Tries persistent path first (runtime saves), falls back to Resources/Config
-    private static string PersistPath => Application.persistentDataPath;
-
     public static Team[] GetTeams()
     {
-        if (TryLoadText("teams.json", out var json)) return JsonUtility.FromJson<TeamList>(json)?.teams ?? Array.Empty<Team>();
-        if (TryLoadResource("Config/teams", out var resJson)) return JsonUtility.FromJson<TeamList>(resJson)?.teams ?? Array.Empty<Team>();
-        Debug.LogWarning("[LeagueRepository] teams.json not found.");
-        return Array.Empty<Team>();
+        var json = LoadJson("teams.json", new[] { "Config/teams", "teams" }, out var src);
+        if (string.IsNullOrEmpty(json)) return Array.Empty<Team>();
+        var teams = JsonUtility.FromJson<TeamList>(json)?.teams ?? Array.Empty<Team>();
+        Debug.Log($"[LeagueRepository] Teams count: {teams.Length}");
+        return teams;
     }
 
     public static List<Player> GetRoster(string abbr)
     {
         if (string.IsNullOrEmpty(abbr)) return new List<Player>();
-        if (TryLoadText("rosters_by_team.json", out var json)) return ParseRoster(json, abbr);
-        if (TryLoadResource("Generated/rosters_by_team", out var resJson)) return ParseRoster(resJson, abbr);
+        var json = LoadJson("rosters_by_team.json", new[] { "Generated/rosters_by_team", "rosters_by_team" }, out var src);
+        if (!string.IsNullOrEmpty(json)) return ParseRoster(json, abbr);
         Debug.LogWarning("[LeagueRepository] rosters_by_team.json not found. Returning placeholder roster.");
         return PlaceholderRoster();
     }
@@ -29,28 +26,52 @@ public static class LeagueRepository
     public static List<TeamGame> GetTeamSchedule(string abbr)
     {
         if (string.IsNullOrEmpty(abbr)) return new List<TeamGame>();
-        if (TryLoadText("schedule_by_team.json", out var json)) return ParseSchedule(json, abbr);
-        if (TryLoadResource("Generated/schedule_by_team", out var resJson)) return ParseSchedule(resJson, abbr);
+        var json = LoadJson("schedule_by_team.json", new[] { "Generated/schedule_by_team", "schedule_by_team" }, out var src);
+        if (!string.IsNullOrEmpty(json)) return ParseSchedule(json, abbr);
         Debug.LogWarning("[LeagueRepository] schedule_by_team.json not found.");
         return new List<TeamGame>();
     }
 
     // ===== helpers =====
-    private static bool TryLoadText(string fileName, out string json)
+    public static string LoadJson(string fileName, string[] resourceCandidates, out string source)
     {
-        json = null;
-        var path = Path.Combine(PersistPath, fileName);
-        if (!File.Exists(path)) return false;
-        json = File.ReadAllText(path);
-        return !string.IsNullOrEmpty(json);
-    }
-    private static bool TryLoadResource(string resPath, out string json)
-    {
-        json = null;
-        var ta = Resources.Load<TextAsset>(resPath);
-        if (ta == null) return false;
-        json = ta.text;
-        return !string.IsNullOrEmpty(json);
+        source = null;
+
+        // persistent data path
+        var path = Path.Combine(Application.persistentDataPath, fileName);
+        if (File.Exists(path))
+        {
+            var json = File.ReadAllText(path);
+            source = path;
+            Debug.Log($"[LeagueRepository] Loaded {fileName} from {source} ({json.Length} bytes)");
+            return json;
+        }
+
+        // streaming assets (synchronous in editor/standalone)
+        path = Path.Combine(Application.streamingAssetsPath, fileName);
+        if ((Application.isEditor || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.LinuxPlayer) && File.Exists(path))
+        {
+            var json = File.ReadAllText(path);
+            source = path;
+            Debug.Log($"[LeagueRepository] Loaded {fileName} from {source} ({json.Length} bytes)");
+            return json;
+        }
+
+        // resources
+        foreach (var candidate in resourceCandidates)
+        {
+            var ta = Resources.Load<TextAsset>(candidate);
+            if (ta != null && !string.IsNullOrEmpty(ta.text))
+            {
+                source = "Resources/" + candidate;
+                var json = ta.text;
+                Debug.Log($"[LeagueRepository] Loaded {fileName} from {source} ({json.Length} bytes)");
+                return json;
+            }
+        }
+
+        Debug.LogWarning($"[LeagueRepository] {fileName} not found.");
+        return null;
     }
 
     private static List<Player> ParseRoster(string json, string abbr)
