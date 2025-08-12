@@ -1,116 +1,66 @@
-using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
-namespace GridironGM.UI.TeamSelection
+[System.Serializable]
+public class TeamRow
 {
-    public class TeamSelectionUI : MonoBehaviour
+    public Button button;      // root button
+    public TMP_Text label;     // shows "CITY NAME (ABBR)"
+}
+
+public class TeamSelectionUI : MonoBehaviour
+{
+    [Header("Prefabs & Targets")]
+    [SerializeField] private Transform contentParent;    // ScrollView/Viewport/Content
+    [SerializeField] private GameObject teamRowPrefab;   // prefab with Button + TMP_Text
+    [SerializeField] private TMP_Text headerText;        // optional: “Select a Team”
+    [SerializeField] private RosterPanelUI rightPanel;   // optional: preview panel at right
+
+    private Team[] teams;
+
+    void Start()
     {
-        [Header("Left list")]
-        [SerializeField] private Transform teamListContent;   // LeftPanel/Viewport/Content
-        [SerializeField] private GameObject teamRowPrefab;    // TeamRowUI prefab
+        PopulateTeams();
+    }
 
-        [Header("Right panel")]
-        [SerializeField] private RosterPanelUI rosterPanel;   // RightPanel has this
-
-        [Header("Flow")]
-        [SerializeField] private Button confirmButton;        // bottom confirm button (optional)
-
-        private List<Team> teams;
-        private TeamRowUI _currentSelectedRow;
-
-        private void Start()
+    public void PopulateTeams()
+    {
+        teams = LeagueRepository.GetTeams();
+        if (teams == null || teams.Length == 0)
         {
-            if (confirmButton != null) confirmButton.interactable = false;
-
-            if (rosterPanel == null)
-                rosterPanel = UnityEngine.Object.FindFirstObjectByType<RosterPanelUI>();
-
-            PopulateTeams();
+            headerText?.SetText("No teams found. Place teams.json in Resources/Config or persistentDataPath.");
+            Debug.LogWarning("[TeamSelectionUI] No teams loaded.");
+            return;
         }
 
-        private void PopulateTeams()
+        headerText?.SetText("Select a Team");
+
+        // Clear existing
+        for (int i = contentParent.childCount - 1; i >= 0; i--)
+            Destroy(contentParent.GetChild(i).gameObject);
+
+        foreach (var t in teams.OrderBy(t => t.abbreviation))
         {
-            TryAutoWire();
+            var go = Instantiate(teamRowPrefab, contentParent);
+            var btn = go.GetComponent<Button>();
+            var label = go.GetComponentInChildren<TMP_Text>();
+            label.SetText($"{t.city} {t.name} ({t.abbreviation})");
 
-            teams = LeagueRepository.GetTeams()?.ToList();
-
-            if (teams == null || teams.Count == 0)
+            string abbr = t.abbreviation; // capture
+            btn.onClick.AddListener(() =>
             {
-                Debug.LogError("[TeamSelectionUI] No teams found.");
-                return;
-            }
-
-            foreach (var t in teams.OrderBy(t => (t.city + " " + t.name)))
-                AddTeamRow(t);
-
-            Debug.Log($"[TeamSelectionUI] Spawned {teams.Count} teams.");
+                GameSession.SelectedTeamAbbr = abbr;
+                Debug.Log($"[TeamSelectionUI] Selected {abbr}");
+                rightPanel?.SetTeam(abbr); // preview roster if you wired it
+            });
         }
 
-        private void AddTeamRow(Team team)
-        {
-            if (!teamListContent || !teamRowPrefab)
-            {
-                Debug.LogError("[TeamSelectionUI] teamListContent or teamRowPrefab not assigned.");
-                return;
-            }
-
-            var rowGO = Instantiate(teamRowPrefab, teamListContent);
-            var rowUI = rowGO.GetComponent<TeamRowUI>();
-            if (rowUI == null)
-            {
-                Debug.LogError("[TeamSelection] teamRowPrefab is missing TeamRowUI.");
-            }
-            else
-            {
-                rowUI.Init(team, OnRowClicked);
-            }
-        }
-
-        private void OnRowClicked(TeamRowUI row)
-        {
-            if (_currentSelectedRow == row) return;
-
-            if (_currentSelectedRow != null)
-                _currentSelectedRow.SetSelected(false);
-
-            _currentSelectedRow = row;
-            _currentSelectedRow.SetSelected(true);
-
-            GameSession.SelectedTeamAbbr = row.Team.abbreviation;
-
-            if (rosterPanel != null)
-                rosterPanel.SetTeam(row.Team.abbreviation);
-
-            if (confirmButton != null)
-                confirmButton.interactable = true;
-
-            Debug.Log($"[TeamSelection] Selected {row.Team.abbreviation}");
-        }
-
-        // Proceed only if a team is selected
-        public void OnConfirm()
-        {
-            if (string.IsNullOrEmpty(GameSession.SelectedTeamAbbr))
-            {
-                Debug.LogWarning("[TeamSelectionUI] No team selected.");
-                return;
-            }
-
-            SceneManager.LoadScene("Dashboard");
-        }
-
-        private void TryAutoWire()
-        {
-            if (!teamListContent)
-            {
-                var tf = transform.root.Find("Canvas/LeftPanel/Viewport/Content");
-                if (!tf) tf = GameObject.Find("LeftPanel/Viewport/Content")?.transform;
-                teamListContent = tf;
-            }
-        }
+        // Layout rebuild
+        Canvas.ForceUpdateCanvases();
+        var rt = contentParent as RectTransform;
+        if (rt) UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        Canvas.ForceUpdateCanvases();
     }
 }
