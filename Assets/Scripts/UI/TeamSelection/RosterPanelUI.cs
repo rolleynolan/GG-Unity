@@ -20,7 +20,8 @@ namespace GridironGM.UI.TeamSelection
         [Tooltip("If ON, adds a faint background + fixed height to each row so visibility is obvious.")]
         [SerializeField] private bool forceRowVisible = true;
 
-        private RosterByTeam rosters;
+        private static RosterByTeam rosters;
+        private readonly Queue<GameObject> rowPool = new();
 
         private void Awake()
         {
@@ -46,35 +47,76 @@ namespace GridironGM.UI.TeamSelection
         /// <summary>Clear and render the selected team's roster.</summary>
         public void ShowRosterForTeam(string abbr)
         {
+            var list = FetchRosterList(abbr);
+            RebuildFromList(list);
+        }
+
+        public static List<PlayerDTO> FetchRosterList(string teamAbbr)
+        {
+            if (string.IsNullOrEmpty(teamAbbr)) return new List<PlayerDTO>();
+
+            if (rosters == null || rosters.Count == 0)
+            {
+                try
+                {
+                    rosters = JsonLoader.LoadFromStreamingAssets<RosterByTeam>("rosters_by_team.json");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[RosterPanelUI] Failed to load rosters: {ex.Message}");
+                    return new List<PlayerDTO>();
+                }
+            }
+
+            if (!rosters.TryGetValue(teamAbbr, out var list) || list == null)
+                return new List<PlayerDTO>();
+
+            var result = new List<PlayerDTO>(list.Count);
+            foreach (var p in list)
+                result.Add(new PlayerDTO { name = $"{p.first} {p.last}", position = p.pos, ovr = p.ovr, age = p.age });
+            return result;
+        }
+
+        public void RebuildFromList(List<PlayerDTO> players)
+        {
             if (!content || !playerRowPrefab)
             {
                 Debug.LogError("[RosterPanelUI] Missing Content or Player Row Prefab.");
                 return;
             }
 
-            // If the file was generated in Start(), make sure we refresh memory
-            if (rosters == null || rosters.Count == 0)
-                ReloadRosters();
-
-            // Clear old children
+            // Return existing children to pool
             for (int i = content.childCount - 1; i >= 0; i--)
-                Destroy(content.GetChild(i).gameObject);
-
-            if (messageText) messageText.text = "";
-
-            if (rosters == null || !rosters.TryGetValue(abbr, out var list) || list == null || list.Count == 0)
             {
-                if (messageText) messageText.text = $"No roster data for {abbr}";
-                Debug.LogWarning($"[RosterPanelUI] No roster for {abbr}.");
+                var child = content.GetChild(i).gameObject;
+                child.SetActive(false);
+                rowPool.Enqueue(child);
+            }
+
+            if (messageText) messageText.text = string.Empty;
+
+            if (players == null || players.Count == 0)
+            {
+                if (messageText) messageText.text = "No roster data";
+                Debug.LogWarning("[RosterPanelUI] No players to render.");
                 return;
             }
 
             int rendered = 0;
-            foreach (var p in list.OrderBy(pl => pl.pos).ThenByDescending(pl => pl.ovr))
+            foreach (var p in players)
             {
-                var go = Instantiate(playerRowPrefab, content);
-                go.name = $"{abbr}_{p.pos}_{p.last}_{p.ovr}";
-                if (forceRowVisible) EnsureRowVisible(go);
+                GameObject go;
+                if (rowPool.Count > 0)
+                {
+                    go = rowPool.Dequeue();
+                    go.transform.SetParent(content, false);
+                    go.SetActive(true);
+                }
+                else
+                {
+                    go = Instantiate(playerRowPrefab, content);
+                    if (forceRowVisible) EnsureRowVisible(go);
+                }
 
                 var row = go.GetComponent<PlayerRowUI>();
                 if (!row)
@@ -82,6 +124,9 @@ namespace GridironGM.UI.TeamSelection
                     Debug.LogError("[RosterPanelUI] PlayerRowUI missing on prefab. Add the script to the prefab root.");
                     continue;
                 }
+
+                row.Set(p);
+
                 var rt = content as RectTransform;
                 if (rt)
                 {
@@ -89,12 +134,10 @@ namespace GridironGM.UI.TeamSelection
                     UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
                 }
 
-
-                row.Set(p);
                 rendered++;
             }
 
-            Debug.Log($"[RosterPanelUI] Rendered {rendered}/{list.Count} players for {abbr}. Content children now: {content.childCount}");
+            Debug.Log($"[RosterPanelUI] Rendered {rendered}/{players.Count} players. Content children now: {content.childCount} pool:{rowPool.Count}");
         }
 
         private void EnsureRowVisible(GameObject go)

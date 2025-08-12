@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using GridironGM.Data;
 using GridironGM.UI.TeamSelection;
 
 namespace GridironGM.UI.Dashboard
@@ -27,6 +29,11 @@ namespace GridironGM.UI.Dashboard
         [SerializeField] private RosterPanelUI rosterPanel;         // existing component
         [SerializeField] private DepthChartPanel depthChartPanel;   // stub
         [SerializeField] private SchedulePanel schedulePanel;       // stub
+
+        [Header("Roster Filters")]
+        [SerializeField] private TMP_Dropdown positionFilter, sortFilter;
+        [SerializeField] private TMP_InputField searchInput;
+        private List<PlayerDTO> teamRoster = new();
 
         private string abbr;
         private string city;
@@ -75,11 +82,49 @@ namespace GridironGM.UI.Dashboard
                 teamLogo.preserveAspect = true;
             }
 
-            if (rosterPanel != null)      rosterPanel.ShowRosterForTeam(abbr);
+            if (rosterPanel != null)
+            {
+                rosterPanel.ShowRosterForTeam(abbr);
+                teamRoster = RosterPanelUI.FetchRosterList(abbr);
+                ApplyFiltersAndRebuild();
+                WireFilterEvents();
+            }
             if (depthChartPanel != null)  depthChartPanel.SetTeam(abbr);
             if (schedulePanel != null)    schedulePanel.SetTeam(abbr);
 
             EnsureTabs();
+        }
+
+        private void WireFilterEvents()
+        {
+            if (positionFilter) positionFilter.onValueChanged.AddListener(_ => ApplyFiltersAndRebuild());
+            if (sortFilter)     sortFilter.onValueChanged.AddListener(_ => ApplyFiltersAndRebuild());
+            if (searchInput)    searchInput.onValueChanged.AddListener(_ => ApplyFiltersAndRebuild());
+        }
+
+        private void ApplyFiltersAndRebuild()
+        {
+            if (teamRoster == null || rosterPanel == null) return;
+
+            string pos = positionFilter ? positionFilter.options[positionFilter.value].text : "All";
+            string q   = searchInput ? (searchInput.text ?? string.Empty).Trim().ToLowerInvariant() : string.Empty;
+            string sort= sortFilter ? sortFilter.options[sortFilter.value].text : "OVR";
+
+            var filtered = teamRoster;
+            if (!string.IsNullOrEmpty(q))
+                filtered = filtered.FindAll(p => p.name.ToLowerInvariant().Contains(q));
+
+            if (pos != "All")
+                filtered = filtered.FindAll(p => p.position == pos);
+
+            switch (sort)
+            {
+                case "Name": filtered.Sort((a,b)=> string.Compare(a.name,b.name,System.StringComparison.Ordinal)); break;
+                case "Age":  filtered.Sort((a,b)=> a.age.CompareTo(b.age)); break;
+                default:      filtered.Sort((a,b)=> b.ovr.CompareTo(a.ovr)); break; // OVR desc
+            }
+
+            rosterPanel.RebuildFromList(filtered);
         }
 
         private void EnsureTabs()
