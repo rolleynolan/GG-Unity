@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
@@ -11,15 +11,16 @@ public class TabController : MonoBehaviour
     [Serializable]
     public class Tab
     {
-        public string id;                 // e.g., "Roster", "Schedule", "Standings"
-        public Button button;             // The tab button
-        public GameObject panel;          // Root panel to show/hide
-        public Selectable firstSelected;  // Optional: focus target when tab opens
-        public UnityEvent onShown;        // Optional extra hook for inspector
+        public string id;                 // e.g., "Roster", "Depth", "Schedule"
+        public Button button;             // Use Button OR Toggle
+        public Toggle toggle;             // Use Toggle OR Button
+        public GameObject panel;          // Root to activate/deactivate
+        public Selectable firstSelected;  // Optional focus target
+        public UnityEvent onShown;        // Optional hook
     }
 
     [Header("Tabs (order matters)")]
-    [SerializeField] private Tab[] tabs;
+    [SerializeField] private Tab[] tabs = Array.Empty<Tab>();
 
     [Header("Behavior")]
     [SerializeField] private int defaultIndex = 0;
@@ -36,45 +37,53 @@ public class TabController : MonoBehaviour
             return;
         }
 
-        // Validate and hook up buttons
+        // Hook listeners and validate
         for (int i = 0; i < tabs.Length; i++)
         {
-            int capture = i;
-            if (tabs[i].button == null || tabs[i].panel == null)
+            int idx = i;
+            var t = tabs[i];
+            if (t.panel == null)
+                Debug.LogError($"[TabController] Tab '{t.id}' missing panel.", this);
+
+            if (t.button != null) t.button.onClick.RemoveAllListeners();
+            if (t.toggle != null) t.toggle.onValueChanged.RemoveAllListeners();
+
+            if (t.button != null)
             {
-                Debug.LogError($"[TabController] Tab {i} missing button or panel.", this);
-                continue;
+                t.button.onClick.AddListener(() => ShowTab(idx));
             }
-            tabs[i].button.onClick.RemoveAllListeners();
-            tabs[i].button.onClick.AddListener(() => ShowTab(capture));
+            else if (t.toggle != null)
+            {
+                t.toggle.onValueChanged.AddListener(on => { if (on) ShowTab(idx); });
+            }
+            else
+            {
+                Debug.LogError($"[TabController] Tab '{t.id}' needs a Button or Toggle.", this);
+            }
         }
 
-        // Hide all initially to avoid flicker
+        // Hide all to avoid flicker
         for (int i = 0; i < tabs.Length; i++)
             SafeSetActive(tabs[i].panel, false);
 
         prefsKey = $"TabController.LastTab.{SceneManager.GetActiveScene().name}.{gameObject.name}";
 
-        int startIndex = defaultIndex;
+        int start = Mathf.Clamp(defaultIndex, 0, tabs.Length - 1);
         if (rememberLastTab && PlayerPrefs.HasKey(prefsKey))
         {
-            string lastId = PlayerPrefs.GetString(prefsKey, tabs[Mathf.Clamp(defaultIndex,0,tabs.Length-1)].id);
+            string lastId = PlayerPrefs.GetString(prefsKey, tabs[start].id);
             int found = IndexOfTab(lastId);
-            if (found >= 0) startIndex = found;
+            if (found >= 0) start = found;
         }
 
-        ShowTab(Mathf.Clamp(startIndex, 0, tabs.Length - 1));
+        ShowTab(start);
     }
 
     public void ShowTab(string id)
     {
         int idx = IndexOfTab(id);
-        if (idx < 0)
-        {
-            Debug.LogWarning($"[TabController] Unknown tab id '{id}'.");
-            return;
-        }
-        ShowTab(idx);
+        if (idx >= 0) ShowTab(idx);
+        else Debug.LogWarning($"[TabController] Unknown tab id '{id}'.");
     }
 
     public void ShowTab(int index)
@@ -83,40 +92,45 @@ public class TabController : MonoBehaviour
         index = Mathf.Clamp(index, 0, tabs.Length - 1);
         if (activeIndex == index) return;
 
-        // Hide previous
+        // Deactivate previous
         if (activeIndex >= 0 && activeIndex < tabs.Length)
-            SafeSetActive(tabs[activeIndex].panel, false);
+        {
+            var prev = tabs[activeIndex];
+            SafeSetActive(prev.panel, false);
+            if (prev.toggle) prev.toggle.SetIsOnWithoutNotify(false);
+        }
 
-        // Show new
+        // Activate current
         activeIndex = index;
-        var t = tabs[activeIndex];
-        SafeSetActive(t.panel, true);
+        var cur = tabs[activeIndex];
 
-        // Layout fix: force rebuild so content doesn't appear blank
-        var rt = t.panel.GetComponent<RectTransform>();
-        if (rt != null)
+        if (cur.toggle) cur.toggle.SetIsOnWithoutNotify(true);
+        SafeSetActive(cur.panel, true);
+
+        // Layout fix on show
+        var rt = cur.panel ? cur.panel.GetComponent<RectTransform>() : null;
+        if (rt)
         {
             Canvas.ForceUpdateCanvases();
-            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
             Canvas.ForceUpdateCanvases();
         }
 
-        // Focus (optional)
-        if (t.firstSelected != null)
-            EventSystem.current?.SetSelectedGameObject(t.firstSelected.gameObject);
+        // Optional focus
+        if (cur.firstSelected != null)
+            EventSystem.current?.SetSelectedGameObject(cur.firstSelected.gameObject);
 
         // ITabView callback
-        var view = t.panel.GetComponentInChildren<ITabView>(includeInactive: false);
+        var view = cur.panel ? cur.panel.GetComponentInChildren<ITabView>(includeInactive: false) : null;
         view?.OnTabShown();
 
-        // UnityEvent hook (inspector)
-        t.onShown?.Invoke();
+        // Inspector hook
+        cur.onShown?.Invoke();
 
-        // Persist
         if (rememberLastTab)
-            PlayerPrefs.SetString(prefsKey, t.id);
+            PlayerPrefs.SetString(prefsKey, cur.id);
 
-        Debug.Log($"[TabController] Shown tab: {t.id} (index {activeIndex})");
+        Debug.Log($"[TabController] Shown tab: {cur.id} (index {activeIndex})");
     }
 
     private int IndexOfTab(string id)
@@ -129,7 +143,6 @@ public class TabController : MonoBehaviour
 
     private static void SafeSetActive(GameObject go, bool active)
     {
-        if (go != null && go.activeSelf != active)
-            go.SetActive(active);
+        if (go && go.activeSelf != active) go.SetActive(active);
     }
 }
