@@ -30,7 +30,7 @@ namespace GridironGM.UI.Dashboard
 
         private string abbr;
         private string city;
-        private string name;
+        private string teamName;
 
         private void Awake()
         {
@@ -53,11 +53,11 @@ namespace GridironGM.UI.Dashboard
 
             abbr = gs.SelectedTeamAbbr.Trim().ToUpperInvariant();
             city = gs.SelectedTeamCity ?? string.Empty;
-            name = gs.SelectedTeamName ?? string.Empty;
+            teamName = gs.SelectedTeamName ?? string.Empty;
 
             if (teamTitle != null)
             {
-                var title = string.IsNullOrEmpty(city + name) ? abbr : $"{city} {name} ({abbr})";
+                var title = string.IsNullOrEmpty(city + teamName) ? abbr : $"{city} {teamName} ({abbr})";
                 teamTitle.text = title;
             }
 

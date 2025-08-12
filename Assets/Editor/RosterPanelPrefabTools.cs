@@ -3,22 +3,35 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 public static class RosterPanelPrefabTools
 {
     const string PrefabPath = "Assets/Prefabs/UI/RosterPanel.prefab";
     const string DashboardScenePath = "Assets/Scenes/Dashboard.unity";
+    const string PanelRosterName = "PanelRoster";
 
     [MenuItem("GridironGM/Build/Make RosterPanel Prefab (from TeamSelection)")]
     public static void MakeRosterPanelPrefab()
     {
-        var go = Object.FindFirstObjectByType<RosterPanelUI>(FindObjectsInactive.Include)?.gameObject;
-        if (go == null) { Debug.LogError("RosterPanelUI not found in current scene. Open TeamSelection and try again."); return; }
+        // Find ANY MonoBehaviour whose type name is exactly "RosterPanelUI" (ignore namespace)
+        var all = Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        MonoBehaviour rp = null;
+        foreach (var mb in all)
+        {
+            if (mb != null && mb.GetType().Name == "RosterPanelUI") { rp = mb; break; }
+        }
 
-        // Ensure folder
-        System.IO.Directory.CreateDirectory("Assets/Prefabs/UI");
+        if (rp == null)
+        {
+            EditorUtility.DisplayDialog("RosterPanel Prefab", "RosterPanelUI not found in the open scene. Open TeamSelection and try again.", "OK");
+            Debug.LogError("RosterPanelUI not found in the open scene.");
+            return;
+        }
 
-        // Save/replace prefab
+        Directory.CreateDirectory("Assets/Prefabs/UI");
+
+        var go = rp.gameObject;
         var prefab = PrefabUtility.SaveAsPrefabAssetAndConnect(go, PrefabPath, InteractionMode.UserAction);
         if (prefab == null) { Debug.LogError("Failed to create RosterPanel prefab."); return; }
         Debug.Log($"[RosterPrefab] Saved {PrefabPath}");
@@ -28,37 +41,56 @@ public static class RosterPanelPrefabTools
     public static void InjectIntoDashboard()
     {
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
-        if (prefab == null) { Debug.LogError($"Prefab missing at {PrefabPath}. Run Make RosterPanel Prefab first."); return; }
+        if (prefab == null) { Debug.LogError($"Prefab missing at {PrefabPath}. Run 'Make RosterPanel Prefab' first."); return; }
 
-        // Open Dashboard scene
         var scene = EditorSceneManager.OpenScene(DashboardScenePath, OpenSceneMode.Single);
         if (!scene.IsValid()) { Debug.LogError($"Cannot open scene {DashboardScenePath}"); return; }
 
-        // Find PanelRoster & DashboardController
+        // Find PanelRoster
         GameObject panelRoster = null;
         foreach (var root in scene.GetRootGameObjects())
         {
-            panelRoster = FindChildRecursive(root.transform, "PanelRoster")?.gameObject ?? panelRoster;
+            var found = FindChildRecursive(root.transform, PanelRosterName);
+            if (found != null) { panelRoster = found.gameObject; break; }
         }
-        if (panelRoster == null) { Debug.LogError("PanelRoster not found in Dashboard scene."); return; }
+        if (panelRoster == null) { Debug.LogError($"'{PanelRosterName}' not found in Dashboard scene."); return; }
 
-        // Clear existing children under PanelRoster (optional)
+        // Clear children
         for (int i = panelRoster.transform.childCount - 1; i >= 0; i--)
             Object.DestroyImmediate(panelRoster.transform.GetChild(i).gameObject);
 
-        // Instantiate prefab under PanelRoster
+        // Instantiate prefab
         var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
         instance.name = "RosterPanel";
         instance.transform.SetParent(panelRoster.transform, false);
         Stretch(instance.GetComponent<RectTransform>());
 
-        // Wire DashboardController.rosterPanel
-        var dc = Object.FindFirstObjectByType<DashboardController>(FindObjectsInactive.Include);
-        var rp = instance.GetComponent<RosterPanelUI>();
-        if (dc == null || rp == null) { Debug.LogError("DashboardController or RosterPanelUI missing."); return; }
+        // Find DashboardController BY NAME (ignore namespace)
+        MonoBehaviour dashboardController = null;
+        var all = Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var mb in all)
+        {
+            if (mb != null && mb.GetType().Name == "DashboardController") { dashboardController = mb; break; }
+        }
+        if (dashboardController == null) { Debug.LogError("DashboardController not found in scene."); return; }
 
-        var so = new SerializedObject(dc);
-        so.FindProperty("rosterPanel").objectReferenceValue = rp;
+        // Find RosterPanelUI on the new instance
+        MonoBehaviour rosterPanelUI = null;
+        foreach (var mb in instance.GetComponentsInChildren<MonoBehaviour>(true))
+        {
+            if (mb.GetType().Name == "RosterPanelUI") { rosterPanelUI = mb; break; }
+        }
+        if (rosterPanelUI == null) { Debug.LogError("RosterPanelUI component not found on the prefab instance."); return; }
+
+        // Assign serialized field named 'rosterPanel' on DashboardController
+        var so = new SerializedObject(dashboardController);
+        var prop = so.FindProperty("rosterPanel");
+        if (prop == null)
+        {
+            Debug.LogError("DashboardController is missing a serialized field named 'rosterPanel'.");
+            return;
+        }
+        prop.objectReferenceValue = rosterPanelUI;
         so.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.SaveScene(scene);
@@ -86,3 +118,4 @@ public static class RosterPanelPrefabTools
     }
 }
 #endif
+
