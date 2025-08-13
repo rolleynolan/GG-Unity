@@ -9,7 +9,12 @@ public static class LeagueRepository
     {
         var json = LoadJson("teams.json", new[] { "Config/teams", "teams" }, out var src);
         if (string.IsNullOrEmpty(json)) return Array.Empty<Team>();
-        var teams = JsonUtility.FromJson<TeamList>(json)?.teams ?? Array.Empty<Team>();
+
+        json = json.Trim();
+        Team[] teams = json.StartsWith("[")
+            ? JsonHelper.FromJson<Team>(json)
+            : JsonUtility.FromJson<TeamList>(json)?.teams ?? Array.Empty<Team>();
+
         Debug.Log($"[LeagueRepository] Teams count: {teams.Length}");
         return teams;
     }
