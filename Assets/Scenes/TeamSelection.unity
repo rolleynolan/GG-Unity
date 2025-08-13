@@ -261,10 +261,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7777777777777777777777777777777, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  content: {fileID: 88984852}
+  contentParent: {fileID: 0}
   playerRowPrefab: {fileID: 3507881918765326154, guid: c4444444444444444444444444444444, type: 3}
-  messageText: {fileID: 0}
-  forceRowVisible: 1
+  headerText: {fileID: 0}
 --- !u!4 &221941119
 Transform:
   m_ObjectHideFlags: 0
@@ -1696,10 +1695,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7777777777777777777777777777777, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  content: {fileID: 88984852}
+  contentParent: {fileID: 0}
   playerRowPrefab: {fileID: 3507881918765326154, guid: c4444444444444444444444444444444, type: 3}
-  messageText: {fileID: 0}
-  forceRowVisible: 1
+  headerText: {fileID: 0}
 --- !u!114 &1272105746
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2012,10 +2010,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6666666666666666666666666666666, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  teamListContent: {fileID: 994291957}
+  contentParent: {fileID: 1211740918}
   teamRowPrefab: {fileID: 1743814068778600647, guid: 04b58625a14716144ba59582c68a7006, type: 3}
-  rosterPanel: {fileID: 221941118}
-  confirmButton: {fileID: 952181751}
+  headerText: {fileID: 0}
+  rightPanel: {fileID: 1272105745}
 --- !u!4 &1565455048
 Transform:
   m_ObjectHideFlags: 0
