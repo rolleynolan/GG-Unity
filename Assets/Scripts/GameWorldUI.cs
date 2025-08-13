@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using GridironGM;
+using GG.Game;
 
 namespace GridironGM.UI
 {
@@ -11,7 +11,7 @@ namespace GridironGM.UI
 
         private void Start()
         {
-            string selectedTeam = GameState.Instance.SelectedTeamAbbr;
+            string selectedTeam = GameState.SelectedTeamAbbr;
             if (string.IsNullOrEmpty(selectedTeam))
             {
                 selectedTeam = "Unknown Team";
