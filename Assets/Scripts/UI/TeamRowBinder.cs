@@ -4,48 +4,35 @@ using UnityEngine.UI;
 
 public class TeamRowBinder : MonoBehaviour
 {
-    public TMP_Text NameText;    // "Washington Generals (WAS)"
-    public TMP_Text ConfText;    // "Conference"
-    public Image LogoImage;      // optional
-
-    public void AutoWireIfNeeded()
-    {
-        if (!NameText) NameText = FindText("NameText");
-        if (!ConfText) ConfText = FindText("ConfText");
-        if (!NameText || !ConfText)
-        {
-            var all = GetComponentsInChildren<TMP_Text>(true);
-            if (all.Length >= 2)
-            {
-                if (!NameText) NameText = all[0];
-                if (!ConfText) ConfText = all[1];
-            }
-        }
-    }
-
-    TMP_Text FindText(string child)
-    {
-        var t = transform.Find(child);
-        return t ? t.GetComponent<TMP_Text>() : null;
-    }
+    public Image LogoImage;
+    public TMP_Text NameText;
+    public TMP_Text ConfText;
 
     public void Set(TeamData t)
     {
         AutoWireIfNeeded();
-        if (NameText) NameText.text = $"{t.city} {t.name} ({t.abbreviation})";
+        if (NameText) NameText.text = $"{t.city} {t.name}";
         if (ConfText) ConfText.text = t.conference;
-        if (!LogoImage)
-        {
-            // Try to find an Image named "Logo" or the first Image child
-            var tr = transform.Find("Logo");
-            if (tr) LogoImage = tr.GetComponent<UnityEngine.UI.Image>();
-            if (!LogoImage) LogoImage = GetComponentInChildren<UnityEngine.UI.Image>(true);
-        }
+        var spr = LogoService.Get(t.abbreviation);
         if (LogoImage)
         {
-            var s = LogoService.Get(t.abbreviation);
-            LogoImage.sprite = s;
-            LogoImage.enabled = s != null;
+            LogoImage.enabled = spr != null;
+            LogoImage.sprite = spr;
+            LogoImage.preserveAspect = true;
+        }
+    }
+
+    void AutoWireIfNeeded()
+    {
+        if (!LogoImage) LogoImage = GetComponentInChildren<Image>(true);
+        if (!NameText || !ConfText)
+        {
+            var texts = GetComponentsInChildren<TMP_Text>(true);
+            if (texts.Length >= 2)
+            {
+                if (!NameText) NameText = texts[0];
+                if (!ConfText) ConfText = texts[1];
+            }
         }
     }
 }
