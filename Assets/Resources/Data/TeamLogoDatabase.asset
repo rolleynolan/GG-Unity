@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3094d5162cb35344eacbad3ff1cb84d5, type: 3}
+  m_Name: TeamLogoDatabase
+  m_EditorClassIdentifier: 
+  items:
+  - abbr: ATL
+    sprite: {fileID: 21300000, guid: 502afee36b1c35844844680980e85a64, type: 3}
+  - abbr: BAL
+    sprite: {fileID: 21300000, guid: eb1cb236e0ef8f147a2348fdea40b895, type: 3}
+  - abbr: BOS
+    sprite: {fileID: 21300000, guid: 672e3673499b61c4b90f4d02d76c72bf, type: 3}
+  - abbr: BUF
+    sprite: {fileID: 21300000, guid: 02a5a2d7cd325a640959b454536e619e, type: 3}
+  - abbr: CHA
+    sprite: {fileID: 21300000, guid: ca52b750bc71aaf46bb0c1495d536466, type: 3}
+  - abbr: CHI
+    sprite: {fileID: 21300000, guid: 6a0dbaeb7af457d459df1e5abaee942d, type: 3}
+  - abbr: CIN
+    sprite: {fileID: 21300000, guid: 1e311f65d49dc2e488f380750874835b, type: 3}
+  - abbr: CLE
+    sprite: {fileID: 21300000, guid: b631a5ceb8d1a8246b478c5360d09c86, type: 3}
+  - abbr: DAL
+    sprite: {fileID: 21300000, guid: 763a10121b7f0224faccac48999448f7, type: 3}
+  - abbr: DEN
+    sprite: {fileID: 21300000, guid: d6aba9a6f78ed0f44beeed31a789c1cd, type: 3}
+  - abbr: DET
+    sprite: {fileID: -2178188244146546526, guid: c830a172869bb894c90692c371fe48c8, type: 3}
+  - abbr: GB
+    sprite: {fileID: 21300000, guid: 3d64d2942a34155458d4a906f1ffbb67, type: 3}
+  - abbr: HOU
+    sprite: {fileID: 21300000, guid: 53ad8966158d4734ebdb2f3c753c9d9c, type: 3}
+  - abbr: IND
+    sprite: {fileID: 21300000, guid: eea24173fdcfdbb4a857f414c5f0b80a, type: 3}
+  - abbr: KC
+    sprite: {fileID: 21300000, guid: 38559a743f99c9b41932f6d421a2c4b6, type: 3}
+  - abbr: LA
+    sprite: {fileID: 21300000, guid: 7c90d27407c8909478ed61285c895495, type: 3}
+  - abbr: LV
+    sprite: {fileID: 21300000, guid: 8c00dba890fcb494288d47e7af0fbb69, type: 3}
+  - abbr: MIA
+    sprite: {fileID: 21300000, guid: ff3eda69ea8bded4ca17d0d87dad5f65, type: 3}
+  - abbr: MIN
+    sprite: {fileID: 21300000, guid: 07a0c130ee19cd54f91d27538fe6ee85, type: 3}
+  - abbr: NOR
+    sprite: {fileID: 21300000, guid: c03b3318eddd3e847b1a0d2821563de5, type: 3}
+  - abbr: NY
+    sprite: {fileID: 21300000, guid: b0db55e41479dd34b9135ac1df352227, type: 3}
+  - abbr: ORL
+    sprite: {fileID: 21300000, guid: f7a81f719b2c5a949840fad95680bb8f, type: 3}
+  - abbr: PHI
+    sprite: {fileID: 21300000, guid: f170fc72176fe95448cbfc4d39917254, type: 3}
+  - abbr: PHX
+    sprite: {fileID: 21300000, guid: cacac317b5e351a4b9e6d90e4ec44a65, type: 3}
+  - abbr: PIT
+    sprite: {fileID: 21300000, guid: 6520534b3a6fa2b49a1edab7416d7369, type: 3}
+  - abbr: POR
+    sprite: {fileID: 21300000, guid: 935714f8e11c03343b0cea6f773902fc, type: 3}
+  - abbr: SD
+    sprite: {fileID: 21300000, guid: 4c253dddb7fd20649bbc1bf8a294bd5c, type: 3}
+  - abbr: SEA
+    sprite: {fileID: 21300000, guid: ab787b17364204149a12a94f17202a9f, type: 3}
+  - abbr: SF
+    sprite: {fileID: 21300000, guid: fcaed81f8fd6f0f4995bad1f61e3120c, type: 3}
+  - abbr: TB
+    sprite: {fileID: 21300000, guid: 5679a8f0d5fbb4b4ea2f589eae0fbde8, type: 3}
+  - abbr: TEN
+    sprite: {fileID: 21300000, guid: 695a3ac1b2dc15b4fba0f49e10e59118, type: 3}
+  - abbr: WAS
+    sprite: {fileID: 21300000, guid: d7338283c4e252a4e81192092d5beb84, type: 3}
