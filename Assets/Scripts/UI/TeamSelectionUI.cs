@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using GG.Game;
 
 public class TeamSelectionUI : MonoBehaviour
 {
@@ -21,9 +23,12 @@ public class TeamSelectionUI : MonoBehaviour
 
     void Awake()
     {
-        // Auto-wire preview in case the Inspector reference is missing
-        if (!preview)
-            preview = FindFirstObjectByType<RosterPanelUI>(FindObjectsInactive.Include);
+        if (!preview) preview = FindFirstObjectByType<RosterPanelUI>(FindObjectsInactive.Include);
+        if (confirmButton)
+        {
+            confirmButton.onClick.RemoveAllListeners();
+            confirmButton.onClick.AddListener(OnConfirm);
+        }
     }
 
     void Start()
@@ -63,16 +68,20 @@ public class TeamSelectionUI : MonoBehaviour
     {
         selectedAbbr = abbr;
         if (confirmButton) confirmButton.interactable = true;
+        preview?.ShowRosterForTeam(abbr);
+        Debug.Log($"[TeamSelectionUI] Selected {abbr}");
+    }
 
-        if (preview)
+    void OnConfirm()
+    {
+        if (string.IsNullOrEmpty(selectedAbbr))
         {
-            Debug.Log($"[TeamSelectionUI] Showing roster for {abbr}");
-            preview.ShowRosterForTeam(abbr);
+            Debug.LogWarning("[TeamSelectionUI] Confirm clicked with no team selected.");
+            return;
         }
-        else
-        {
-            Debug.LogWarning("[TeamSelectionUI] Roster preview panel not found.");
-        }
+        GameState.SelectedTeamAbbr = selectedAbbr;
+        Debug.Log($"[TeamSelectionUI] Confirm → Dashboard for {selectedAbbr}");
+        SceneManager.LoadScene("Dashboard", LoadSceneMode.Single);
     }
 
     List<TeamData> LoadTeamsFromStreamingAssets()
