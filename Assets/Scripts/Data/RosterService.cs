@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-[Serializable] public class PlayerDTO { public string first_name; public string last_name; public string pos; public int overall; public int age; }
-[Serializable] public class TeamRosterDTO { public string abbreviation; public List<PlayerDTO> players = new(); }
-[Serializable] public class RostersRoot { public List<TeamRosterDTO> teams = new(); }
+// Remove or rename this class if a PlayerDTO definition already exists elsewhere in your project.
+// public class PlayerDTO { public string first_name; public string last_name; public string pos; public int overall; public int age; }
 
 public static class RosterService
 {
