@@ -3,7 +3,10 @@ guid: f7a99c13a12041f8a003f7a3b2e35ac1
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - contentParent: {instanceID: 0}
+  - playerRowPrefab: {fileID: 3507881918765326154, guid: c4444444444444444444444444444444, type: 3}
+  - headerText: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

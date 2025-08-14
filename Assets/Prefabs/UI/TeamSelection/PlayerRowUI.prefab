@@ -369,13 +369,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 3507881918765326154}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8888888888888888888888888888888, type: 3}
+  m_Script: {fileID: 11500000, guid: 76e7bb10fdd148e39678da96fe4af1db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nameText: {fileID: 6716804512107310351}
-  posText: {fileID: 5654700726044638800}
-  ovrText: {fileID: 4601552420889876211}
-  ageText: {fileID: 7943408265181916863}
+  NameText: {fileID: 6716804512107310351}
+  PosText: {fileID: 5654700726044638800}
+  OvrText: {fileID: 4601552420889876211}
+  AgeText: {fileID: 7943408265181916863}
 --- !u!1 &6181821160981392655
 GameObject:
   m_ObjectHideFlags: 0
