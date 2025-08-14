@@ -232,53 +232,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &221941117
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 221941119}
-  - component: {fileID: 221941118}
-  m_Layer: 0
-  m_Name: RosterUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &221941118
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 221941117}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7777777777777777777777777777777, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  contentParent: {fileID: 0}
-  playerRowPrefab: {fileID: 3507881918765326154, guid: c4444444444444444444444444444444, type: 3}
-  headerText: {fileID: 0}
---- !u!4 &221941119
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 221941117}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 870.9041, y: 505.75836, z: -5.5507355}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &316542209
 GameObject:
   m_ObjectHideFlags: 0
@@ -1654,7 +1607,6 @@ GameObject:
   - component: {fileID: 1272105748}
   - component: {fileID: 1272105747}
   - component: {fileID: 1272105746}
-  - component: {fileID: 1272105745}
   m_Layer: 5
   m_Name: RosterScroll
   m_TagString: Untagged
@@ -1683,21 +1635,6 @@ RectTransform:
   m_AnchoredPosition: {x: 617.19, y: 28.6763}
   m_SizeDelta: {x: 685.6, y: 1022.6473}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1272105745
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1272105743}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7777777777777777777777777777777, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  contentParent: {fileID: 0}
-  playerRowPrefab: {fileID: 3507881918765326154, guid: c4444444444444444444444444444444, type: 3}
-  headerText: {fileID: 0}
 --- !u!114 &1272105746
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2013,7 +1950,6 @@ MonoBehaviour:
   contentParent: {fileID: 1211740918}
   teamRowPrefab: {fileID: 1743814068778600647, guid: 04b58625a14716144ba59582c68a7006, type: 3}
   headerText: {fileID: 0}
-  rightPanel: {fileID: 1272105745}
 --- !u!4 &1565455048
 Transform:
   m_ObjectHideFlags: 0

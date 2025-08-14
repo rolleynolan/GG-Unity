@@ -34,6 +34,18 @@ public class TeamRowBinder : MonoBehaviour
         AutoWireIfNeeded();
         if (NameText) NameText.text = $"{t.city} {t.name} ({t.abbreviation})";
         if (ConfText) ConfText.text = t.conference;
-        // LogoImage stays as-is (you load sprites elsewhere)
+        if (!LogoImage)
+        {
+            // Try to find an Image named "Logo" or the first Image child
+            var tr = transform.Find("Logo");
+            if (tr) LogoImage = tr.GetComponent<UnityEngine.UI.Image>();
+            if (!LogoImage) LogoImage = GetComponentInChildren<UnityEngine.UI.Image>(true);
+        }
+        if (LogoImage)
+        {
+            var s = LogoService.Get(t.abbreviation);
+            LogoImage.sprite = s;
+            LogoImage.enabled = s != null;
+        }
     }
 }

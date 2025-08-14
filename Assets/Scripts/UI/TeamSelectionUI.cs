@@ -19,6 +19,7 @@ public class TeamSelectionUI : MonoBehaviour
 
     [Header("Buttons")]
     [SerializeField] private Button confirmButton;     // ConfirmTeamButton
+    [SerializeField] private RosterPreviewView preview; // assign the right-side view in TeamSelection
 
     private List<TeamData> _teams = new();
 
@@ -90,6 +91,7 @@ public class TeamSelectionUI : MonoBehaviour
     {
         GameState.SelectedTeamAbbr = t.abbreviation;
         confirmButton.interactable = true;
+        preview?.Show(t.abbreviation); // <— populate right panel immediately
         Debug.Log($"[TeamSelectionUI] Selected {t.abbreviation}");
     }
 
