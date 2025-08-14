@@ -10,12 +10,14 @@ public class RosterPanelUI : MonoBehaviour
     [SerializeField] GameObject playerRowPrefab;     // PlayerRowUI prefab
 
     [Header("Row Layout")]
-    [SerializeField] float rowMinHeight = 40f;
-    [SerializeField] float spacing = 12f;
-    [SerializeField] float nameMinWidth = 300f;  // flexible column
-    [SerializeField] float posWidth     = 60f;   // fixed
-    [SerializeField] float ovrWidth     = 48f;   // fixed
-    [SerializeField] float ageWidth     = 48f;   // fixed
+    [SerializeField] float rowMinHeight = 44f;
+    [SerializeField] float spacing = 16f;
+    [SerializeField] float nameMinWidth = 420f;  // Name column gets remaining width but never below this
+    [SerializeField] float posWidth     = 70f;   // fixed
+    [SerializeField] float ovrWidth     = 52f;   // fixed
+    [SerializeField] float ageWidth     = 52f;   // fixed
+    [SerializeField] int   padX         = 12;    // HorizontalLayoutGroup padding
+    [SerializeField] int   padY         = 6;
 
     [Header("Colors")]
     [SerializeField] Color baseColor     = new Color(0.10f, 0.18f, 0.28f, 1f);
@@ -23,6 +25,12 @@ public class RosterPanelUI : MonoBehaviour
     [SerializeField] Color selectedColor = new Color(0.26f, 0.36f, 0.50f, 1f);
 
     Image _selectedBG;
+
+    void OnRectTransformDimensionsChange()
+    {
+        // When the panel size changes (window resize, scale, etc.), recompute widths.
+        ReapplyRowWidths();
+    }
 
     public void ShowRosterForTeam(string abbr)
     {
@@ -47,14 +55,13 @@ public class RosterPanelUI : MonoBehaviour
             var p   = team.players[i];
             var row = Instantiate(playerRowPrefab, content);
 
-            // Ensure background + zebra color
-            var bg = row.GetComponent<Image>();
-            if (!bg) bg = row.AddComponent<Image>();
+            // Background + zebra color
+            var bg = row.GetComponent<Image>() ?? row.AddComponent<Image>();
             bg.color = (i % 2 == 0) ? baseColor : altColor;
 
-            // Make the row clickable for selection
+            // Click to select highlight
             var btn = row.GetComponent<Button>() ?? row.AddComponent<Button>();
-            btn.transition = Selectable.Transition.None; // color change handled by us
+            btn.transition = Selectable.Transition.None;
             btn.onClick.RemoveAllListeners();
             btn.onClick.AddListener(() =>
             {
@@ -63,18 +70,21 @@ public class RosterPanelUI : MonoBehaviour
                 _selectedBG.color = selectedColor;
             });
 
-            // Enforce fixed column layout before binding text
-            EnsureRowLayout(row);
+            // Layout & widths before binding
+            ApplyRowLayout(row);
 
             // Bind data
             var binder = row.GetComponent<PlayerRowBinder>() ?? row.AddComponent<PlayerRowBinder>();
             binder.Bind(p);
         }
 
+        // One more pass to ensure widths are perfect after first layout
+        ReapplyRowWidths();
+
         Debug.Log($"[RosterPanel] Rendered {team.players.Count} players for {abbr}");
     }
 
-    // ----- helpers -----
+    // ---------------- helpers ----------------
 
     void ClearContent()
     {
@@ -98,9 +108,8 @@ public class RosterPanelUI : MonoBehaviour
         return content && playerRowPrefab;
     }
 
-    void EnsureRowLayout(GameObject row)
+    void ApplyRowLayout(GameObject row)
     {
-        // Row layout container
         var h = row.GetComponent<HorizontalLayoutGroup>() ?? row.AddComponent<HorizontalLayoutGroup>();
         h.spacing = spacing;
         h.childAlignment = TextAnchor.MiddleLeft;
@@ -108,16 +117,50 @@ public class RosterPanelUI : MonoBehaviour
         h.childControlHeight = true;
         h.childForceExpandWidth = false;
         h.childForceExpandHeight = false;
-        h.padding = new RectOffset(12, 12, 6, 6);
+        h.padding = new RectOffset(padX, padX, padY, padY);
 
         var leRow = row.GetComponent<LayoutElement>() ?? row.AddComponent<LayoutElement>();
         leRow.minHeight = rowMinHeight;
 
-        // Lock columns by name; create LayoutElements if missing
-        LockColumn(FindTMP(row.transform, "NameText"), nameMinWidth, flexible: true,  TextAlignmentOptions.MidlineLeft);
-        LockColumn(FindTMP(row.transform, "PosText"),  posWidth,     flexible: false, TextAlignmentOptions.Midline);
-        LockColumn(FindTMP(row.transform, "OvrText"),  ovrWidth,     flexible: false, TextAlignmentOptions.Midline);
-        LockColumn(FindTMP(row.transform, "AgeText"),  ageWidth,     flexible: false, TextAlignmentOptions.Midline);
+        // Find TMPs
+        var name = FindTMP(row.transform, "NameText");
+        var pos  = FindTMP(row.transform, "PosText");
+        var ovr  = FindTMP(row.transform, "OvrText");
+        var age  = FindTMP(row.transform, "AgeText");
+
+        // Lock fixed columns now
+        LockFixed(pos, posWidth);
+        LockFixed(ovr, ovrWidth);
+        LockFixed(age, ageWidth);
+
+        // Configure text to avoid squish
+        ConfigureText(name, TextAlignmentOptions.MidlineLeft);
+        ConfigureText(pos,  TextAlignmentOptions.Midline);
+        ConfigureText(ovr,  TextAlignmentOptions.Midline);
+        ConfigureText(age,  TextAlignmentOptions.Midline);
+
+        // Compute remaining width for Name (exact preferred width)
+        var parentRT = (RectTransform)row.transform.parent;
+        float parentW = parentRT.rect.width;
+        float totalFixed = posWidth + ovrWidth + ageWidth + spacing * 3 + padX * 2;
+        float nameW = Mathf.Max(nameMinWidth, parentW - totalFixed);
+        LockExact(name, nameW);
+    }
+
+    void ReapplyRowWidths()
+    {
+        // Recompute Name width for every row
+        for (int i = 0; i < content.childCount; i++)
+        {
+            var row = content.GetChild(i).gameObject;
+            var name = FindTMP(row.transform, "NameText");
+            var parentRT = (RectTransform)row.transform.parent;
+            float parentW = parentRT.rect.width;
+            float totalFixed = posWidth + ovrWidth + ageWidth + spacing * 3 + padX * 2;
+            float nameW = Mathf.Max(nameMinWidth, parentW - totalFixed);
+            LockExact(name, nameW);
+        }
+        LayoutRebuilder.MarkLayoutForRebuild((RectTransform)content);
     }
 
     static TMP_Text FindTMP(Transform root, string childName)
@@ -126,24 +169,35 @@ public class RosterPanelUI : MonoBehaviour
         return t ? t.GetComponent<TMP_Text>() : null;
     }
 
-    static void LockColumn(TMP_Text txt, float width, bool flexible, TextAlignmentOptions align)
+    static void LockFixed(TMP_Text txt, float width)
     {
         if (!txt) return;
         var le = txt.GetComponent<LayoutElement>() ?? txt.gameObject.AddComponent<LayoutElement>();
-        if (flexible)
-        {
-            le.minWidth = width;
-            le.preferredWidth = -1;
-            le.flexibleWidth = 1f;
-        }
-        else
-        {
-            le.minWidth = width;
-            le.preferredWidth = width;
-            le.flexibleWidth = 0f;
-        }
+        le.minWidth = width;
+        le.preferredWidth = width;
+        le.flexibleWidth = 0f;
         txt.enableAutoSizing = false;
+        txt.overflowMode = TextOverflowModes.Ellipsis;
+        txt.textWrappingMode = TextWrappingModes.NoWrap;
+    }
+
+    static void LockExact(TMP_Text txt, float width)
+    {
+        if (!txt) return;
+        var le = txt.GetComponent<LayoutElement>() ?? txt.gameObject.AddComponent<LayoutElement>();
+        le.minWidth = width;
+        le.preferredWidth = width;   // exact width for Name column
+        le.flexibleWidth = 0f;
+        txt.enableAutoSizing = false;
+        txt.overflowMode = TextOverflowModes.Ellipsis;
+        txt.textWrappingMode = TextWrappingModes.NoWrap;
+    }
+
+    static void ConfigureText(TMP_Text txt, TextAlignmentOptions align)
+    {
+        if (!txt) return;
         txt.alignment = align;
+        txt.textWrappingMode = TextWrappingModes.NoWrap;
+        txt.overflowMode = TextOverflowModes.Ellipsis;
     }
 }
-
