@@ -27,13 +27,17 @@ public class RosterPanelUI : MonoBehaviour
     [SerializeField] Color headerTextTint = new Color(0.85f, 0.92f, 1f, 0.9f);
 
     [Header("Header")]
-    [SerializeField] bool showHeader = true;     // toggle if you ever want to hide it
+    [SerializeField] bool pinHeader = true;      // pinned (not scrolling). Set false for scrolling header.
+    [SerializeField] bool showHeader = true;
 
     Image _selectedBG;
+    RectTransform _pinnedHeaderRT;   // created at runtime under the ScrollRect viewport
+    float _headerHeightCached;
 
     void OnRectTransformDimensionsChange()
     {
         ReapplyRowWidths();
+        if (pinHeader && _pinnedHeaderRT) ApplyHeaderLayout(_pinnedHeaderRT.gameObject);
     }
 
     public void ShowRosterForTeam(string abbr)
@@ -53,9 +57,7 @@ public class RosterPanelUI : MonoBehaviour
         }
 
         ClearContent();
-
-        // ----- HEADER (scrolls with list) -----
-        if (showHeader) AddHeaderRow();
+        EnsureHeader();
 
         for (int i = 0; i < team.players.Count; i++)
         {
@@ -64,7 +66,7 @@ public class RosterPanelUI : MonoBehaviour
 
             // Background + zebra color
             var bg = row.GetComponent<Image>() ?? row.AddComponent<Image>();
-            var zebraIndex = showHeader ? i + 1 : i; // keep pattern after header
+            var zebraIndex = showHeader && !pinHeader ? i + 1 : i; // if header scrolls, offset
             bg.color = (zebraIndex % 2 == 0) ? baseColor : altColor;
 
             // Click to select highlight
@@ -93,26 +95,59 @@ public class RosterPanelUI : MonoBehaviour
 
     // ---------------- header ----------------
 
-    void AddHeaderRow()
+    void EnsureHeader()
     {
-        // Reuse the row prefab, but turn it into a non-interactive header
-        var row = Instantiate(playerRowPrefab, content);
-        row.name = "HeaderRow";
+        if (!showHeader) return;
 
-        // Remove selection behavior
-        var btn = row.GetComponent<Button>();
-        if (btn) Destroy(btn);
+        if (pinHeader)
+        {
+            // Build or reuse pinned header under viewport (not in content)
+            var sr = GetComponentInChildren<ScrollRect>(true);
+            if (!sr || !sr.viewport) return;
 
-        // Remove binder so it won't overwrite our labels
-        var binder = row.GetComponent<PlayerRowBinder>();
-        if (binder) Destroy(binder);
+            if (!_pinnedHeaderRT)
+            {
+                var header = Instantiate(playerRowPrefab, sr.viewport);
+                header.name = "PinnedHeader";
+                _pinnedHeaderRT = (RectTransform)header.transform;
 
-        // Layout first, then label
-        ApplyRowLayout(row);
+                // Non-interactive / no binder
+                var btn = header.GetComponent<Button>(); if (btn) Destroy(btn);
+                var binder = header.GetComponent<PlayerRowBinder>(); if (binder) Destroy(binder);
 
-        var bg = row.GetComponent<Image>() ?? row.AddComponent<Image>();
-        bg.color = headerBgColor;
+                // Background
+                var bg = header.GetComponent<Image>() ?? header.AddComponent<Image>();
+                bg.color = headerBgColor;
 
+                // Anchor to top-stretch
+                _pinnedHeaderRT.anchorMin = new Vector2(0, 1);
+                _pinnedHeaderRT.anchorMax = new Vector2(1, 1);
+                _pinnedHeaderRT.pivot     = new Vector2(0.5f, 1f);
+
+                // Label
+                ApplyRowLayout(header);
+                SetHeaderLabels(header);
+            }
+
+            ApplyHeaderLayout(_pinnedHeaderRT.gameObject);
+            EnsureHeaderSpacer();
+        }
+        else
+        {
+            // Scrolling header: inject as first row into content
+            var row = Instantiate(playerRowPrefab, content);
+            row.name = "HeaderRow";
+            var btn = row.GetComponent<Button>(); if (btn) Destroy(btn);
+            var binder = row.GetComponent<PlayerRowBinder>(); if (binder) Destroy(binder);
+            ApplyRowLayout(row);
+            var bg = row.GetComponent<Image>() ?? row.AddComponent<Image>();
+            bg.color = headerBgColor;
+            SetHeaderLabels(row);
+        }
+    }
+
+    void SetHeaderLabels(GameObject row)
+    {
         var name = FindTMP(row.transform, "NameText");
         var pos  = FindTMP(row.transform, "PosText");
         var ovr  = FindTMP(row.transform, "OvrText");
@@ -124,6 +159,39 @@ public class RosterPanelUI : MonoBehaviour
         if (age)  { age.text  = "AGE";  age.fontStyle  = FontStyles.Bold; age.color  = headerTextTint; }
     }
 
+    void ApplyHeaderLayout(GameObject header)
+    {
+        var rt = (RectTransform)header.transform;
+        float h = Mathf.Max(rowMinHeight + padY * 2, 40f);
+        _headerHeightCached = h;
+        rt.offsetMin = new Vector2(0, -h);
+        rt.offsetMax = new Vector2(0, 0);
+
+        // Ensure columns align like rows
+        ApplyRowLayout(header);
+    }
+
+    void EnsureHeaderSpacer()
+    {
+        if (!content) return;
+        // Insert a spacer as first child so rows start below the pinned header
+        if (content.childCount == 0 || content.GetChild(0).name != "HeaderSpacer")
+        {
+            var spacer = new GameObject("HeaderSpacer", typeof(RectTransform), typeof(LayoutElement));
+            var rt = (RectTransform)spacer.transform;
+            rt.SetParent(content, false);
+            rt.SetSiblingIndex(0);
+            var le = spacer.GetComponent<LayoutElement>();
+            le.minHeight = _headerHeightCached;
+            le.preferredHeight = _headerHeightCached;
+        }
+        else
+        {
+            var le = content.GetChild(0).GetComponent<LayoutElement>();
+            if (le) { le.minHeight = _headerHeightCached; le.preferredHeight = _headerHeightCached; }
+        }
+    }
+
     // ---------------- helpers ----------------
 
     void ClearContent()
@@ -131,6 +199,7 @@ public class RosterPanelUI : MonoBehaviour
         for (int i = content.childCount - 1; i >= 0; i--)
             Destroy(content.GetChild(i).gameObject);
         _selectedBG = null;
+        // Keep pinned header if created
     }
 
     bool EnsureWired()
@@ -162,24 +231,20 @@ public class RosterPanelUI : MonoBehaviour
         var leRow = row.GetComponent<LayoutElement>() ?? row.AddComponent<LayoutElement>();
         leRow.minHeight = rowMinHeight;
 
-        // Find TMPs
         var name = FindTMP(row.transform, "NameText");
         var pos  = FindTMP(row.transform, "PosText");
         var ovr  = FindTMP(row.transform, "OvrText");
         var age  = FindTMP(row.transform, "AgeText");
 
-        // Lock fixed columns now
         LockFixed(pos, posWidth);
         LockFixed(ovr, ovrWidth);
         LockFixed(age, ageWidth);
 
-        // Configure text to avoid squish
         ConfigureText(name, TextAlignmentOptions.MidlineLeft);
         ConfigureText(pos,  TextAlignmentOptions.Midline);
         ConfigureText(ovr,  TextAlignmentOptions.Midline);
         ConfigureText(age,  TextAlignmentOptions.Midline);
 
-        // Compute remaining width for Name (exact preferred width)
         var parentRT = (RectTransform)row.transform.parent;
         float parentW = parentRT.rect.width;
         float totalFixed = posWidth + ovrWidth + ageWidth + spacing * 3 + padX * 2;
@@ -189,9 +254,11 @@ public class RosterPanelUI : MonoBehaviour
 
     void ReapplyRowWidths()
     {
+        if (!content) return;
         for (int i = 0; i < content.childCount; i++)
         {
             var row = content.GetChild(i).gameObject;
+            if (row.name == "HeaderSpacer") continue;
             var name = FindTMP(row.transform, "NameText");
             var parentRT = (RectTransform)row.transform.parent;
             float parentW = parentRT.rect.width;
@@ -217,7 +284,7 @@ public class RosterPanelUI : MonoBehaviour
         le.flexibleWidth = 0f;
 
         txt.enableAutoSizing  = false;
-        txt.textWrappingMode  = TextWrappingModes.NoWrap;   // TMP 4.x API
+        txt.textWrappingMode  = TextWrappingModes.NoWrap;
         txt.overflowMode      = TextOverflowModes.Ellipsis;
     }
 
@@ -226,11 +293,11 @@ public class RosterPanelUI : MonoBehaviour
         if (!txt) return;
         var le = txt.GetComponent<LayoutElement>() ?? txt.gameObject.AddComponent<LayoutElement>();
         le.minWidth = width;
-        le.preferredWidth = width;   // exact width for Name column
+        le.preferredWidth = width;
         le.flexibleWidth = 0f;
 
         txt.enableAutoSizing  = false;
-        txt.textWrappingMode  = TextWrappingModes.NoWrap;   // TMP 4.x API
+        txt.textWrappingMode  = TextWrappingModes.NoWrap;
         txt.overflowMode      = TextOverflowModes.Ellipsis;
     }
 
@@ -238,7 +305,7 @@ public class RosterPanelUI : MonoBehaviour
     {
         if (!txt) return;
         txt.alignment        = align;
-        txt.textWrappingMode = TextWrappingModes.NoWrap;   // TMP 4.x API
+        txt.textWrappingMode = TextWrappingModes.NoWrap;
         txt.overflowMode     = TextOverflowModes.Ellipsis;
     }
 }
