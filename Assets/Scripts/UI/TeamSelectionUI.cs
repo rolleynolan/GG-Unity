@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using GG.Game;
 
@@ -79,9 +78,16 @@ public class TeamSelectionUI : MonoBehaviour
             Debug.LogWarning("[TeamSelectionUI] Confirm clicked with no team selected.");
             return;
         }
+
+        // Primary: in-memory (survives scene load)
         GameState.SelectedTeamAbbr = selectedAbbr;
+
+        // Fallback: persists across domain reloads/editor recompiles
+        PlayerPrefs.SetString("selected_team", selectedAbbr);
+        PlayerPrefs.Save();
+
         Debug.Log($"[TeamSelectionUI] Confirm → Dashboard for {selectedAbbr}");
-        SceneManager.LoadScene("Dashboard", LoadSceneMode.Single);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Dashboard", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     List<TeamData> LoadTeamsFromStreamingAssets()

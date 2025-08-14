@@ -1,19 +1,28 @@
-using GG.Game;
 using UnityEngine;
 
-public class DashboardBootstrap : MonoBehaviour
+namespace GG.Game
 {
-    void Start()
+    // Run after most scripts so we override any default team selection
+    [DefaultExecutionOrder(1000)]
+    public class DashboardBootstrap : MonoBehaviour
     {
-        var panel = FindFirstObjectByType<RosterPanelUI>(FindObjectsInactive.Include);
-        if (!panel)
+        void Start()
         {
-            Debug.LogWarning("[DashboardBootstrap] No RosterPanelUI found in Dashboard.");
-            return;
-        }
+            var panel = FindFirstObjectByType<RosterPanelUI>(FindObjectsInactive.Include);
+            if (!panel)
+            {
+                Debug.LogWarning("[DashboardBootstrap] No RosterPanelUI found in Dashboard.");
+                return;
+            }
 
-        var abbr = string.IsNullOrEmpty(GameState.SelectedTeamAbbr) ? "ATL" : GameState.SelectedTeamAbbr;
-        Debug.Log($"[DashboardBootstrap] Showing roster for {abbr}");
-        panel.ShowRosterForTeam(abbr);
+            // Prefer in-memory selection; fall back to PlayerPrefs; default to ATL
+            var abbr = !string.IsNullOrEmpty(GameState.SelectedTeamAbbr)
+                       ? GameState.SelectedTeamAbbr
+                       : PlayerPrefs.GetString("selected_team", "ATL");
+
+            Debug.Log($"[DashboardBootstrap] Showing roster for {abbr}");
+            panel.ShowRosterForTeam(abbr);
+        }
     }
 }
+
