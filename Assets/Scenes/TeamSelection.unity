@@ -1066,8 +1066,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 457.43, y: -505.02}
-  m_SizeDelta: {x: 366.07, y: 69.9565}
+  m_AnchoredPosition: {x: 380.52988, y: -505.02}
+  m_SizeDelta: {x: 392.3299, y: 69.9565}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &947307470
 MonoBehaviour:
@@ -1187,8 +1187,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 800.23016, y: -505.02}
-  m_SizeDelta: {x: 319.5287, y: 69.958}
+  m_AnchoredPosition: {x: 768.34, y: -505.02}
+  m_SizeDelta: {x: 383.3, y: 69.958}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &952181751
 MonoBehaviour:
@@ -1524,8 +1524,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -342.8, y: 0.00099563}
-  m_SizeDelta: {x: 1234.4, y: 1080}
+  m_AnchoredPosition: {x: -387.8174, y: 0.00050735}
+  m_SizeDelta: {x: 1144.3651, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1211740919
 MonoBehaviour:
@@ -1607,6 +1607,7 @@ GameObject:
   - component: {fileID: 1272105748}
   - component: {fileID: 1272105747}
   - component: {fileID: 1272105746}
+  - component: {fileID: 1272105749}
   m_Layer: 5
   m_Name: RosterScroll
   m_TagString: Untagged
@@ -1632,8 +1633,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 617.19, y: 28.6763}
-  m_SizeDelta: {x: 685.6, y: 1022.6473}
+  m_AnchoredPosition: {x: 572.18, y: 28.6763}
+  m_SizeDelta: {x: 775.62, y: 1022.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1272105746
 MonoBehaviour:
@@ -1703,6 +1704,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1272105743}
   m_CullTransparentMesh: 1
+--- !u!114 &1272105749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1272105743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1842cfac7c6cebf46b8070a4b1d05901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollSensitivity: 60
+  decelerationRate: 0.135
+  movement: 2
 --- !u!1 &1422310092
 GameObject:
   m_ObjectHideFlags: 0
@@ -1947,9 +1963,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6666666666666666666666666666666, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  listContent: {fileID: 0}
+  listContent: {fileID: 994291957}
   teamRowPrefab: {fileID: 1743814068778600647, guid: 04b58625a14716144ba59582c68a7006, type: 3}
-  confirmButton: {fileID: 0}
+  confirmButton: {fileID: 952181751}
+  preview: {fileID: 0}
 --- !u!4 &1565455048
 Transform:
   m_ObjectHideFlags: 0
@@ -1965,6 +1982,66 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1728440116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1728440118}
+  - component: {fileID: 1728440119}
+  m_Layer: 0
+  m_Name: RosterPanelUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1728440118
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728440116}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 997.6026, y: 521.2405, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1728440119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1728440116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4106f1f47456450dbee857a9bb9d0faf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  content: {fileID: 88984852}
+  playerRowPrefab: {fileID: 3507881918765326154, guid: c4444444444444444444444444444444, type: 3}
+  rowMinHeight: 40
+  spacing: 12
+  nameMinWidth: 200
+  posWidth: 175
+  ovrWidth: 175
+  ageWidth: 175
+  padX: 12
+  padY: 6
+  baseColor: {r: 0.1, g: 0.18, b: 0.28, a: 1}
+  altColor: {r: 0.12, g: 0.2, b: 0.32, a: 1}
+  selectedColor: {r: 0.26, g: 0.36, b: 0.5, a: 1}
+  headerBgColor: {r: 0.08, g: 0.14, b: 0.22, a: 1}
+  headerTextTint: {r: 0.85, g: 0.92, b: 1, a: 0.9}
+  showHeader: 1
 --- !u!1 &1747750116
 GameObject:
   m_ObjectHideFlags: 0
@@ -2192,3 +2269,4 @@ SceneRoots:
   - {fileID: 1422310095}
   - {fileID: 1565455048}
   - {fileID: 2042485389}
+  - {fileID: 1728440118}
