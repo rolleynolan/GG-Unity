@@ -7,10 +7,14 @@ using TMPro;
 public static class PlayerRowPrefabBaker
 {
     [MenuItem("GridironGM/UI/Bake PlayerRowUI Prefab")]
-    public static void Bake()
+    public static void Bake()   // ← void, not Button
     {
         var guids = AssetDatabase.FindAssets("t:Prefab PlayerRowUI");
-        if (guids.Length == 0) { Debug.LogWarning("[Bake] PlayerRowUI prefab not found."); return; }
+        if (guids.Length == 0)
+        {
+            Debug.LogWarning("[Bake] PlayerRowUI prefab not found.");
+            return;
+        }
 
         foreach (var g in guids)
         {
@@ -23,7 +27,8 @@ public static class PlayerRowPrefabBaker
             img.color = new Color(0.10f, 0.18f, 0.28f, 1f); // matches list base
 
             // Ensure clickable (RosterPanelUI uses this for selection highlight)
-            root.GetComponent<Button>() ?? root.AddComponent<Button>();
+            var btn = root.GetComponent<Button>() ?? root.AddComponent<Button>();  // ← assign it
+            btn.transition = Selectable.Transition.None;
 
             // Ensure the four TMP children exist and sane text flags (no wrap, ellipsis)
             SetTMPFlags(root.transform, "NameText");
@@ -43,9 +48,9 @@ public static class PlayerRowPrefabBaker
         if (!t) return;
         var tmp = t.GetComponent<TMP_Text>();
         if (!tmp) return;
-        tmp.enableAutoSizing = false;
-        tmp.textWrappingMode = TextWrappingModes.NoWrap;
-        tmp.overflowMode = TextOverflowModes.Ellipsis;
+        tmp.enableAutoSizing  = false;
+        tmp.textWrappingMode  = TextWrappingModes.NoWrap; // TMP 4.x
+        tmp.overflowMode      = TextOverflowModes.Ellipsis;
     }
 }
 #endif
