@@ -20,15 +20,19 @@ public class RosterPanelUI : MonoBehaviour
     [SerializeField] int   padY         = 6;
 
     [Header("Colors")]
-    [SerializeField] Color baseColor     = new Color(0.10f, 0.18f, 0.28f, 1f);
-    [SerializeField] Color altColor      = new Color(0.12f, 0.20f, 0.32f, 1f);
-    [SerializeField] Color selectedColor = new Color(0.26f, 0.36f, 0.50f, 1f);
+    [SerializeField] Color baseColor      = new Color(0.10f, 0.18f, 0.28f, 1f);
+    [SerializeField] Color altColor       = new Color(0.12f, 0.20f, 0.32f, 1f);
+    [SerializeField] Color selectedColor  = new Color(0.26f, 0.36f, 0.50f, 1f);
+    [SerializeField] Color headerBgColor  = new Color(0.08f, 0.14f, 0.22f, 1f);
+    [SerializeField] Color headerTextTint = new Color(0.85f, 0.92f, 1f, 0.9f);
+
+    [Header("Header")]
+    [SerializeField] bool showHeader = true;     // toggle if you ever want to hide it
 
     Image _selectedBG;
 
     void OnRectTransformDimensionsChange()
     {
-        // When the panel size changes (window resize, scale, etc.), recompute widths.
         ReapplyRowWidths();
     }
 
@@ -50,6 +54,9 @@ public class RosterPanelUI : MonoBehaviour
 
         ClearContent();
 
+        // ----- HEADER (scrolls with list) -----
+        if (showHeader) AddHeaderRow();
+
         for (int i = 0; i < team.players.Count; i++)
         {
             var p   = team.players[i];
@@ -57,7 +64,8 @@ public class RosterPanelUI : MonoBehaviour
 
             // Background + zebra color
             var bg = row.GetComponent<Image>() ?? row.AddComponent<Image>();
-            bg.color = (i % 2 == 0) ? baseColor : altColor;
+            var zebraIndex = showHeader ? i + 1 : i; // keep pattern after header
+            bg.color = (zebraIndex % 2 == 0) ? baseColor : altColor;
 
             // Click to select highlight
             var btn = row.GetComponent<Button>() ?? row.AddComponent<Button>();
@@ -65,7 +73,8 @@ public class RosterPanelUI : MonoBehaviour
             btn.onClick.RemoveAllListeners();
             btn.onClick.AddListener(() =>
             {
-                if (_selectedBG) _selectedBG.color = (_selectedBG.transform.GetSiblingIndex() % 2 == 0) ? baseColor : altColor;
+                if (_selectedBG)
+                    _selectedBG.color = (_selectedBG.transform.GetSiblingIndex() % 2 == 0) ? baseColor : altColor;
                 _selectedBG = bg;
                 _selectedBG.color = selectedColor;
             });
@@ -78,10 +87,41 @@ public class RosterPanelUI : MonoBehaviour
             binder.Bind(p);
         }
 
-        // One more pass to ensure widths are perfect after first layout
         ReapplyRowWidths();
-
         Debug.Log($"[RosterPanel] Rendered {team.players.Count} players for {abbr}");
+    }
+
+    // ---------------- header ----------------
+
+    void AddHeaderRow()
+    {
+        // Reuse the row prefab, but turn it into a non-interactive header
+        var row = Instantiate(playerRowPrefab, content);
+        row.name = "HeaderRow";
+
+        // Remove selection behavior
+        var btn = row.GetComponent<Button>();
+        if (btn) Destroy(btn);
+
+        // Remove binder so it won't overwrite our labels
+        var binder = row.GetComponent<PlayerRowBinder>();
+        if (binder) Destroy(binder);
+
+        // Layout first, then label
+        ApplyRowLayout(row);
+
+        var bg = row.GetComponent<Image>() ?? row.AddComponent<Image>();
+        bg.color = headerBgColor;
+
+        var name = FindTMP(row.transform, "NameText");
+        var pos  = FindTMP(row.transform, "PosText");
+        var ovr  = FindTMP(row.transform, "OvrText");
+        var age  = FindTMP(row.transform, "AgeText");
+
+        if (name) { name.text = "NAME"; name.fontStyle = FontStyles.Bold; name.color = headerTextTint; }
+        if (pos)  { pos.text  = "POS";  pos.fontStyle  = FontStyles.Bold; pos.color  = headerTextTint; }
+        if (ovr)  { ovr.text  = "OVR";  ovr.fontStyle  = FontStyles.Bold; ovr.color  = headerTextTint; }
+        if (age)  { age.text  = "AGE";  age.fontStyle  = FontStyles.Bold; age.color  = headerTextTint; }
     }
 
     // ---------------- helpers ----------------
@@ -149,7 +189,6 @@ public class RosterPanelUI : MonoBehaviour
 
     void ReapplyRowWidths()
     {
-        // Recompute Name width for every row
         for (int i = 0; i < content.childCount; i++)
         {
             var row = content.GetChild(i).gameObject;
@@ -176,9 +215,10 @@ public class RosterPanelUI : MonoBehaviour
         le.minWidth = width;
         le.preferredWidth = width;
         le.flexibleWidth = 0f;
-        txt.enableAutoSizing = false;
-        txt.overflowMode = TextOverflowModes.Ellipsis;
-        txt.textWrappingMode = TextWrappingModes.NoWrap;
+
+        txt.enableAutoSizing  = false;
+        txt.textWrappingMode  = TextWrappingModes.NoWrap;   // TMP 4.x API
+        txt.overflowMode      = TextOverflowModes.Ellipsis;
     }
 
     static void LockExact(TMP_Text txt, float width)
@@ -188,16 +228,17 @@ public class RosterPanelUI : MonoBehaviour
         le.minWidth = width;
         le.preferredWidth = width;   // exact width for Name column
         le.flexibleWidth = 0f;
-        txt.enableAutoSizing = false;
-        txt.overflowMode = TextOverflowModes.Ellipsis;
-        txt.textWrappingMode = TextWrappingModes.NoWrap;
+
+        txt.enableAutoSizing  = false;
+        txt.textWrappingMode  = TextWrappingModes.NoWrap;   // TMP 4.x API
+        txt.overflowMode      = TextOverflowModes.Ellipsis;
     }
 
     static void ConfigureText(TMP_Text txt, TextAlignmentOptions align)
     {
         if (!txt) return;
-        txt.alignment = align;
-        txt.textWrappingMode = TextWrappingModes.NoWrap;
-        txt.overflowMode = TextOverflowModes.Ellipsis;
+        txt.alignment        = align;
+        txt.textWrappingMode = TextWrappingModes.NoWrap;   // TMP 4.x API
+        txt.overflowMode     = TextOverflowModes.Ellipsis;
     }
 }
