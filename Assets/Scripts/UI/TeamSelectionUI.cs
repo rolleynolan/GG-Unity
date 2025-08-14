@@ -79,7 +79,7 @@ public class TeamSelectionUI : MonoBehaviour
             var row = Instantiate(teamRowPrefab, listContent);
             var binder = row.GetComponent<TeamRowBinder>();
             if (!binder) binder = row.AddComponent<TeamRowBinder>();
-            binder.Set(t);
+            binder.Set(t); // Set() auto-wires if needed
             var btn = row.GetComponent<Button>();
             if (!btn) btn = row.AddComponent<Button>();
             btn.onClick.AddListener(() => OnTeamClicked(t));

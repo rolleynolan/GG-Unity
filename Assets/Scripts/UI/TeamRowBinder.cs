@@ -4,32 +4,36 @@ using UnityEngine.UI;
 
 public class TeamRowBinder : MonoBehaviour
 {
-    public TMP_Text NameText;    // e.g., "Washington Generals (WAS)"
-    public TMP_Text ConfText;    // e.g., "Conference"
-    public Image LogoImage;
+    public TMP_Text NameText;    // "Washington Generals (WAS)"
+    public TMP_Text ConfText;    // "Conference"
+    public Image LogoImage;      // optional
 
-    void EnsureLayout()
+    public void AutoWireIfNeeded()
     {
-        // Ensure a HorizontalLayoutGroup exists so texts don’t overlap.
-        var h = GetComponent<HorizontalLayoutGroup>();
-        if (!h)
+        if (!NameText) NameText = FindText("NameText");
+        if (!ConfText) ConfText = FindText("ConfText");
+        if (!NameText || !ConfText)
         {
-            h = gameObject.AddComponent<HorizontalLayoutGroup>();
-            h.childAlignment = TextAnchor.MiddleLeft;
-            h.spacing = 12f;
-            h.childForceExpandWidth = true;
+            var all = GetComponentsInChildren<TMP_Text>(true);
+            if (all.Length >= 2)
+            {
+                if (!NameText) NameText = all[0];
+                if (!ConfText) ConfText = all[1];
+            }
         }
+    }
 
-        var le = GetComponent<LayoutElement>();
-        if (!le) le = gameObject.AddComponent<LayoutElement>();
-        le.minHeight = 48f;
+    TMP_Text FindText(string child)
+    {
+        var t = transform.Find(child);
+        return t ? t.GetComponent<TMP_Text>() : null;
     }
 
     public void Set(TeamData t)
     {
-        EnsureLayout();
+        AutoWireIfNeeded();
         if (NameText) NameText.text = $"{t.city} {t.name} ({t.abbreviation})";
         if (ConfText) ConfText.text = t.conference;
-        // LogoImage is optional; you already load sprites elsewhere.
+        // LogoImage stays as-is (you load sprites elsewhere)
     }
 }
