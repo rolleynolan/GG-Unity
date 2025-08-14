@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -6,57 +7,54 @@ using UnityEngine;
 public static class ProjectCleanup
 {
     [MenuItem("GridironGM/Cleanup/Remove Missing Scripts In Scene")]
-    public static void RemoveInScene()
+    public static void RemoveMissingInScene()
     {
-        int total = 0;
-        foreach (var go in Object.FindObjectsOfType<GameObject>())
-            total += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
-        Debug.Log($"[Cleanup] Removed {total} missing scripts from OPEN scene.");
-    }
-
-    [MenuItem("GridironGM/Cleanup/Remove Missing Scripts In All Scenes")]
-    public static void RemoveInAllScenes()
-    {
-        var guids = AssetDatabase.FindAssets("t:Scene");
-        int scenes = 0, total = 0;
-        foreach (var guid in guids)
-        {
-            var path = AssetDatabase.GUIDToAssetPath(guid);
-            var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
-            int removed = 0;
-            foreach (var go in scene.GetRootGameObjects())
-                removed += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
-            if (removed > 0)
-            {
-                scenes++;
-                total += removed;
-                EditorSceneManager.MarkSceneDirty(scene);
-                EditorSceneManager.SaveScene(scene);
-            }
-        }
-        Debug.Log($"[Cleanup] Removed {total} missing scripts across {scenes} scenes.");
+        int count = 0;
+        foreach (var go in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            count += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+        Debug.Log($"[Cleanup] Removed {count} missing script components in current scene.");
     }
 
     [MenuItem("GridironGM/Cleanup/Remove Missing Scripts In Prefabs")]
-    public static void RemoveInPrefabs()
+    public static void RemoveMissingInPrefabs()
     {
         var guids = AssetDatabase.FindAssets("t:Prefab");
-        int prefabs = 0, total = 0;
-        foreach (var guid in guids)
+        int total = 0;
+        foreach (var g in guids)
         {
-            var path = AssetDatabase.GUIDToAssetPath(guid);
-            var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (!go) continue;
-            int removed = GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+            var path = AssetDatabase.GUIDToAssetPath(g);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (!prefab) continue;
+            int removed = 0;
+            foreach (var comp in prefab.GetComponentsInChildren<Component>(true))
+                if (comp == null) removed++;
             if (removed > 0)
             {
+                var stage = PrefabUtility.LoadPrefabContents(path);
+                foreach (var go in stage.GetComponentsInChildren<GameObject>(true))
+                    GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+                PrefabUtility.SaveAsPrefabAsset(stage, path);
+                PrefabUtility.UnloadPrefabContents(stage);
                 total += removed;
-                prefabs++;
-                EditorUtility.SetDirty(go);
             }
         }
-        AssetDatabase.SaveAssets();
-        Debug.Log($"[Cleanup] Removed {total} missing scripts across {prefabs} prefabs.");
+        Debug.Log($"[Cleanup] Removed ~{total} missing script components across prefabs.");
+    }
+
+    [MenuItem("GridironGM/Cleanup/Remove Missing Scripts In All Scenes")]
+    public static void RemoveMissingInAllScenes()
+    {
+        var sceneGuids = AssetDatabase.FindAssets("t:Scene");
+        int total = 0;
+        foreach (var g in sceneGuids)
+        {
+            var path = AssetDatabase.GUIDToAssetPath(g);
+            var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
+            total += Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                    .Sum(go => GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go));
+            EditorSceneManager.SaveScene(scene);
+        }
+        Debug.Log($"[Cleanup] Removed {total} missing script components across all scenes.");
     }
 }
 #endif

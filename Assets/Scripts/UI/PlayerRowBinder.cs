@@ -33,6 +33,7 @@ public class PlayerRowBinder : MonoBehaviour
 
     public void Bind(PlayerDTO p)
     {
+        AutoWireIfNeeded();
         if (NameText) NameText.text = $"{p.first_name} {p.last_name}";
         if (PosText)  PosText.text  = p.pos;
         if (OvrText)  OvrText.text  = p.overall.ToString();
