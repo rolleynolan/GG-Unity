@@ -6,38 +6,38 @@ using UnityEngine;
 
 public static class LogoDatabaseBuilder
 {
-    [MenuItem("GridironGM/Logos/Rebuild Logo Database (from Assets/teamsprites)")]
+    [MenuItem("GridironGM/Logos/Rebuild Logo Database")]
     public static void Rebuild()
     {
-        const string srcFolder = "Assets/teamsprites";
-        const string resourcesFolder = "Assets/Resources/Data";
-        const string assetPath = resourcesFolder + "/TeamLogoDatabase.asset";
+        string[] sources = { "Assets/teamsprites", "Assets/Resources/TeamSprites", "Assets/TeamSprites" };
+        const string resourcesDir = "Assets/Resources/Data";
+        const string assetPath = resourcesDir + "/TeamLogoDatabase.asset";
 
-        if (!AssetDatabase.IsValidFolder("Assets/Resources"))
-            AssetDatabase.CreateFolder("Assets", "Resources");
-        if (!AssetDatabase.IsValidFolder(resourcesFolder))
-            AssetDatabase.CreateFolder("Assets/Resources", "Data");
+        if (!AssetDatabase.IsValidFolder("Assets/Resources")) AssetDatabase.CreateFolder("Assets", "Resources");
+        if (!AssetDatabase.IsValidFolder(resourcesDir)) AssetDatabase.CreateFolder("Assets/Resources", "Data");
 
-        var guids = AssetDatabase.FindAssets("t:Sprite", new[] { srcFolder });
-        var sprites = guids
-            .Select(g => AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(g)))
-            .Where(s => s != null)
-            .ToList();
+        var guids = sources
+            .Where(AssetDatabase.IsValidFolder)
+            .SelectMany(src => AssetDatabase.FindAssets("t:Sprite", new[] { src }))
+            .Distinct()
+            .ToArray();
 
         var db = ScriptableObject.CreateInstance<TeamLogoDatabase>();
-        foreach (var s in sprites)
+        foreach (var g in guids)
         {
-            // Map by filename (without extension); trim whitespace, uppercase.
-            var file = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(s));
-            var abbr = file.Trim().ToUpperInvariant(); // Expect KC.png, WAS.png, etc.
-            db.items.Add(new TeamLogoDatabase.Entry { abbr = abbr, sprite = s });
+            var path = AssetDatabase.GUIDToAssetPath(g);
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (!sprite) continue;
+            var abbr = Path.GetFileNameWithoutExtension(path).Trim().ToUpperInvariant(); // KC.png -> KC
+            db.items.Add(new TeamLogoDatabase.Entry { abbr = abbr, sprite = sprite });
         }
 
         var existing = AssetDatabase.LoadAssetAtPath<TeamLogoDatabase>(assetPath);
-        if (existing == null) AssetDatabase.CreateAsset(db, assetPath);
-        else { existing.items = db.items; EditorUtility.SetDirty(existing); }
+        if (!existing) AssetDatabase.CreateAsset(db, assetPath);
+        else { existing.items = db.items; EditorUtility.SetDirty(existing); Object.DestroyImmediate(db, true); }
+
         AssetDatabase.SaveAssets();
-        Debug.Log($"[LogoDatabaseBuilder] Rebuilt logo DB with {db.items.Count} entries at {assetPath}");
+        Debug.Log($"[Logos] Built TeamLogoDatabase with {db.items.Count} sprites → {assetPath}");
     }
 }
 #endif

@@ -23,5 +23,6 @@ public static class LogoService
         foreach (var e in db.items)
             if (!string.IsNullOrEmpty(e.abbr) && e.sprite)
                 _map[e.abbr.ToUpperInvariant()] = e.sprite;
+        Debug.Log($"[LogoService] Loaded logos: {_map.Count}");
     }
 }

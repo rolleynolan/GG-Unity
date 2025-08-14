@@ -15,9 +15,9 @@ public static class RosterService
     public static TeamRosterDTO LoadRosterFor(string abbr)
     {
         EnsureLoaded();
-        if (_cache.TryGetValue(abbr.ToUpperInvariant(), out var t)) return t;
-        Debug.LogError($"[RosterService] Roster not found for {abbr}");
-        return null;
+        if (string.IsNullOrEmpty(abbr)) return null;
+        _cache.TryGetValue(abbr.ToUpperInvariant(), out var t);
+        return t;
     }
 
     private static void EnsureLoaded()
@@ -25,6 +25,7 @@ public static class RosterService
         if (_loaded) return;
         string path = Path.Combine(Application.streamingAssetsPath, "rosters_by_team.json");
         if (!File.Exists(path)) { Debug.LogError($"[RosterService] Missing {path}"); _cache = new(); _loaded = true; return; }
+
         string json = File.ReadAllText(path).TrimStart();
         if (json.StartsWith("[")) json = "{\"teams\":" + json + "}";
 

@@ -6,6 +6,33 @@ using UnityEngine;
 
 public static class ProjectCleanup
 {
+    [MenuItem("GridironGM/Cleanup/Apply Project Patch (delete legacy + cleanup)")]
+    public static void ApplyPatch()
+    {
+        string[] toDelete =
+        {
+            "Assets/Scripts/RosterUI.cs",
+            "Assets/Scripts/PlayerRow.cs",
+            "Assets/Scripts/TeamDataUI.cs" // delete only if it exists; safe if missing
+        };
+
+        foreach (var path in toDelete)
+        {
+            if (AssetDatabase.LoadAssetAtPath<Object>(path) != null)
+            {
+                AssetDatabase.DeleteAsset(path);
+                Debug.Log($"[Patch] Deleted legacy asset: {path}");
+            }
+        }
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        RemoveMissingInPrefabs();
+        RemoveMissingInAllScenes();
+
+        Debug.Log("[Patch] Project patch complete. If you see compile errors, re-import and play again.");
+    }
+
     [MenuItem("GridironGM/Cleanup/Remove Missing Scripts In Scene")]
     public static void RemoveMissingInScene()
     {
@@ -23,20 +50,16 @@ public static class ProjectCleanup
         foreach (var g in guids)
         {
             var path = AssetDatabase.GUIDToAssetPath(g);
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (!prefab) continue;
+            var stage = PrefabUtility.LoadPrefabContents(path);
             int removed = 0;
-            foreach (var comp in prefab.GetComponentsInChildren<Component>(true))
-                if (comp == null) removed++;
+            foreach (var go in stage.GetComponentsInChildren<GameObject>(true))
+                removed += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
             if (removed > 0)
             {
-                var stage = PrefabUtility.LoadPrefabContents(path);
-                foreach (var go in stage.GetComponentsInChildren<GameObject>(true))
-                    GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
                 PrefabUtility.SaveAsPrefabAsset(stage, path);
-                PrefabUtility.UnloadPrefabContents(stage);
                 total += removed;
             }
+            PrefabUtility.UnloadPrefabContents(stage);
         }
         Debug.Log($"[Cleanup] Removed ~{total} missing script components across prefabs.");
     }
@@ -50,8 +73,8 @@ public static class ProjectCleanup
         {
             var path = AssetDatabase.GUIDToAssetPath(g);
             var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
-            total += Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                    .Sum(go => GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go));
+            foreach (var go in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                total += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
             EditorSceneManager.SaveScene(scene);
         }
         Debug.Log($"[Cleanup] Removed {total} missing script components across all scenes.");
