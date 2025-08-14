@@ -262,12 +262,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1743814068778600647}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32fd81e565b1a164b9b27d3f17dc8467, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nameText: {fileID: 8436826697955408626}
-  conferenceText: {fileID: 134775940823328123}
-  logoImage: {fileID: 2066392291632843872}
+  m_Script: {fileID: 11500000, guid: e3308062cb0142c89e041fe23bb72a3c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  NameText: {fileID: 8436826697955408626}
+  ConfText: {fileID: 134775940823328123}
+  LogoImage: {fileID: 2066392291632843872}
 --- !u!114 &7923731118198394440
 MonoBehaviour:
   m_ObjectHideFlags: 0
