@@ -1947,9 +1947,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6666666666666666666666666666666, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  contentParent: {fileID: 1211740918}
+  listContent: {fileID: 0}
   teamRowPrefab: {fileID: 1743814068778600647, guid: 04b58625a14716144ba59582c68a7006, type: 3}
-  headerText: {fileID: 0}
+  confirmButton: {fileID: 0}
 --- !u!4 &1565455048
 Transform:
   m_ObjectHideFlags: 0
@@ -2160,7 +2160,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2042485389}
-  - component: {fileID: 2042485388}
   m_Layer: 0
   m_Name: GameState
   m_TagString: Untagged
@@ -2168,18 +2167,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2042485388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2042485387}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5555555555555555555555555555555, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &2042485389
 Transform:
   m_ObjectHideFlags: 0
@@ -2205,4 +2192,3 @@ SceneRoots:
   - {fileID: 1422310095}
   - {fileID: 1565455048}
   - {fileID: 2042485389}
-  - {fileID: 221941119}
