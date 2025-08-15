@@ -79,15 +79,12 @@ public class TeamSelectionUI : MonoBehaviour
             return;
         }
 
-        // Primary: in-memory (survives scene load)
         GameState.SelectedTeamAbbr = selectedAbbr;
-
-        // Fallback: persists across domain reloads/editor recompiles
         PlayerPrefs.SetString("selected_team", selectedAbbr);
         PlayerPrefs.Save();
 
         Debug.Log($"[TeamSelectionUI] Confirm → Dashboard for {selectedAbbr}");
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Dashboard", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Dashboard");
     }
 
     List<TeamData> LoadTeamsFromStreamingAssets()
