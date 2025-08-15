@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace GG.Game
 {
-    // Runs as a component (if present) and ALSO as a global hook after scene load
+    // Enforces the selected team on Dashboard both as a component and as a static scene hook.
     [DefaultExecutionOrder(1000)]
     public class DashboardBootstrap : MonoBehaviour
     {
@@ -13,8 +13,7 @@ namespace GG.Game
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void AfterSceneLoadHook()
         {
-            var active = SceneManager.GetActiveScene();
-            if (active.name == "Dashboard")
+            if (SceneManager.GetActiveScene().name == "Dashboard")
                 ApplySelectionToDashboard();
         }
 
@@ -24,11 +23,21 @@ namespace GG.Game
                        ? GameState.SelectedTeamAbbr
                        : PlayerPrefs.GetString("selected_team", "ATL");
 
-            // Header
+            // Ensure there is a HeaderBinder in the scene; if not, create one at the Canvas root
             var header = Object.FindFirstObjectByType<DashboardHeaderBinder>(FindObjectsInactive.Include);
+            if (!header)
+            {
+                var canvas = Object.FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+                if (canvas)
+                {
+                    var go = new GameObject("HeaderBinder (Runtime)", typeof(DashboardHeaderBinder));
+                    go.transform.SetParent(canvas.transform, false);
+                    header = go.GetComponent<DashboardHeaderBinder>();
+                }
+            }
             if (header) header.Apply(abbr);
 
-            // Roster panel (if present in Dashboard)
+            // If a RosterPanelUI exists in Dashboard, show that team's roster too
             var panel = Object.FindFirstObjectByType<RosterPanelUI>(FindObjectsInactive.Include);
             if (panel) panel.ShowRosterForTeam(abbr);
 
