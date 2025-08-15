@@ -30,6 +30,10 @@ public class RosterPanelUI : MonoBehaviour
     [SerializeField] bool pinHeader = true;      // pinned (not scrolling). Set false for scrolling header.
     [SerializeField] bool showHeader = true;
 
+    [Header("Optional visuals")]
+    [SerializeField] bool enableWatermark = false;   // default OFF
+    Image _watermark;                                // cached if one exists
+
     Image _selectedBG;
     RectTransform _pinnedHeaderRT;   // created at runtime under the ScrollRect viewport
     float _headerHeightCached;
@@ -91,6 +95,10 @@ public class RosterPanelUI : MonoBehaviour
         }
 
         ReapplyRowWidths();
+        if (!enableWatermark)
+            ClearWatermark();
+        else
+            UpdateWatermark(abbr);
         Debug.Log($"[RosterPanel] Rendered {team.players.Count} players for {abbr}");
     }
 
@@ -268,6 +276,34 @@ public class RosterPanelUI : MonoBehaviour
             LockExact(name, nameW);
         }
         LayoutRebuilder.MarkLayoutForRebuild((RectTransform)content);
+    }
+
+    void UpdateWatermark(string abbr)
+    {
+        if (!enableWatermark) { ClearWatermark(); return; }
+
+        if (!_watermark)
+        {
+            var go = new GameObject("Watermark", typeof(Image));
+            var rt = go.GetComponent<RectTransform>();
+            rt.SetParent(transform, false);
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.sizeDelta = Vector2.zero;
+            _watermark = go.GetComponent<Image>();
+            _watermark.raycastTarget = false;
+            _watermark.preserveAspect = true;
+            _watermark.color = new Color(1f, 1f, 1f, 0.06f);
+        }
+        _watermark.enabled = true;
+        _watermark.sprite = LogoService.Get(abbr);
+    }
+
+    void ClearWatermark()
+    {
+        if (_watermark)
+            _watermark.enabled = false;
+        var stray = transform.Find("Watermark");
+        if (stray && stray != _watermark?.transform)
+            DestroyImmediate(stray.gameObject);
     }
 
     static TMP_Text FindTMP(Transform root, string childName)
