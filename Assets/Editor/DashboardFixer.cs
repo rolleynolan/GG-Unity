@@ -14,9 +14,15 @@ public static class DashboardFixer
     public static void Install()
     {
         var scene = EditorSceneManager.GetActiveScene();
-        if (!scene.IsValid() || !scene.isLoaded)
+
+        // ✅ Guard: only install in the Dashboard scene
+        if (!scene.isLoaded || scene.name != "Dashboard")
         {
-            EditorUtility.DisplayDialog("Dashboard", "Open the Dashboard scene first.", "OK");
+            EditorUtility.DisplayDialog(
+                "Dashboard Binder",
+                "Open the 'Dashboard' scene before running this installer.\n\n" +
+                $"Current scene: {(scene.isLoaded ? scene.name : "(none)")}",
+                "OK");
             return;
         }
 
@@ -27,12 +33,10 @@ public static class DashboardFixer
             return;
         }
 
-        // Remove older patches so nothing conflicts
         RemoveIfExists("DashboardBootstrap");
         RemoveIfExists("DashboardHeaderBinder");
         RemoveIfExists("DashboardTeamEnforcer");
 
-        // Add or reuse controller
         var ctrl = UnityEngine.Object.FindFirstObjectByType<DashboardSceneController>(FindObjectsInactive.Include);
         if (!ctrl)
         {
@@ -41,45 +45,32 @@ public static class DashboardFixer
             ctrl = go.AddComponent<DashboardSceneController>();
         }
 
-        // Try to auto-wire title/Logo from existing UI
         AutoWire(ctrl, canvas.transform);
-
         EditorSceneManager.MarkSceneDirty(scene);
         Debug.Log("[DashboardFixer] Simple binder installed and auto-wired.");
     }
 
-    [MenuItem("GridironGM/Dashboard/Remove Old Patch Components")]
-    public static void RemoveOldPatches()
+    [MenuItem("GridironGM/Dashboard/Remove Binder From Non-Dashboard Scenes")]
+    public static void RemoveBinderFromWrongScenes()
     {
-        int n = 0;
-        n += RemoveIfExists("DashboardBootstrap");
-        n += RemoveIfExists("DashboardHeaderBinder");
-        n += RemoveIfExists("DashboardTeamEnforcer");
-        Debug.Log($"[DashboardFixer] Removed {n} old patch component(s).");
-    }
-
-    static int RemoveIfExists(string typeName)
-    {
-        var type = AppDomain.CurrentDomain.GetAssemblies()
-                     .SelectMany(a => a.GetTypes())
-                     .FirstOrDefault(t => t.Name == typeName);
-        if (type == null) return 0;
-
-        var comps = UnityEngine.Object.FindObjectsByType(type, FindObjectsInactive.Include, FindObjectsSortMode.None);
-        foreach (var c in comps) UnityEngine.Object.DestroyImmediate((UnityEngine.Object)c, true);
-        return comps.Length;
+        int removed = 0;
+        foreach (var ctrl in UnityEngine.Object.FindObjectsByType<DashboardSceneController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            var s = ctrl.gameObject.scene;
+            if (s.IsValid() && s.isLoaded && s.name != "Dashboard")
+            {
+                UnityEngine.Object.DestroyImmediate(ctrl.gameObject, true);
+                removed++;
+            }
+        }
+        Debug.Log($"[DashboardFixer] Removed {removed} DashboardSceneController object(s) from non-Dashboard scenes.");
     }
 
     static void AutoWire(DashboardSceneController ctrl, Transform root)
     {
-        // Heuristics: pick two biggest TMPs near top for the header, and a square-ish Image as logo.
+        // Heuristics: two biggest TMPs near the top; and a square-ish Image as the logo.
         var tmps = root.GetComponentsInChildren<TextMeshProUGUI>(true);
-        var topHalf = tmps.Where(t =>
-        {
-            var y = ((RectTransform)t.transform).anchoredPosition.y;
-            return y > -200f; // roughly near top bar
-        }).ToArray();
-
+        var topHalf = tmps.Where(t => ((RectTransform)t.transform).anchoredPosition.y > -200f).ToArray();
         var title1 = topHalf.OrderByDescending(t => t.fontSize).FirstOrDefault();
         var title2 = topHalf.Where(t => t != title1).OrderByDescending(t => t.fontSize).FirstOrDefault();
 
@@ -94,6 +85,18 @@ public static class DashboardFixer
         so.ApplyModifiedPropertiesWithoutUndo();
 
         Debug.Log($"[DashboardFixer] Auto-wired: title1='{title1?.name}', title2='{title2?.name}', logo='{logo?.name}'.");
+    }
+
+    static int RemoveIfExists(string typeName)
+    {
+        var type = AppDomain.CurrentDomain.GetAssemblies()
+                     .SelectMany(a => a.GetTypes())
+                     .FirstOrDefault(t => t.Name == typeName);
+        if (type == null) return 0;
+
+        var comps = UnityEngine.Object.FindObjectsByType(type, FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var c in comps) UnityEngine.Object.DestroyImmediate((UnityEngine.Object)c, true);
+        return comps.Length;
     }
 }
 #endif

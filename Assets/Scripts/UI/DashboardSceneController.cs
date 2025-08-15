@@ -18,6 +18,16 @@ namespace GG.Game
 
         Dictionary<string, TeamData> _teams;
 
+        void Awake()
+        {
+            // Refuse to run outside the Dashboard scene (prevents accidents in other scenes)
+            if (gameObject.scene.name != "Dashboard")
+            {
+                enabled = false;       // prevents Start()
+                return;
+            }
+        }
+
         void Start()
         {
             var abbr = ResolveAbbr();

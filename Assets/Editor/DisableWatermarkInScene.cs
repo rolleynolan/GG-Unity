@@ -20,9 +20,8 @@ public static class DisableWatermarkInScene
 
             if (!looksLikeWatermark) continue;
 
-            // If it’s a naked watermark object with only an Image, remove it; else just disable
             var comps = img.GetComponents<Component>();
-            if (comps.Length <= 2) // Transform + Image
+            if (comps.Length <= 2) // Transform + Image only
             {
                 Object.DestroyImmediate(img.gameObject, true);
                 removed++;
@@ -38,4 +37,3 @@ public static class DisableWatermarkInScene
     }
 }
 #endif
-
