@@ -19,20 +19,23 @@ public class DashboardHeaderBinder : MonoBehaviour
         abbr = (abbr ?? "").ToUpperInvariant();
         EnsureTeamIndex();
 
-        // Auto-wire if not set: scan the whole UI under this GameObject
+        // Auto-wire if not set
         if (!teamTitle) teamTitle = FindBestTitleText();
         if (!teamLogo)  teamLogo  = FindBestLogoImage();
 
-        _teams?.TryGetValue(abbr, out var t);
+        // Safe lookup (no ?. with out var)
+        TeamData t = null;
+        if (_teams != null && _teams.TryGetValue(abbr, out var found))
+            t = found;
 
         if (teamTitle)
-            teamTitle.text = t != null ? $"{t.city} {t.name} ({abbr})" : abbr;
+            teamTitle.text = (t != null) ? $"{t.city} {t.name} ({abbr})" : abbr;
 
         if (teamLogo)
         {
             var spr = LogoService.Get(abbr);
-            teamLogo.enabled = spr != null;
-            teamLogo.sprite  = spr;
+            teamLogo.enabled     = spr != null;
+            teamLogo.sprite      = spr;
             teamLogo.preserveAspect = true;
         }
 
