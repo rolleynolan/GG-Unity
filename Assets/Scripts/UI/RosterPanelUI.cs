@@ -45,6 +45,7 @@ public class RosterPanelUI : MonoBehaviour
         if (!EnsureWired())
         {
             Debug.LogWarning("[RosterPanel] Missing Content or PlayerRowUI prefab refs.");
+            Debug.Log($"[RosterPanel] ShowRosterForTeam({abbr})\n{System.Environment.StackTrace}");
             return;
         }
 
