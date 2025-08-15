@@ -1,55 +1,36 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace GG.Season
+namespace GG.Game
 {
     public static class ScheduleService
     {
-        public static List<GameInfo>[] Generate(List<string> teamAbbrs, int weeks = 14)
+        // Simple weekly pairings for a vertical slice.
+        public static List<WeekGames> Generate(List<string> abbrs, int weeks = 14, int seed = 12345)
         {
-            if (teamAbbrs == null) return Array.Empty<List<GameInfo>>();
-            var rng = new Random(SeasonState.SeasonStartSeed);
-            var teams = teamAbbrs.Where(t => !string.IsNullOrEmpty(t)).ToList();
-            if (teams.Count % 2 == 1) teams.Add("BYE");
+            var rnd = new Random(seed);
+            var weeksList = new List<WeekGames>(weeks);
 
-            // shuffle initial order
-            for (int i = teams.Count - 1; i > 0; i--)
+            for (int w = 1; w <= weeks; w++)
             {
-                int j = rng.Next(i + 1);
-                (teams[i], teams[j]) = (teams[j], teams[i]);
-            }
+                var wg = new WeekGames { week = w };
+                var list = new List<string>(abbrs);
 
-            int totalWeeks = Math.Min(weeks, teams.Count - 1);
-            var schedule = new List<GameInfo>[totalWeeks];
-            var rotation = new List<string>(teams);
+                // Shuffle
+                for (int i = list.Count - 1; i > 0; i--)
+                { int j = rnd.Next(i + 1); (list[i], list[j]) = (list[j], list[i]); }
 
-            for (int w = 0; w < totalWeeks; w++)
-            {
-                var games = new List<GameInfo>();
-                int half = rotation.Count / 2;
-                for (int i = 0; i < half; i++)
+                // Pair neighbors
+                for (int i = 0; i + 1 < list.Count; i += 2)
                 {
-                    var home = rotation[i];
-                    var away = rotation[rotation.Count - 1 - i];
-                    if (home == "BYE" || away == "BYE") continue;
-                    bool swap = ((i + w) % 2 == 0);
-                    var g = new GameInfo
-                    {
-                        week = w + 1,
-                        home = swap ? home : away,
-                        away = swap ? away : home
-                    };
-                    games.Add(g);
+                    var a = list[i]; var b = list[i + 1];
+                    var home = rnd.NextDouble() < 0.5 ? a : b;
+                    var away = home == a ? b : a;
+                    wg.games.Add(new GameInfo { week = w, home = home, away = away });
                 }
-                schedule[w] = games;
-
-                // rotate teams except first
-                var last = rotation[rotation.Count - 1];
-                rotation.RemoveAt(rotation.Count - 1);
-                rotation.Insert(1, last);
+                weeksList.Add(wg);
             }
-            return schedule;
+            return weeksList;
         }
     }
 }
