@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace GG.Game
 {
-    // Enforces the selected team on Dashboard both as a component and as a static scene hook.
+    // Enforce the selected team on Dashboard both via component and static hook.
     [DefaultExecutionOrder(1000)]
     public class DashboardBootstrap : MonoBehaviour
     {
@@ -23,25 +23,30 @@ namespace GG.Game
                        ? GameState.SelectedTeamAbbr
                        : PlayerPrefs.GetString("selected_team", "ATL");
 
-            // Ensure there is a HeaderBinder in the scene; if not, create one at the Canvas root
+            // Ensure Canvas exists
+            var canvas = Object.FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+            if (!canvas)
+            {
+                Debug.LogWarning("[DashboardBootstrap] No Canvas found in Dashboard.");
+                return;
+            }
+
+            // Find or create a header binder and point it at the whole Canvas
             var header = Object.FindFirstObjectByType<DashboardHeaderBinder>(FindObjectsInactive.Include);
             if (!header)
             {
-                var canvas = Object.FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
-                if (canvas)
-                {
-                    var go = new GameObject("HeaderBinder (Runtime)", typeof(DashboardHeaderBinder));
-                    go.transform.SetParent(canvas.transform, false);
-                    header = go.GetComponent<DashboardHeaderBinder>();
-                }
+                var go = new GameObject("HeaderBinder (Runtime)", typeof(DashboardHeaderBinder));
+                go.transform.SetParent(canvas.transform, false);
+                header = go.GetComponent<DashboardHeaderBinder>();
             }
-            if (header) header.Apply(abbr);
+            if (header) header.GetType().GetField("searchRoot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(header, canvas.transform);
+            header?.Apply(abbr);
 
-            // If a RosterPanelUI exists in Dashboard, show that team's roster too
+            // Drive roster panel too, if present
             var panel = Object.FindFirstObjectByType<RosterPanelUI>(FindObjectsInactive.Include);
-            if (panel) panel.ShowRosterForTeam(abbr);
+            panel?.ShowRosterForTeam(abbr);
 
-            Debug.Log($"[DashboardBootstrap] Enforced selected team {abbr} on Dashboard.");
+            Debug.Log($"[DashboardBootstrap] Enforced selected team {abbr} on Dashboard (canvas='{canvas.name}').");
         }
     }
 }

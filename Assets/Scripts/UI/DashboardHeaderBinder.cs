@@ -9,8 +9,11 @@ using UnityEngine.UI;
 public class DashboardHeaderBinder : MonoBehaviour
 {
     [Header("Optional explicit refs (auto-wires if left empty)")]
-    [SerializeField] TMP_Text teamTitle;     // e.g., "Baltimore Knights (BAL)"
-    [SerializeField] Image    teamLogo;      // crest/logo
+    [SerializeField] TMP_Text teamTitle;          // e.g., "Baltimore Knights (BAL)"
+    [SerializeField] Image    teamLogo;           // crest/logo
+
+    [Header("Where to search for header UI (defaults to Canvas)")]
+    [SerializeField] Transform searchRoot;
 
     Dictionary<string, TeamData> _teams;
 
@@ -19,27 +22,32 @@ public class DashboardHeaderBinder : MonoBehaviour
         abbr = (abbr ?? "").ToUpperInvariant();
         EnsureTeamIndex();
 
-        // Auto-wire if not set
-        if (!teamTitle) teamTitle = FindBestTitleText();
-        if (!teamLogo)  teamLogo  = FindBestLogoImage();
+        // Choose search scope: explicit root > parent Canvas > scene root of this object
+        var scope = searchRoot
+                    ? searchRoot
+                    : (GetComponentInParent<Canvas>(true)?.transform ?? transform.root);
 
-        // Safe lookup (no ?. with out var)
-        TeamData t = null;
-        if (_teams != null && _teams.TryGetValue(abbr, out var found))
-            t = found;
+        // Auto-wire if not set: scan the whole UI under scope
+        if (!teamTitle) teamTitle = FindBestTitleText(scope);
+        if (!teamLogo)  teamLogo  = FindBestLogoImage(scope);
+
+        TeamData team = null;
+        if (_teams != null && _teams.TryGetValue(abbr, out var found)) team = found;
 
         if (teamTitle)
-            teamTitle.text = (t != null) ? $"{t.city} {t.name} ({abbr})" : abbr;
+            teamTitle.text = (team != null) ? $"{team.city} {team.name} ({abbr})" : abbr;
 
         if (teamLogo)
         {
             var spr = LogoService.Get(abbr);
-            teamLogo.enabled     = spr != null;
-            teamLogo.sprite      = spr;
+            teamLogo.enabled = spr != null;
+            teamLogo.sprite  = spr;
             teamLogo.preserveAspect = true;
         }
 
-        Debug.Log($"[HeaderBinder] Applied header for {abbr}");
+        int tmpCount = scope.GetComponentsInChildren<TMP_Text>(true).Length;
+        int imgCount = scope.GetComponentsInChildren<Image>(true).Length;
+        Debug.Log($"[HeaderBinder] Applied header for {abbr} (scope='{scope.name}', TMPs={tmpCount}, Images={imgCount})");
     }
 
     // -------- helpers --------
@@ -47,6 +55,7 @@ public class DashboardHeaderBinder : MonoBehaviour
     void EnsureTeamIndex()
     {
         if (_teams != null) return;
+
         var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
         var list = new List<TeamData>();
         if (File.Exists(path))
@@ -55,28 +64,30 @@ public class DashboardHeaderBinder : MonoBehaviour
             if (json.StartsWith("[")) json = "{\"teams\":" + json + "}";
             list = JsonUtility.FromJson<TeamDataList>(json)?.teams ?? new List<TeamData>();
         }
+
         _teams = new Dictionary<string, TeamData>(StringComparer.OrdinalIgnoreCase);
         foreach (var t in list)
             if (!string.IsNullOrEmpty(t.abbreviation))
                 _teams[t.abbreviation] = t;
     }
 
-    TMP_Text FindBestTitleText()
+    TMP_Text FindBestTitleText(Transform scope)
     {
-        // Prefer names containing Team/Title/Header; else largest TMP under this root.
-        var tmps = GetComponentsInChildren<TMP_Text>(true);
+        var tmps = scope.GetComponentsInChildren<TMP_Text>(true);
         var byName = tmps.FirstOrDefault(x =>
-             x.name.IndexOf("Team", StringComparison.OrdinalIgnoreCase) >= 0 ||
-             x.name.IndexOf("Title", StringComparison.OrdinalIgnoreCase) >= 0 ||
+             x.name.IndexOf("Team",   StringComparison.OrdinalIgnoreCase) >= 0 ||
+             x.name.IndexOf("Title",  StringComparison.OrdinalIgnoreCase) >= 0 ||
              x.name.IndexOf("Header", StringComparison.OrdinalIgnoreCase) >= 0);
         if (byName) return byName;
+
+        // Fallback: biggest font size
         return tmps.OrderByDescending(x => x.fontSize).FirstOrDefault();
     }
 
-    Image FindBestLogoImage()
+    Image FindBestLogoImage(Transform scope)
     {
-        // Pick square-ish Image closest to the title if possible
-        var images = GetComponentsInChildren<Image>(true);
+        var images = scope.GetComponentsInChildren<Image>(true);
+        // Prefer square-ish images (crests)
         return images
             .OrderBy(img => Mathf.Abs(((RectTransform)img.transform).rect.width - ((RectTransform)img.transform).rect.height))
             .FirstOrDefault();
