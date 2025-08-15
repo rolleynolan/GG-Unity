@@ -31,6 +31,7 @@ namespace GG.Game
         void Start()
         {
             var abbr = ResolveAbbr();
+            TryRebindHeaderIfBad();
             var team = GetTeam(abbr);
 
             // Header text
@@ -51,6 +52,45 @@ namespace GG.Game
             if (panel) panel.ShowRosterForTeam(abbr);
 
             Debug.Log($"[DashboardSceneController] Applied selected team '{abbr}' to header & roster.");
+        }
+
+        bool LooksLikeTabLabel(TMP_Text t)
+        {
+            if (!t) return false;
+            string n = t.name.ToLowerInvariant();
+            string txt = (t.text ?? "").Trim().ToLowerInvariant();
+            if (t.GetComponentInParent<UnityEngine.UI.Selectable>() != null) return true;
+            return
+                n.Contains("tab") || n.Contains("button") ||
+                n.Contains("roster") || n.Contains("depth") || n.Contains("schedule") ||
+                txt == "roster" || txt == "depth charts" || txt == "team schedule";
+        }
+
+        void TryRebindHeaderIfBad()
+        {
+            var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+            if (!canvas) return;
+
+            if (LooksLikeTabLabel(titleLine1) || LooksLikeTabLabel(titleLine2) || teamLogo == null)
+            {
+                // Reuse the installer heuristics (simplified)
+                var tmps = canvas.GetComponentsInChildren<TextMeshProUGUI>(true)
+                                 .Where(t => ((RectTransform)t.transform).anchoredPosition.y > -200f)
+                                 .Where(t => !LooksLikeTabLabel(t))
+                                 .OrderByDescending(t => t.fontSize)
+                                 .ToList();
+
+                titleLine1 = titleLine1 && !LooksLikeTabLabel(titleLine1) ? titleLine1 : tmps.FirstOrDefault();
+                titleLine2 = titleLine2 && !LooksLikeTabLabel(titleLine2) ? titleLine2 : tmps.Skip(1).FirstOrDefault();
+
+                var imgs = canvas.GetComponentsInChildren<UnityEngine.UI.Image>(true);
+                teamLogo = teamLogo ? teamLogo :
+                           imgs.FirstOrDefault(i =>
+                               (i.name.ToLowerInvariant().Contains("logo") || i.name.ToLowerInvariant().Contains("crest")) &&
+                               ((RectTransform)i.transform).rect.width >= 16f &&
+                               ((RectTransform)i.transform).rect.height >= 16f);
+                Debug.Log("[DashboardSceneController] Rebound header fields at runtime.");
+            }
         }
 
         string ResolveAbbr()
