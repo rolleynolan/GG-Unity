@@ -1,103 +1,141 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text.Json;
 using UnityEngine;
 
-namespace GG.Season
+namespace GG.Game // <- match your project namespace if you have one
 {
+    [Serializable] public struct TeamRecord { public int W, L, PF, PA; }
+
+    [Serializable] public struct GameInfo
+    {
+        public int week;
+        public string home, away;
+    }
+
+    [Serializable] public struct GameResult
+    {
+        public int week;
+        public string home, away;
+        public int homeScore, awayScore;
+    }
+
+    // Wrapper so JsonUtility can serialize weeks and their games
+    [Serializable] public class WeekGames
+    {
+        public int week;
+        public List<GameInfo> games = new List<GameInfo>();
+    }
+
+    // Wrapper so JsonUtility can serialize records (dictionaries are not supported)
+    [Serializable] public class TeamRecordEntry
+    {
+        public string abbr;
+        public TeamRecord rec;
+    }
+
     [Serializable]
     public class SeasonState
     {
-        public const int SeasonStartSeed = 20240101;
-
-        public int week;
-        public Dictionary<string, TeamRecord> records = new();
-        public List<GameInfo>[] scheduleByWeek;
-        public List<GameResult> results = new();
+        public int week = 1;                                            // 1-based
+        public List<WeekGames> schedule = new List<WeekGames>();        // [week]->games
+        public List<GameResult> results = new List<GameResult>();       // played games
+        public List<TeamRecordEntry> records = new List<TeamRecordEntry>(); // serialized map
 
         static string SavePath => Path.Combine(Application.persistentDataPath, "season.json");
 
-        public static SeasonState LoadOrCreate(string selectedAbbr)
+        /// Load season from disk or create a fresh season with a generated schedule.
+        public static SeasonState LoadOrCreate(string selectedAbbr, List<string> allAbbrs, Func<List<string>, List<WeekGames>> scheduleGen)
         {
             try
             {
                 if (File.Exists(SavePath))
                 {
                     var json = File.ReadAllText(SavePath);
-                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var loaded = JsonSerializer.Deserialize<SeasonState>(json, options);
-                    if (loaded != null)
+                    var loaded = JsonUtility.FromJson<SeasonState>(json);
+                    if (loaded != null && loaded.schedule != null && loaded.schedule.Count > 0)
                         return loaded;
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"[SeasonState] Load failed: {e}");
+                Debug.LogWarning($"[SeasonState] Load failed: {e.Message}");
             }
 
-            var teamAbbrs = global::LeagueRepository.GetTeams()
-                .Where(t => !string.IsNullOrEmpty(t.abbreviation))
-                .Select(t => t.abbreviation)
-                .ToList();
-
-            var state = new SeasonState();
-            state.week = 1;
-            state.records = teamAbbrs.ToDictionary(a => a, a => new TeamRecord());
-            state.scheduleByWeek = ScheduleService.Generate(teamAbbrs, 14);
-            state.Save();
-            return state;
+            // New season
+            var s = new SeasonState();
+            s.week = 1;
+            s.schedule = scheduleGen != null ? scheduleGen(allAbbrs) : new List<WeekGames>();
+            s.records = new List<TeamRecordEntry>(allAbbrs.Count);
+            foreach (var ab in allAbbrs) s.records.Add(new TeamRecordEntry { abbr = ab, rec = new TeamRecord() });
+            s.results = new List<GameResult>();
+            s.Save();
+            return s;
         }
 
         public void Save()
         {
-            try
-            {
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                var json = JsonSerializer.Serialize(this, options);
-                File.WriteAllText(SavePath, json);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"[SeasonState] Save failed: {e}");
-            }
+            var json = JsonUtility.ToJson(this, true);
+            File.WriteAllText(SavePath, json);
         }
+
+        // ------- Records helpers (convert to/from map) -------
+
+        Dictionary<string, TeamRecord> ToMap()
+        {
+            var map = new Dictionary<string, TeamRecord>(StringComparer.OrdinalIgnoreCase);
+            foreach (var e in records) map[e.abbr] = e.rec;
+            return map;
+        }
+
+        void FromMap(Dictionary<string, TeamRecord> map)
+        {
+            records.Clear();
+            foreach (var kv in map) records.Add(new TeamRecordEntry { abbr = kv.Key, rec = kv.Value });
+        }
+
+        // ------- API used by UI/Sim -------
 
         public GameInfo? GetNextGame(string abbr)
         {
-            if (string.IsNullOrEmpty(abbr) || scheduleByWeek == null) return null;
-            int w = week - 1;
-            if (w < 0 || w >= scheduleByWeek.Length) return null;
-            foreach (var g in scheduleByWeek[w])
+            for (int w = week; w <= schedule.Count; w++)
             {
-                bool played = results.Exists(r => r.week == g.week && r.home == g.home && r.away == g.away);
-                if (!played && (g.home == abbr || g.away == abbr))
+                var wg = schedule[w - 1];
+                foreach (var g in wg.games)
+                {
+                    if (!g.home.Equals(abbr, StringComparison.OrdinalIgnoreCase) &&
+                        !g.away.Equals(abbr, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    // Skip if already have a result
+                    if (results.Exists(r => r.week == g.week && r.home == g.home && r.away == g.away))
+                        continue;
+
                     return g;
+                }
             }
             return null;
         }
 
         public void ApplyResult(GameResult r)
         {
+            // de-dup (resim same game)
+            results.RemoveAll(x => x.week == r.week && x.home == r.home && x.away == r.away);
             results.Add(r);
 
-            if (!records.ContainsKey(r.home)) records[r.home] = new TeamRecord();
-            if (!records.ContainsKey(r.away)) records[r.away] = new TeamRecord();
+            var map = ToMap();
+            if (!map.TryGetValue(r.home, out var home)) home = new TeamRecord();
+            if (!map.TryGetValue(r.away, out var away)) away = new TeamRecord();
 
-            var home = records[r.home];
-            var away = records[r.away];
-
-            home.PF += r.homeScore;
-            home.PA += r.awayScore;
-            away.PF += r.awayScore;
-            away.PA += r.homeScore;
+            home.PF += r.homeScore; home.PA += r.awayScore;
+            away.PF += r.awayScore; away.PA += r.homeScore;
 
             if (r.homeScore > r.awayScore) { home.W++; away.L++; }
-            else { away.W++; home.L++; }
+            else                           { away.W++; home.L++; }
 
-            records[r.home] = home;
-            records[r.away] = away;
+            map[r.home] = home;
+            map[r.away] = away;
+            FromMap(map);
         }
     }
 }
