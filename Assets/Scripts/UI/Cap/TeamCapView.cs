@@ -41,7 +41,7 @@ namespace GG.UI.Cap
             {
                 var go = new GameObject("CapText", typeof(RectTransform));
                 go.transform.SetParent(transform, false);
-                content = go.AddComponent<TMP_Text>();
+                content = go.AddComponent<TextMeshProUGUI>();
             }
             Render();
         }

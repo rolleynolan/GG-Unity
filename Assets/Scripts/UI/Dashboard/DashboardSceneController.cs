@@ -3,7 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Serialization;
 using GG.Bridge.Repositories;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 
 namespace GG.UI.Dashboard
@@ -16,31 +17,12 @@ namespace GG.UI.Dashboard
         [SerializeField, FormerlySerializedAs("SimSeasonButton")] Button simSeasonButton;
         [SerializeField, FormerlySerializedAs("HeaderTeam")] TMP_Text headerTeam;
         [SerializeField, FormerlySerializedAs("SelectedTeamAbbr")] string selectedTeamAbbr = "";
+        [SerializeField] TMP_Text statusHud;
 
-        [System.Serializable] private class _Team { public string city; public string name; public string abbreviation; }
-            [System.Serializable] private class _TeamRoot { public _Team[] teams; }
-
-            private static System.Collections.Generic.List<string> LoadTeamAbbrs()
-            {
-                var list = new System.Collections.Generic.List<string>();
-                try
-                {
-                    var path = Path.Combine(UnityEngine.Application.streamingAssetsPath, "teams.json");
-                    if (File.Exists(path))
-                    {
-                        var json = File.ReadAllText(path);
-                        var root = JsonUtility.FromJson<_TeamRoot>(json);
-                        if (root?.teams != null)
-                            foreach (var t in root.teams)
-                                if (!string.IsNullOrEmpty(t.abbreviation))
-                                    list.Add(t.abbreviation);
-                    }
-                }
-                catch { /* fall through */ }
-
-                if (list.Count == 0) list.AddRange(new[] { "ATL", "PHI", "DAL", "NYG" });
-                return list;
-}
+        static List<string> LoadTeamAbbrs()
+        {
+            return new TeamProvider().GetAllTeamAbbrs();
+        }
 
 #if UNITY_EDITOR
         void OnValidate()
@@ -61,12 +43,14 @@ namespace GG.UI.Dashboard
 // new
             var abbrs = LoadTeamAbbrs();
 
-
             if (string.IsNullOrEmpty(selectedTeamAbbr)) selectedTeamAbbr = abbrs.Count > 0 ? abbrs[0] : "ATL";
             if (headerTeam) headerTeam.text = selectedTeamAbbr;
 
             if (!ScheduleRepository.TryLoad(out _))
                 ScheduleRepository.AutoGenerateIfMissing(abbrs, 2026);
+            BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
+
+            CreateStatusHud();
 
             WireButtons();
             RefreshInteractivity();
@@ -108,6 +92,34 @@ namespace GG.UI.Dashboard
             if (simGameButton)   simGameButton.interactable   = hasGame;
             if (simWeekButton)   simWeekButton.interactable   = true;
             if (simSeasonButton) simSeasonButton.interactable = true;
+        }
+
+        void CreateStatusHud()
+        {
+            var existing = FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                           .FirstOrDefault(t => t.name == "GG_StatusHUD");
+            if (existing)
+            {
+                statusHud = existing;
+                return;
+            }
+            var go = new GameObject("GG_StatusHUD", typeof(RectTransform));
+            go.transform.SetParent(FindCanvasTransform(), false);
+            var txt = go.AddComponent<TextMeshProUGUI>();
+            txt.fontSize = 18;
+            txt.alignment = TextAlignmentOptions.TopLeft;
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(0, 1);
+            rt.pivot = new Vector2(0, 1);
+            rt.anchoredPosition = new Vector2(10, -10);
+            statusHud = txt;
+        }
+
+        Transform FindCanvasTransform()
+        {
+            var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+            return canvas ? canvas.transform : transform;
         }
     }
 }

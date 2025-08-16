@@ -8,8 +8,8 @@ namespace GG.UI.Schedule
 {
     public class TeamSchedulePanel : MonoBehaviour
     {
-        public TMP_Text content;
-        public string TeamAbbr = "ATL";
+        [SerializeField] TMP_Text content;
+        [SerializeField] string TeamAbbr = "ATL";
 
         void OnEnable()
         {
@@ -17,13 +17,15 @@ namespace GG.UI.Schedule
             {
                 var go = new GameObject("TeamScheduleText", typeof(RectTransform));
                 go.transform.SetParent(transform, false);
-                content = go.AddComponent<TMP_Text>();
+                var t = go.AddComponent<TextMeshProUGUI>();
+                t.enableWordWrapping = false;
+                t.fontSize = 18;
+                content = t;
             }
             RefreshTeamSchedule();
         }
 
-        // Called by DashboardSceneController after sims
-        void RefreshTeamSchedule()
+        public void RefreshTeamSchedule()
         {
             if (ScheduleRepository.Current == null) { content.text = "No schedule."; return; }
             var sb = new StringBuilder();
@@ -41,3 +43,4 @@ namespace GG.UI.Schedule
         }
     }
 }
+

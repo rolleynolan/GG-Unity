@@ -13,7 +13,7 @@ public class ContractDetailPanel : MonoBehaviour
 
     void OnEnable()
     {
-        if (!content) content = gameObject.GetComponent<TMP_Text>() ?? gameObject.AddComponent<TMP_Text>();
+        if (!content) content = gameObject.GetComponent<TMP_Text>() ?? gameObject.AddComponent<TextMeshProUGUI>();
         Render();
     }
 
@@ -40,7 +40,7 @@ public class ContractDetailPanel : MonoBehaviour
         {
             var go = new GameObject("ErrorBanner", typeof(RectTransform));
             go.transform.SetParent(transform, false);
-            errorBanner = go.AddComponent<TMP_Text>();
+            errorBanner = go.AddComponent<TextMeshProUGUI>();
         }
         errorBanner.text = msg;
     }
