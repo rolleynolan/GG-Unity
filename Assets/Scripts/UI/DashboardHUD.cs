@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.Reflection;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -153,11 +155,11 @@ namespace GG.Game
 
         void Start()
         {
-            var allAbbrs = LoadAbbrsFromTeamsJson();
+            var allAbbrs = LoadAllTeamAbbrs();
 
             if (allAbbrs.Count <= 1)
             {
-                Debug.LogWarning("[DashboardHUD] Could not load 2+ teams from teams.json. Using selected only.");
+                Debug.LogWarning("[DashboardHUD] Could not load 2+ teams from available sources. Using selected only.");
                 allAbbrs = new List<string> { Selected };
             }
 
@@ -224,38 +226,282 @@ namespace GG.Game
 
         // ---------------- helpers ----------------
 
-        private static readonly Regex AbbrRegex =
-            new Regex(@"""abbr""\s*:\s*""([A-Za-z_-]+)""", RegexOptions.Compiled);
+        // ----- Team list discovery (robust: JSON props, JSON keys, repo fallback) -----
 
-        private static List<string> LoadAbbrsFromTeamsJson()
+        // Case-insensitive "abbr" property:  "abbr": "ATL"
+        private static readonly Regex AbbrPropRegex =
+            new Regex(@"""abbr""\s*:\s*""([^"""]+)""", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Object keys like:  "ATL": { ... }
+        private static readonly Regex KeyObjectRegex =
+            new Regex(@"^\s*""([A-Za-z0-9_-]{2,6})""\s*:\s*\{", RegexOptions.Multiline | RegexOptions.Compiled);
+
+        private static List<string> LoadAllTeamAbbrs()
+        {
+            // 1) Try "abbr" properties
+            var fromProps = LoadAbbrsFromTeamsJson_ByProperty();
+            if (fromProps.Count > 1) { Debug.Log($"[DashboardHUD] Loaded {fromProps.Count} teams via 'abbr' property."); return fromProps; }
+
+            // 2) Try object keys like "ATL": { ... }
+            var fromKeys = LoadAbbrsFromTeamsJson_ByKeys();
+            if (fromKeys.Count > 1) { Debug.Log($"[DashboardHUD] Loaded {fromKeys.Count} teams via JSON keys."); return fromKeys; }
+
+            // 3) Fallback to LeagueRepository (already loaded per your console)
+            var fromRepo = TryGetAbbrsFromLeagueRepository();
+            if (fromRepo.Count > 1) { Debug.Log($"[DashboardHUD] Loaded {fromRepo.Count} teams via LeagueRepository."); return fromRepo; }
+
+            Debug.LogWarning("[DashboardHUD] No team ABBRs discovered from JSON or repository.");
+            return new List<string>();
+        }
+
+        private static List<string> LoadAbbrsFromTeamsJson_ByProperty()
         {
             try
             {
                 var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
-                if (!File.Exists(path))
-                {
-                    Debug.LogWarning($"[DashboardHUD] teams.json not found at {path}");
-                    return new List<string>();
-                }
+                if (!File.Exists(path)) return new List<string>();
 
                 var txt = File.ReadAllText(path);
-                var matches = AbbrRegex.Matches(txt);
+                var matches = AbbrPropRegex.Matches(txt);
 
                 var list = new List<string>(matches.Count);
                 foreach (Match m in matches) list.Add(m.Groups[1].Value);
 
-                list = list.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-
-                if (list.Count == 0)
-                    Debug.LogWarning("[DashboardHUD] No abbr entries found in teams.json.");
-
-                return list;
+                return list.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"[DashboardHUD] Failed to parse teams.json: {ex.Message}");
+                Debug.LogWarning($"[DashboardHUD] JSON prop parse failed: {ex.Message}");
                 return new List<string>();
             }
+        }
+
+        private static List<string> LoadAbbrsFromTeamsJson_ByKeys()
+        {
+            try
+            {
+                var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
+                if (!File.Exists(path)) return new List<string>();
+
+                var txt = File.ReadAllText(path);
+                var matches = KeyObjectRegex.Matches(txt);
+
+                // This collects keys that open an object block. In most team files those are the ABBRs.
+                var list = new List<string>(matches.Count);
+                foreach (Match m in matches)
+                {
+                    var key = m.Groups[1].Value;
+                    // crude filter: avoid common non-team keys
+                    if (!IsLikelyNonTeamKey(key)) list.Add(key);
+                }
+
+                return list.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[DashboardHUD] JSON key parse failed: {ex.Message}");
+                return new List<string>();
+            }
+        }
+
+        private static bool IsLikelyNonTeamKey(string key)
+        {
+            // Knock out obvious config keys that sometimes live next to team objects
+            switch (key.ToLowerInvariant())
+            {
+                case "teams":
+                case "meta":
+                case "logos":
+                case "settings":
+                case "version":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // ---- Minimal, safe repo fallback (no heavy reflection gymnastics) ----
+        private static List<string> TryGetAbbrsFromLeagueRepository()
+        {
+            var result = new List<string>();
+            try
+            {
+                var repoType = FindTypeByName("LeagueRepository");
+                if (repoType == null) return result;
+
+                // Instance (Instance/Current) if present; else static-only
+                var repo = GetSingleton(repoType);
+
+                // Try common shapes in order:
+
+                // a) Dictionary<string, T>
+                if (TryGetDictionaryKeys(repoType, repo, result)) return Dedup(result);
+
+                // b) IEnumerable<Team-like> with "abbr"/"Abbr"/"id"/"ID"
+                if (TryGetEnumerableAbbrs(repoType, repo, result)) return Dedup(result);
+
+                // c) Method GetTeams(): IEnumerable<...>
+                var getTeams = repoType.GetMethod("GetTeams", BindingFlags.Public | BindingFlags.NonPublic |
+                                                          (repo == null ? BindingFlags.Static : BindingFlags.Instance));
+                if (getTeams != null)
+                {
+                    var seq = getTeams.Invoke(repo, null) as IEnumerable;
+                    if (seq != null)
+                    {
+                        foreach (var it in seq)
+                        {
+                            var a = ExtractAbbrFromObject(it);
+                            if (!string.IsNullOrEmpty(a)) result.Add(a);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[DashboardHUD] Repo fallback failed: {ex.Message}");
+            }
+            return Dedup(result);
+        }
+
+        private static bool TryGetDictionaryKeys(Type repoType, object repo, List<string> sink)
+        {
+            var flags = BindingFlags.Public | BindingFlags.NonPublic |
+                        (repo == null ? BindingFlags.Static : BindingFlags.Instance);
+
+            foreach (var m in repoType.GetMembers(flags))
+            {
+                object val = null;
+                try
+                {
+                    switch (m)
+                    {
+                        case PropertyInfo p when p.CanRead:
+                            val = p.GetValue(repo, null);
+                            break;
+                        case FieldInfo f:
+                            val = f.GetValue(repo);
+                            break;
+                        default: continue;
+                    }
+                }
+                catch { continue; }
+
+                if (val == null) continue;
+
+                // Look for IDictionary with string keys and object values
+                if (val is IDictionary dict)
+                {
+                    foreach (var k in dict.Keys)
+                    {
+                        if (k is string s && LooksLikeAbbr(s)) sink.Add(s);
+                    }
+                    if (sink.Count > 0) return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool TryGetEnumerableAbbrs(Type repoType, object repo, List<string> sink)
+        {
+            var flags = BindingFlags.Public | BindingFlags.NonPublic |
+                        (repo == null ? BindingFlags.Static : BindingFlags.Instance);
+
+            foreach (var m in repoType.GetMembers(flags))
+            {
+                object val = null;
+                try
+                {
+                    switch (m)
+                    {
+                        case PropertyInfo p when p.CanRead:
+                            val = p.GetValue(repo, null); break;
+                        case FieldInfo f:
+                            val = f.GetValue(repo); break;
+                        default: continue;
+                    }
+                }
+                catch { continue; }
+
+                if (val is IEnumerable seq && !(val is string))
+                {
+                    foreach (var it in seq)
+                    {
+                        var a = ExtractAbbrFromObject(it);
+                        if (!string.IsNullOrEmpty(a)) sink.Add(a);
+                    }
+                    if (sink.Count > 0) return true;
+                }
+            }
+            return false;
+        }
+
+        private static string ExtractAbbrFromObject(object obj)
+        {
+            if (obj == null) return null;
+            var t = obj.GetType();
+
+            var prop = t.GetProperty("abbr") ?? t.GetProperty("Abbr") ?? t.GetProperty("id") ?? t.GetProperty("ID");
+            if (prop != null)
+            {
+                var v = prop.GetValue(obj)?.ToString();
+                if (LooksLikeAbbr(v)) return v;
+            }
+            var field = t.GetField("abbr") ?? t.GetField("Abbr") ?? t.GetField("id") ?? t.GetField("ID");
+            if (field != null)
+            {
+                var v = field.GetValue(obj)?.ToString();
+                if (LooksLikeAbbr(v)) return v;
+            }
+            return null;
+        }
+
+        private static bool LooksLikeAbbr(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            s = s.Trim();
+            if (s.Length < 2 || s.Length > 6) return false;
+            int letters = 0;
+            foreach (var c in s)
+            {
+                if (char.IsLetter(c)) letters++;
+                else if (c == '-' || c == '_') continue;
+                else return false;
+            }
+            return letters >= 2;
+        }
+
+        private static List<string> Dedup(List<string> list) =>
+            list.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+        private static Type FindTypeByName(string typeName)
+        {
+            var t = Type.GetType(typeName);
+            if (t != null) return t;
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    var found = asm.GetTypes().FirstOrDefault(x => x.Name == typeName);
+                    if (found != null) return found;
+                }
+                catch { }
+            }
+            return null;
+        }
+
+        private static object GetSingleton(Type type)
+        {
+            var p = type.GetProperty("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetProperty("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetProperty("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (p != null) { try { return p.GetValue(null, null); } catch { } }
+
+            var f = type.GetField("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetField("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetField("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (f != null) { try { return f.GetValue(null); } catch { } }
+
+            return null;
         }
 
         private static int MakeSeed(GameInfo g)
