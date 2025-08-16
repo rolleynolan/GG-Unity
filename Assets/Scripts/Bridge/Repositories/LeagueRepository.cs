@@ -1,33 +1,62 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
-using UnityEngine;
-using GG.Infra;
 
 namespace GG.Bridge.Repositories
 {
-    [Serializable] public class TeamData { public string city; public string name; public string abbreviation; }
-    [Serializable] public class TeamDataList { public TeamData[] teams; }
+    [Serializable]
+    public class TeamData
+    {
+        public string city;
+        public string name;
+        public string abbreviation;
+    }
 
+    // Bridge wrapper that exposes team data via the core TeamProvider.
     public static class LeagueRepository
     {
-        public static readonly List<TeamData> Teams = new();
-        public static bool Loaded => Teams.Count > 0;
+        public static readonly List<TeamData> Teams = new List<TeamData>();
+        public static bool Loaded { get { return Teams.Count > 0; } }
 
-        /// <summary>Loads teams from StreamingAssets/teams.json (your existing file).</summary>
         public static void LoadTeams()
         {
             Teams.Clear();
-            var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
-            if (!File.Exists(path)) { GGLog.Warn("StreamingAssets/teams.json missing."); return; }
-            var json = File.ReadAllText(path);
-            var obj = JsonConvert.DeserializeObject<TeamDataList>(json);
-            if (obj?.teams != null) Teams.AddRange(obj.teams);
-            GGLog.Info($"[LeagueRepository] teams count: {Teams.Count}");
+            try
+            {
+                var abbrs = new TeamProvider().GetAllTeamAbbrs();
+                if (abbrs != null && abbrs.Count > 0)
+                {
+                    foreach (var abbr in abbrs)
+                    {
+                        Teams.Add(new TeamData
+                        {
+                            abbreviation = abbr,
+                            name = abbr,
+                            city = string.Empty
+                        });
+                    }
+                    GGLog.Info("[LeagueRepository] loaded " + Teams.Count + " teams via TeamProvider.");
+                }
+                else
+                {
+                    GGLog.Warn("[LeagueRepository] TeamProvider returned no abbreviations.");
+                }
+            }
+            catch (Exception ex)
+            {
+                GGLog.Warn("[LeagueRepository] load failed: " + ex.Message);
+            }
         }
 
-        public static List<string> TeamAbbrs() => Teams.Select(t => t.abbreviation).ToList();
+        public static List<string> TeamAbbrs()
+        {
+            if (!Loaded) LoadTeams();
+            var list = new List<string>(Teams.Count);
+            foreach (var t in Teams)
+            {
+                if (!string.IsNullOrEmpty(t.abbreviation))
+                    list.Add(t.abbreviation);
+            }
+            return list;
+        }
     }
 }
