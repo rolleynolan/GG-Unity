@@ -30,6 +30,127 @@ namespace GG.Game
         private string Selected =>
             GameState.SelectedTeamAbbr ?? PlayerPrefs.GetString("selected_team", "ATL");
 
+        // --- AUTO-WIRE BUTTONS (always try) -----------------------------------------
+
+        void Awake()
+        {
+            AutoWireUi();
+        }
+
+#if UNITY_EDITOR
+        // Helpful in Editor after domain reloads / recompiles
+        void OnValidate()
+        {
+            if (!Application.isPlaying) AutoWireUi();
+        }
+#endif
+
+        void OnEnable()
+        {
+            // Re-add listeners in case domain reload removed them
+            RegisterButtonListeners();
+        }
+
+        void OnDisable()
+        {
+            // Clean up to avoid duplicate invokes
+            if (simButton != null) simButton.onClick.RemoveListener(OnClickSim);
+            if (advanceButton != null) advanceButton.onClick.RemoveListener(OnClickAdvance);
+        }
+
+        /// <summary>
+        /// Attempts to find missing UI references (buttons and optional texts) and wire them up.
+        /// Prefer existing serialized refs, then try names in children, then whole-scene search.
+        /// </summary>
+        private void AutoWireUi()
+        {
+            // 1) Try to find buttons if not assigned
+            if (simButton == null)
+                simButton = FindButtonByCommonNames(new[] { "SimButton", "Sim", "Sim Game", "ButtonSim" });
+
+            if (advanceButton == null)
+                advanceButton = FindButtonByCommonNames(new[] { "AdvanceButton", "Advance", "NextWeek", "ButtonAdvance" });
+
+            // (Optional) if you want the texts auto-wired too, uncomment:
+            // if (weekText == null) weekText = FindTextByCommonNames(new[] { "WeekText", "Week", "TxtWeek" });
+            // if (nextOpponentText == null) nextOpponentText = FindTextByCommonNames(new[] { "NextOpponentText", "Next", "TxtNextOpponent" });
+
+            RegisterButtonListeners();
+        }
+
+        private void RegisterButtonListeners()
+        {
+            if (simButton != null)
+            {
+                simButton.onClick.RemoveListener(OnClickSim);
+                simButton.onClick.AddListener(OnClickSim);
+            }
+            else
+            {
+                Debug.LogWarning("[DashboardHUD] Sim button not found. Assign it in the Inspector or name it 'SimButton'.");
+            }
+
+            if (advanceButton != null)
+            {
+                advanceButton.onClick.RemoveListener(OnClickAdvance);
+                advanceButton.onClick.AddListener(OnClickAdvance);
+            }
+            else
+            {
+                Debug.LogWarning("[DashboardHUD] Advance button not found. Assign it in the Inspector or name it 'AdvanceButton'.");
+            }
+        }
+
+        // --- find helpers ------------------------------------------------------------
+
+        private Button FindButtonByCommonNames(IEnumerable<string> names)
+        {
+            // search under this HUD first (active or inactive)
+            var inChildren = GetComponentsInChildren<Button>(true);
+            foreach (var n in names)
+            {
+                var b = inChildren.FirstOrDefault(x => string.Equals(x.name, n, StringComparison.OrdinalIgnoreCase));
+                if (b != null) return b;
+            }
+
+            // fall back to scene-wide search (includes inactive)
+#if UNITY_2020_1_OR_NEWER
+            var all = UnityEngine.Object.FindObjectsOfType<Button>(true);
+#else
+            var all = UnityEngine.Object.FindObjectsOfType<Button>();
+#endif
+            foreach (var n in names)
+            {
+                var b = all.FirstOrDefault(x => string.Equals(x.name, n, StringComparison.OrdinalIgnoreCase));
+                if (b != null) return b;
+            }
+
+            return null;
+        }
+
+        private TMP_Text FindTextByCommonNames(IEnumerable<string> names)
+        {
+            var inChildren = GetComponentsInChildren<TMP_Text>(true);
+            foreach (var n in names)
+            {
+                var t = inChildren.FirstOrDefault(x => string.Equals(x.name, n, StringComparison.OrdinalIgnoreCase));
+                if (t != null) return t;
+            }
+
+#if UNITY_2020_1_OR_NEWER
+            var all = UnityEngine.Object.FindObjectsOfType<TMP_Text>(true);
+#else
+            var all = UnityEngine.Object.FindObjectsOfType<TMP_Text>();
+#endif
+            foreach (var n in names)
+            {
+                var t = all.FirstOrDefault(x => string.Equals(x.name, n, StringComparison.OrdinalIgnoreCase));
+                if (t != null) return t;
+            }
+
+            return null;
+        }
+
         void Start()
         {
             var allAbbrs = LoadAbbrsFromTeamsJson();
