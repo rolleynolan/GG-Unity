@@ -6,7 +6,7 @@ using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using GG.Game; // <- use the Season models in GG.Game
+using GG.Game;
 
 namespace GG.Game
 {
@@ -30,8 +30,8 @@ namespace GG.Game
                 allAbbrs = new List<string> { Selected };
             }
 
-            // NEW signature: (selected, allAbbrs, generator)
-            _season = SeasonState.LoadOrCreate(Selected, allAbbrs, ScheduleService.Generate);
+            // FIX 1: pass a lambda, not a method group
+            _season = SeasonState.LoadOrCreate(Selected, allAbbrs, teams => ScheduleService.Generate(teams));
             Refresh();
         }
 
@@ -43,7 +43,9 @@ namespace GG.Game
             if (!maybe.HasValue) return;
 
             var g = maybe.Value;
-            var engine = new LocalSimpleSim(abbr => RosterService.GetTeamOverall(abbr));
+
+            // FIX 2: compute team overall from roster (no dependency on missing API)
+            var engine = new LocalSimpleSim(abbr => TeamOverallFromRoster(abbr));
             var result = engine.Simulate(g, MakeSeed(g));
             _season.ApplyResult(result);
             _season.Save();
@@ -82,6 +84,8 @@ namespace GG.Game
             advanceButton.interactable = _season.week < Math.Max(1, _season.schedule.Count);
         }
 
+        // ------------ helpers ------------
+
         static int MakeSeed(GameInfo g)
         {
             unchecked
@@ -93,7 +97,104 @@ namespace GG.Game
             }
         }
 
-        // Robustly enumerate team abbreviations from LeagueRepository (no hard API dependency)
+        // Get overall via RosterService using reflection-friendly calls
+        static int TeamOverallFromRoster(string abbr)
+        {
+            var roster = TryGetRosterEnumerable(abbr);
+            if (roster == null) return 72;
+
+            int sum = 0, n = 0;
+
+            foreach (var p in roster)
+            {
+                int ovr = ExtractOvr(p);
+                if (ovr > 0) { sum += ovr; n++; }
+            }
+
+            if (n == 0) return 72;
+            var avg = Mathf.RoundToInt(sum / (float)n);
+            return Mathf.Clamp(avg, 55, 95);
+        }
+
+        // Try common RosterService shapes to get IEnumerable of players
+        static IEnumerable TryGetRosterEnumerable(string abbr)
+        {
+            var rsType = Type.GetType("RosterService") ??
+                         AppDomain.CurrentDomain.GetAssemblies()
+                            .SelectMany(a => a.GetTypes())
+                            .FirstOrDefault(t => t.Name == "RosterService");
+            if (rsType == null) return null;
+
+            object roster = null;
+
+            // Common static methods
+            var methods = new[]
+            {
+                "GetRosterForTeam", "GetRoster", "GetPlayersForTeam",
+                "GetByAbbr", "Get"
+            };
+
+            foreach (var name in methods)
+            {
+                var mi = rsType.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                if (mi == null) continue;
+                var pars = mi.GetParameters();
+                if (pars.Length == 1 && pars[0].ParameterType == typeof(string))
+                {
+                    roster = mi.Invoke(null, new object[] { abbr });
+                    break;
+                }
+            }
+
+            // Some services expose a dictionary: Dictionary<string, List<Player>>
+            if (roster == null)
+            {
+                var field = rsType.GetField("Rosters", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                if (field != null)
+                {
+                    var dict = field.GetValue(null);
+                    if (dict != null)
+                    {
+                        var idx = dict.GetType().GetMethod("get_Item");
+                        if (idx != null) roster = idx.Invoke(dict, new object[] { abbr });
+                    }
+                }
+            }
+
+            return roster as IEnumerable;
+        }
+
+        // Extract OVR from a player object via common property/field names
+        static int ExtractOvr(object player)
+        {
+            if (player == null) return 0;
+            var t = player.GetType();
+
+            // common names: ovr, OVR, overall, Overall, rating
+            var prop = t.GetProperty("ovr") ?? t.GetProperty("OVR") ??
+                       t.GetProperty("overall") ?? t.GetProperty("Overall") ??
+                       t.GetProperty("rating") ?? t.GetProperty("Rating");
+            if (prop != null)
+            {
+                var val = prop.GetValue(player);
+                if (val is int vi) return vi;
+                if (val != null && int.TryParse(val.ToString(), out var pi)) return pi;
+            }
+
+            var field = t.GetField("ovr") ?? t.GetField("OVR") ??
+                        t.GetField("overall") ?? t.GetField("Overall") ??
+                        t.GetField("rating") ?? t.GetField("Rating");
+            if (field != null)
+            {
+                var val = field.GetValue(player);
+                if (val is int vi) return vi;
+                if (val != null && int.TryParse(val.ToString(), out var pi)) return pi;
+            }
+
+            return 0;
+        }
+
+        // Robust team abbrs from LeagueRepository
         static List<string> GetAllTeamAbbrs()
         {
             var abbrs = new List<string>();
