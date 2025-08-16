@@ -1,34 +1,38 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Serialization;
 using GG.Bridge.Repositories;
 
 namespace GG.UI.Dashboard
 {
     public class DashboardSceneController : MonoBehaviour
     {
-        [Header("Optional references (found by name if null)")]
-        public Button SimGameButton;
-        public Button SimWeekButton;
-        public Button SimSeasonButton;
-        public TMP_Text HeaderTeam;
+        [Header("Optional references (auto-wired in editor if null)")]
+        [SerializeField, FormerlySerializedAs("SimGameButton")] Button simGameButton;
+        [SerializeField, FormerlySerializedAs("SimWeekButton")] Button simWeekButton;
+        [SerializeField, FormerlySerializedAs("SimSeasonButton")] Button simSeasonButton;
+        [SerializeField, FormerlySerializedAs("HeaderTeam")] TMP_Text headerTeam;
+        [SerializeField, FormerlySerializedAs("SelectedTeamAbbr")] string selectedTeamAbbr = "";
 
-        public string SelectedTeamAbbr = "ATL";   // fallback if selection system not wired
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+            if (!simGameButton)   simGameButton   = GameObject.Find("SimGameButton")?.GetComponent<Button>();
+            if (!simWeekButton)   simWeekButton   = GameObject.Find("SimWeekButton")?.GetComponent<Button>();
+            if (!simSeasonButton) simSeasonButton = GameObject.Find("SimSeasonButton")?.GetComponent<Button>();
+            if (!headerTeam)      headerTeam      = GameObject.Find("HeaderTeam")?.GetComponent<TMP_Text>();
+        }
+#endif
 
         void Awake()
         {
-            // Try find buttons by common names if not assigned
-            if (!SimGameButton)  SimGameButton  = GameObject.Find("SimGameButton")?.GetComponent<Button>();
-            if (!SimWeekButton)  SimWeekButton  = GameObject.Find("SimWeekButton")?.GetComponent<Button>();
-            if (!SimSeasonButton)SimSeasonButton= GameObject.Find("SimSeasonButton")?.GetComponent<Button>();
-            if (!HeaderTeam)     HeaderTeam     = GameObject.Find("HeaderTeam")?.GetComponent<TMP_Text>();
+            var abbrs = TeamDirectory.GetAbbrs();
+            if (string.IsNullOrEmpty(selectedTeamAbbr)) selectedTeamAbbr = abbrs.Count > 0 ? abbrs[0] : "ATL";
+            if (headerTeam) headerTeam.text = selectedTeamAbbr;
 
-            LeagueRepository.LoadTeams();
-            if (HeaderTeam) HeaderTeam.text = $"{SelectedTeamAbbr}";
-
-            // Load or build a tiny schedule so buttons can work immediately
             if (!ScheduleRepository.TryLoad(out _))
-                ScheduleRepository.AutoGenerateIfMissing(LeagueRepository.TeamAbbrs(), 2026);
+                ScheduleRepository.AutoGenerateIfMissing(abbrs, 2026);
 
             WireButtons();
             RefreshInteractivity();
@@ -36,14 +40,14 @@ namespace GG.UI.Dashboard
 
         void WireButtons()
         {
-            if (SimGameButton)  { SimGameButton.onClick.RemoveAllListeners();  SimGameButton.onClick.AddListener(OnSimGame); }
-            if (SimWeekButton)  { SimWeekButton.onClick.RemoveAllListeners();  SimWeekButton.onClick.AddListener(OnSimWeek); }
-            if (SimSeasonButton){ SimSeasonButton.onClick.RemoveAllListeners();SimSeasonButton.onClick.AddListener(OnSimSeason); }
+            if (simGameButton)   { simGameButton.onClick.RemoveAllListeners();   simGameButton.onClick.AddListener(OnSimGame); }
+            if (simWeekButton)   { simWeekButton.onClick.RemoveAllListeners();   simWeekButton.onClick.AddListener(OnSimWeek); }
+            if (simSeasonButton) { simSeasonButton.onClick.RemoveAllListeners(); simSeasonButton.onClick.AddListener(OnSimSeason); }
         }
 
         void OnSimGame()
         {
-            ScheduleRepository.SimNextGameForTeam(SelectedTeamAbbr);
+            ScheduleRepository.SimNextGameForTeam(selectedTeamAbbr);
             RefreshInteractivity();
             BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
         }
@@ -57,7 +61,7 @@ namespace GG.UI.Dashboard
 
         void OnSimSeason()
         {
-            while (ScheduleRepository.HasUnplayedThisWeek(SelectedTeamAbbr, out _))
+            while (ScheduleRepository.HasUnplayedThisWeek(selectedTeamAbbr, out _))
                 ScheduleRepository.SimEntireWeek();
             RefreshInteractivity();
             BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
@@ -65,10 +69,10 @@ namespace GG.UI.Dashboard
 
         void RefreshInteractivity()
         {
-            var hasGame = ScheduleRepository.HasUnplayedThisWeek(SelectedTeamAbbr, out _);
-            if (SimGameButton)  SimGameButton.interactable  = hasGame;
-            if (SimWeekButton)  SimWeekButton.interactable  = true; // allow sim week always once schedule exists
-            if (SimSeasonButton)SimSeasonButton.interactable= true;
+            var hasGame = ScheduleRepository.HasUnplayedThisWeek(selectedTeamAbbr, out _);
+            if (simGameButton)   simGameButton.interactable   = hasGame;
+            if (simWeekButton)   simWeekButton.interactable   = true;
+            if (simSeasonButton) simSeasonButton.interactable = true;
         }
     }
 }
