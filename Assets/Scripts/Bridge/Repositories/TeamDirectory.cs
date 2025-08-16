@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace GG.Bridge.Repositories
 {
     // Minimal, self-contained loader for team abbreviations via TeamProvider.
-    internal static class TeamDirectory
+    public static class TeamDirectory
     {
         public static List<string> GetAbbrs()
         {

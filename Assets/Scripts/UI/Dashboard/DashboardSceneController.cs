@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Serialization;
 using GG.Bridge.Repositories;
+using System.IO;
+
 
 namespace GG.UI.Dashboard
 {
@@ -14,6 +16,31 @@ namespace GG.UI.Dashboard
         [SerializeField, FormerlySerializedAs("SimSeasonButton")] Button simSeasonButton;
         [SerializeField, FormerlySerializedAs("HeaderTeam")] TMP_Text headerTeam;
         [SerializeField, FormerlySerializedAs("SelectedTeamAbbr")] string selectedTeamAbbr = "";
+
+        [System.Serializable] private class _Team { public string city; public string name; public string abbreviation; }
+            [System.Serializable] private class _TeamRoot { public _Team[] teams; }
+
+            private static System.Collections.Generic.List<string> LoadTeamAbbrs()
+            {
+                var list = new System.Collections.Generic.List<string>();
+                try
+                {
+                    var path = Path.Combine(UnityEngine.Application.streamingAssetsPath, "teams.json");
+                    if (File.Exists(path))
+                    {
+                        var json = File.ReadAllText(path);
+                        var root = JsonUtility.FromJson<_TeamRoot>(json);
+                        if (root?.teams != null)
+                            foreach (var t in root.teams)
+                                if (!string.IsNullOrEmpty(t.abbreviation))
+                                    list.Add(t.abbreviation);
+                    }
+                }
+                catch { /* fall through */ }
+
+                if (list.Count == 0) list.AddRange(new[] { "ATL", "PHI", "DAL", "NYG" });
+                return list;
+}
 
 #if UNITY_EDITOR
         void OnValidate()
@@ -27,7 +54,14 @@ namespace GG.UI.Dashboard
 
         void Awake()
         {
-            var abbrs = new TeamProvider().GetAllTeamAbbrs();
+            // option A: fully-qualified (works even without using)
+            // old (causing error)
+// var abbrs = GG.Bridge.Repositories.TeamDirectory.GetAbbrs();
+
+// new
+            var abbrs = LoadTeamAbbrs();
+
+
             if (string.IsNullOrEmpty(selectedTeamAbbr)) selectedTeamAbbr = abbrs.Count > 0 ? abbrs[0] : "ATL";
             if (headerTeam) headerTeam.text = selectedTeamAbbr;
 
@@ -36,6 +70,7 @@ namespace GG.UI.Dashboard
 
             WireButtons();
             RefreshInteractivity();
+
         }
 
         void WireButtons()
