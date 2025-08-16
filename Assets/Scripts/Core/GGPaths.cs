@@ -1,6 +1,24 @@
-using System.IO; using UnityEngine;
-public static class GGPaths {
-  public static string Streaming(string file)=>Path.Combine(Application.streamingAssetsPath,file);
-  public static string Save(string file)=>Path.Combine(Application.persistentDataPath,file);
-  public static string Project(string file)=>Path.GetFullPath(Path.Combine(Application.dataPath,"..",file));
+using System.IO;
+using UnityEngine;
+
+/// <summary>
+/// Shared path helpers for accessing application directories.
+/// </summary>
+public static class GGPaths
+{
+    /// <summary>
+    /// Returns a path inside <see cref="Application.streamingAssetsPath"/>.
+    /// </summary>
+    public static string Streaming(string file)
+    {
+        return Path.Combine(Application.streamingAssetsPath, file);
+    }
+
+    /// <summary>
+    /// Returns a path inside <see cref="Application.persistentDataPath"/>.
+    /// </summary>
+    public static string Save(string file)
+    {
+        return Path.Combine(Application.persistentDataPath, file);
+    }
 }
