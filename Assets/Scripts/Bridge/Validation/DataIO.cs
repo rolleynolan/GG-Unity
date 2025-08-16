@@ -1,62 +1,68 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
-using GG.Infra; // for GGLog
+using UnityEngine;
 
 namespace GG.Bridge.Validation
 {
     internal static class DataIO
     {
-        private static string ProjectRoot =>
-            Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, ".."));
-
-        private static string EnsureDataRoot()
+        [Serializable]
+        private class ArrayWrapper<TItem>
         {
-            var p = Path.Combine(ProjectRoot, "data");
-            if (!Directory.Exists(p)) Directory.CreateDirectory(p);
-            return p;
+            public TItem[] items;
+        }
+
+        [Serializable]
+        private class ListWrapper<TItem>
+        {
+            public List<TItem> items;
         }
 
         /// <summary>
-        /// Loads JSON from:
-        ///  - absolute path, or
-        ///  - "data/..." or "/data/..." under the project root, or
-        ///  - relative path under the "/data" folder (e.g., "cap/capsheet_2026.json").
+        /// Loads JSON from an absolute path or a path relative to the project's data folder.
         /// </summary>
         public static T LoadJson<T>(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Empty path", nameof(path));
 
-            string abs;
-            var norm = path.Replace("\\", "/");
-            var dataRoot = EnsureDataRoot();
+            var abs = Path.IsPathRooted(path) ? path : GGPaths.Data(path);
 
-            if (Path.IsPathRooted(path))
+            try
             {
-                abs = path;
+                var json = File.ReadAllText(abs);
+
+                T obj;
+
+                if (typeof(T).IsArray)
+                {
+                    var elemType = typeof(T).GetElementType();
+                    var wrapperType = typeof(ArrayWrapper<>).MakeGenericType(elemType);
+                    var wrapperJson = $"{{\"items\":{json}}}";
+                    var wrapper = JsonUtility.FromJson(wrapperJson, wrapperType);
+                    obj = (T)wrapperType.GetField("items").GetValue(wrapper);
+                }
+                else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    var elemType = typeof(T).GetGenericArguments()[0];
+                    var wrapperType = typeof(ListWrapper<>).MakeGenericType(elemType);
+                    var wrapperJson = $"{{\"items\":{json}}}";
+                    var wrapper = JsonUtility.FromJson(wrapperJson, wrapperType);
+                    obj = (T)wrapperType.GetField("items").GetValue(wrapper);
+                }
+                else
+                {
+                    obj = JsonUtility.FromJson<T>(json);
+                }
+
+                GGLog.Info($"Loaded JSON: {abs}");
+                return obj;
             }
-            else if (norm.StartsWith("data/", StringComparison.OrdinalIgnoreCase) ||
-                     norm.StartsWith("/data/", StringComparison.OrdinalIgnoreCase))
+            catch (Exception ex)
             {
-                abs = Path.GetFullPath(Path.Combine(ProjectRoot, norm.TrimStart('/')));
+                GGLog.Error($"Failed to load JSON: {abs}", ex);
+                throw;
             }
-            else
-            {
-                abs = Path.GetFullPath(Path.Combine(dataRoot, norm));
-            }
-
-            var json = File.ReadAllText(abs);
-
-            var settings = new JsonSerializerSettings
-            {
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore,
-                MetadataPropertyHandling = MetadataPropertyHandling.Ignore
-            };
-
-            var obj = JsonConvert.DeserializeObject<T>(json, settings);
-            GGLog.Info($"Loaded JSON: {abs}");
-            return obj;
         }
     }
 }
