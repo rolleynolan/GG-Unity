@@ -7,6 +7,8 @@ namespace GG.Infra
         public static string ProjectRoot => global::GGPaths.ProjectRoot;
         public static string DataRoot() => global::GGPaths.DataRoot();
         public static string Data(string relative) => global::GGPaths.Data(relative);
+        public static string Streaming(string relative) => global::GGPaths.Streaming(relative);
+        public static string Save(string relative) => global::GGPaths.Save(relative);
         public static string ScheduleFile() => global::GGPaths.ScheduleFile();
         public static string ContractFile(string rel) => global::GGPaths.ContractFile(rel);
         public static string CapSheetFile(int year) => global::GGPaths.CapSheetFile(year);
