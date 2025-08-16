@@ -42,6 +42,10 @@ namespace GG.UI.Cap
                 go.transform.SetParent(transform, false);
                 content = go.AddComponent<TextMeshProUGUI>();
             }
+
+            // Ensure wrapping mode is compatible with TMP 4.x
+            content.textWrappingMode = TextWrappingModes.NoWrap;
+
             Render();
         }
 

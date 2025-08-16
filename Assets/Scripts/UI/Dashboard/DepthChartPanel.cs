@@ -23,6 +23,7 @@ namespace GridironGM.UI.Dashboard
             if (placeholder != null)
             {
                 placeholder.gameObject.SetActive(true);
+                placeholder.textWrappingMode = TextWrappingModes.NoWrap;
                 placeholder.text = $"Depth chart for {abbr} coming soon.";
             }
         }
