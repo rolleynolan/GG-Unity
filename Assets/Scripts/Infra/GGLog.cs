@@ -8,7 +8,7 @@ namespace GG.Infra
     public static class GGLog
     {
         private static readonly object _lock = new object();
-        private static string LogPath => GGPaths.Save("gg_log.txt");
+        private static string LogPath => global::GGPaths.Save("gg_log.txt");
 
         public static void Info(string msg)  => Write("INFO", msg, null);
         public static void Warn(string msg)  => Write("WARN", msg, null);
