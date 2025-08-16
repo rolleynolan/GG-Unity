@@ -23,14 +23,34 @@ namespace GG.Game
 
         void Start()
         {
-            var allAbbrs = GetAllTeamAbbrs();
+            // Defer init until LeagueRepository (or a fallback) is ready
+            StartCoroutine(BootstrapWhenReady());
+        }
+
+        IEnumerator BootstrapWhenReady()
+        {
+            // Try for ~2 seconds to get a non-empty team list
+            List<string> allAbbrs = null;
+            float timeout = 2f;
+            while (timeout > 0f)
+            {
+                allAbbrs = GetAllTeamAbbrs(silent: true);
+                if (allAbbrs != null && allAbbrs.Count > 0) break;
+
+                // fallback source: try roster keys if available
+                allAbbrs = TryGetAbbrsFromRosterService();
+                if (allAbbrs != null && allAbbrs.Count > 0) break;
+
+                timeout -= Time.unscaledDeltaTime;
+                yield return null;
+            }
+
             if (allAbbrs == null || allAbbrs.Count == 0)
             {
-                Debug.LogError("[DashboardHUD] Could not enumerate teams from LeagueRepository.");
+                Debug.LogWarning("[DashboardHUD] Team list still empty after waiting; using selected only.");
                 allAbbrs = new List<string> { Selected };
             }
 
-            // FIX 1: pass a lambda, not a method group
             _season = SeasonState.LoadOrCreate(Selected, allAbbrs, teams => ScheduleService.Generate(teams));
             Refresh();
         }
@@ -43,8 +63,6 @@ namespace GG.Game
             if (!maybe.HasValue) return;
 
             var g = maybe.Value;
-
-            // FIX 2: compute team overall from roster (no dependency on missing API)
             var engine = new LocalSimpleSim(abbr => TeamOverallFromRoster(abbr));
             var result = engine.Simulate(g, MakeSeed(g));
             _season.ApplyResult(result);
@@ -97,14 +115,13 @@ namespace GG.Game
             }
         }
 
-        // Get overall via RosterService using reflection-friendly calls
+        // Compute team overall from roster (reflection-friendly)
         static int TeamOverallFromRoster(string abbr)
         {
             var roster = TryGetRosterEnumerable(abbr);
             if (roster == null) return 72;
 
             int sum = 0, n = 0;
-
             foreach (var p in roster)
             {
                 int ovr = ExtractOvr(p);
@@ -116,7 +133,6 @@ namespace GG.Game
             return Mathf.Clamp(avg, 55, 95);
         }
 
-        // Try common RosterService shapes to get IEnumerable of players
         static IEnumerable TryGetRosterEnumerable(string abbr)
         {
             var rsType = Type.GetType("RosterService") ??
@@ -146,7 +162,7 @@ namespace GG.Game
                 }
             }
 
-            // Some services expose a dictionary: Dictionary<string, List<Player>>
+            // Some services expose: Dictionary<string, List<Player>> Rosters
             if (roster == null)
             {
                 var field = rsType.GetField("Rosters", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
@@ -164,13 +180,11 @@ namespace GG.Game
             return roster as IEnumerable;
         }
 
-        // Extract OVR from a player object via common property/field names
         static int ExtractOvr(object player)
         {
             if (player == null) return 0;
             var t = player.GetType();
 
-            // common names: ovr, OVR, overall, Overall, rating
             var prop = t.GetProperty("ovr") ?? t.GetProperty("OVR") ??
                        t.GetProperty("overall") ?? t.GetProperty("Overall") ??
                        t.GetProperty("rating") ?? t.GetProperty("Rating");
@@ -194,8 +208,9 @@ namespace GG.Game
             return 0;
         }
 
-        // Robust team abbrs from LeagueRepository
-        static List<string> GetAllTeamAbbrs()
+        // --- Team list discovery ---
+
+        static List<string> GetAllTeamAbbrs(bool silent = false)
         {
             var abbrs = new List<string>();
 
@@ -229,18 +244,35 @@ namespace GG.Game
                 }
             }
 
-            if (abbrs.Count == 0)
-            {
-                var m = repoType.GetMethod("GetAllAbbrs", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                if (m != null)
-                {
-                    var ret = m.Invoke(null, null) as IEnumerable;
-                    if (ret != null)
-                        foreach (var s in ret) abbrs.Add(s?.ToString());
-                }
-            }
+            if (abbrs.Count == 0 && !silent)
+                Debug.Log("[DashboardHUD] LeagueRepository found but team list is empty (still loading?).");
 
             return abbrs.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         }
+
+        // Second fallback: pull keys from RosterService if it holds a dictionary of rosters
+        static List<string> TryGetAbbrsFromRosterService()
+        {
+            var result = new List<string>();
+            var rsType = Type.GetType("RosterService") ??
+                         AppDomain.CurrentDomain.GetAssemblies()
+                            .SelectMany(a => a.GetTypes())
+                            .FirstOrDefault(t => t.Name == "RosterService");
+            if (rsType == null) return result;
+
+            var field = rsType.GetField("Rosters", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (field == null) return result;
+
+            var dict = field.GetValue(null);
+            if (dict == null) return result;
+
+            var keysProp = dict.GetType().GetProperty("Keys");
+            var keys = keysProp?.GetValue(dict) as IEnumerable;
+            if (keys != null)
+                foreach (var k in keys) result.Add(k?.ToString());
+
+            return result.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
     }
 }
+
