@@ -1,30 +1,57 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-[System.Serializable] class __TP_Team { public string city; public string name; public string abbreviation; }
-[System.Serializable] class __TP_Root { public __TP_Team[] teams; }
-
-public static class TeamProvider
+public interface ITeamProvider
 {
-    public static List<string> GetAbbrs()
+    List<string> GetAllTeamAbbrs();
+}
+
+public class TeamProvider : ITeamProvider
+{
+    [Serializable] private class Team { public string abbreviation; }
+    [Serializable] private class Root { public Team[] teams; }
+
+    public List<string> GetAllTeamAbbrs()
     {
         var list = new List<string>();
+        var path = GGPaths.Streaming(GGConventions.TeamsJsonFile);
+
         try
         {
-            var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
             if (File.Exists(path))
             {
                 var json = File.ReadAllText(path);
-                var root = JsonUtility.FromJson<__TP_Root>(json);
+                var root = JsonUtility.FromJson<Root>(json);
                 if (root?.teams != null)
+                {
                     foreach (var t in root.teams)
+                    {
                         if (!string.IsNullOrEmpty(t.abbreviation))
+                        {
                             list.Add(t.abbreviation);
+                        }
+                    }
+                }
+            }
+
+            if (list.Count > 0)
+            {
+                GGLog.Info($"TeamProvider loaded {list.Count} teams from {path}.");
+            }
+            else
+            {
+                GGLog.Warn("TeamProvider found no team abbreviations; using defaults.");
+                list.AddRange(new[] { "ATL", "PHI", "DAL", "NYG" });
             }
         }
-        catch { }
-        if (list.Count == 0) list.AddRange(new[] { "ATL", "PHI", "DAL", "NYG" });
+        catch (Exception ex)
+        {
+            GGLog.Error($"TeamProvider failed to read teams from {path}", ex);
+            list.AddRange(new[] { "ATL", "PHI", "DAL", "NYG" });
+        }
+
         return list;
     }
 }
