@@ -8,10 +8,8 @@ namespace GG.Bridge.Validation
         public static void Validate(ContractDTO c)
         {
             if (c == null) throw new GGDataException("GG2001", "Null contract payload");
-            if (c.ApiVersion != "gg.v1")
-                throw new GGDataException("GG2002", $"Version {c.ApiVersion} not supported");
-            if (c.Terms == null || c.Terms.Count == 0)
-                throw new GGDataException("GG2003", "Missing terms[]");
+            if (c.ApiVersion != "gg.v1") throw new GGDataException("GG2002", $"Version {c.ApiVersion} not supported");
+            if (c.Terms == null || c.Terms.Count == 0) throw new GGDataException("GG2003", "Missing terms[]");
 
             foreach (var t in c.Terms)
             {
