@@ -2,10 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Serialization;
-using GG.Bridge.Repositories;
 using System.Collections.Generic;
 using System.Linq;
-
 
 namespace GG.UI.Dashboard
 {
@@ -36,13 +34,7 @@ namespace GG.UI.Dashboard
 
         void Awake()
         {
-            // option A: fully-qualified (works even without using)
-            // old (causing error)
-// var abbrs = GG.Bridge.Repositories.TeamDirectory.GetAbbrs();
-
-// new
             var abbrs = LoadTeamAbbrs();
-
             if (string.IsNullOrEmpty(selectedTeamAbbr)) selectedTeamAbbr = abbrs.Count > 0 ? abbrs[0] : "ATL";
             if (headerTeam) headerTeam.text = selectedTeamAbbr;
 
@@ -53,7 +45,6 @@ namespace GG.UI.Dashboard
             WireButtons();
             BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
             RefreshInteractivity();
-
         }
 
         void WireButtons()
@@ -82,6 +73,7 @@ namespace GG.UI.Dashboard
             int guard = 256;
             while (guard-- > 0 && ScheduleRepository.HasUnplayedThisWeek(selectedTeamAbbr, out _))
                 ScheduleRepository.SimEntireWeek();
+
             BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
             RefreshInteractivity();
         }
@@ -110,16 +102,20 @@ namespace GG.UI.Dashboard
                 statusHud = existing;
                 return;
             }
+
             var go = new GameObject("GG_StatusHUD", typeof(RectTransform));
             go.transform.SetParent(FindCanvasTransform(), false);
+
             var txt = go.AddComponent<TextMeshProUGUI>();
             txt.fontSize = 18;
             txt.alignment = TextAlignmentOptions.TopLeft;
+
             var rt = (RectTransform)go.transform;
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(0, 1);
             rt.pivot = new Vector2(0, 1);
             rt.anchoredPosition = new Vector2(10, -10);
+
             statusHud = txt;
         }
 
