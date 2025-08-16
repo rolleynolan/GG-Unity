@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,24 +30,22 @@ namespace GG.Game
 
         IEnumerator BootstrapWhenReady()
         {
-            // Try to proactively kick the repo if it exposes a Load() method.
+            // Try to proactively kick the repo (if it exposes Load/Init).
             TryInvokeRepoLoad();
 
-            // Wait up to 5s for a non-empty (preferably >1) team list.
+            // Wait up to 6s for a team list (prefer >1).
             List<string> allAbbrs = null;
-            float timeout = 5f;
+            float timeout = 6f;
             while (timeout > 0f)
             {
                 allAbbrs = GetAllTeamAbbrs(silent: true);
                 if (allAbbrs != null && allAbbrs.Count > 1) break;
 
-                // fallback: dictionary keys on RosterService (if present)
                 var viaRoster = TryGetAbbrsFromRosterService();
-                if (viaRoster != null && viaRoster.Count > 1)
-                {
-                    allAbbrs = viaRoster;
-                    break;
-                }
+                if (viaRoster != null && viaRoster.Count > 1) { allAbbrs = viaRoster; break; }
+
+                var viaJson = TryGetAbbrsFromTeamsJson();
+                if (viaJson != null && viaJson.Count > 1) { allAbbrs = viaJson; break; }
 
                 timeout -= Time.unscaledDeltaTime;
                 yield return null;
@@ -121,6 +121,7 @@ namespace GG.Game
             }
         }
 
+        // Compute team overall from roster (reflection-friendly)
         static int TeamOverallFromRoster(string abbr)
         {
             var roster = TryGetRosterEnumerable(abbr);
@@ -140,10 +141,7 @@ namespace GG.Game
 
         static IEnumerable TryGetRosterEnumerable(string abbr)
         {
-            var rsType = Type.GetType("RosterService") ??
-                         AppDomain.CurrentDomain.GetAssemblies()
-                            .SelectMany(a => a.GetTypes())
-                            .FirstOrDefault(t => t.Name == "RosterService");
+            var rsType = FindTypeByName("RosterService");
             if (rsType == null) return null;
 
             object roster = null;
@@ -215,120 +213,167 @@ namespace GG.Game
 
         static void TryInvokeRepoLoad()
         {
-            var repoType = Type.GetType("LeagueRepository") ??
-                           AppDomain.CurrentDomain.GetAssemblies()
-                                    .SelectMany(a => a.GetTypes())
-                                    .FirstOrDefault(t => t.Name == "LeagueRepository");
+            var repoType = FindTypeByName("LeagueRepository");
             if (repoType == null) return;
 
-            // static Load()
-            var m = repoType.GetMethod("Load", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            if (m != null) { try { m.Invoke(null, null); } catch {} }
+            // static Load/Init
+            foreach (var name in new[] { "Load", "Init", "Initialize" })
+            {
+                var m = repoType.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                if (m != null) { try { m.Invoke(null, null); } catch {} }
+            }
 
-            // instance Load() on Instance/Current
-            var inst = GetRepoInstance(repoType);
+            // instance Load/Init on Instance/Current
+            var inst = GetSingleton(repoType);
             if (inst != null)
             {
-                var mi = repoType.GetMethod("Load", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (mi != null) { try { mi.Invoke(inst, null); } catch {} }
+                foreach (var name in new[] { "Load", "Init", "Initialize" })
+                {
+                    var mi = repoType.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (mi != null) { try { mi.Invoke(inst, null); } catch {} }
+                }
             }
-        }
-
-        static object GetRepoInstance(Type repoType)
-        {
-            // Common patterns: Instance, Current, Singleton
-            var p = repoType.GetProperty("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-                 ?? repoType.GetProperty("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-                 ?? repoType.GetProperty("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            if (p != null) return p.GetValue(null, null);
-
-            var f = repoType.GetField("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-                 ?? repoType.GetField("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-                 ?? repoType.GetField("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            if (f != null) return f.GetValue(null);
-
-            return null;
         }
 
         static List<string> GetAllTeamAbbrs(bool silent = false)
         {
             var abbrs = new List<string>();
-            var repoType = Type.GetType("LeagueRepository") ??
-                           AppDomain.CurrentDomain.GetAssemblies()
-                                    .SelectMany(a => a.GetTypes())
-                                    .FirstOrDefault(t => t.Name == "LeagueRepository");
+            var repoType = FindTypeByName("LeagueRepository");
             if (repoType == null) return abbrs;
 
-            // Try static containers first
-            if (TryExtractAbbrsFromRepo(repoType, /*instance*/ null, abbrs)) goto DONE;
+            // Scan static then instance members and recursively extract abbrs
+            var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+            TryExtractFromRepo(repoType, /*instance*/ null, abbrs, visited);
+            var inst = GetSingleton(repoType);
+            if (inst != null) TryExtractFromRepo(repoType, inst, abbrs, visited);
 
-            // Then instance-based repositories (Instance/Current/Singleton)
-            var inst = GetRepoInstance(repoType);
-            if (inst != null) TryExtractAbbrsFromRepo(repoType, inst, abbrs);
-
-        DONE:
             if (abbrs.Count == 0 && !silent)
                 Debug.Log("[DashboardHUD] LeagueRepository found but team list is empty (still loading?).");
+
             return abbrs.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         }
 
-        static bool TryExtractAbbrsFromRepo(Type repoType, object repoObj, List<string> outAbbrs)
+        static void TryExtractFromRepo(Type repoType, object repoObj, List<string> sink, HashSet<object> visited)
         {
-            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic |
-                                 (repoObj == null ? BindingFlags.Static : BindingFlags.Instance);
+            var flags = BindingFlags.Public | BindingFlags.NonPublic |
+                        (repoObj == null ? BindingFlags.Static : BindingFlags.Instance);
 
-            object teamsEnumerable = null;
-
-            // Common props/fields that hold team collections
-            var propNames = new[] { "Teams", "AllTeams", "All", "List", "Values" };
-            foreach (var name in propNames)
+            // Properties
+            foreach (var p in repoType.GetProperties(flags))
             {
-                var p = repoType.GetProperty(name, flags);
-                if (p != null) { teamsEnumerable = p.GetValue(repoObj, null); if (teamsEnumerable != null) break; }
+                if (!p.CanRead) continue;
+                object val = null;
+                try { val = p.GetValue(repoObj, null); } catch { }
+                ExtractAbbrsFromAny(val, sink, visited, 3);
             }
-            if (teamsEnumerable == null)
+            // Fields
+            foreach (var f in repoType.GetFields(flags))
             {
-                var fieldNames = new[] { "Teams", "AllTeams", "All", "List", "Values" };
-                foreach (var name in fieldNames)
+                object val = null;
+                try { val = f.GetValue(repoObj); } catch { }
+                ExtractAbbrsFromAny(val, sink, visited, 3);
+            }
+            // Parameterless methods that look like getters
+            foreach (var m in repoType.GetMethods(flags))
+            {
+                if (m.GetParameters().Length != 0) continue;
+                if (m.ReturnType == typeof(void)) continue;
+                if (!LooksLikeGetterName(m.Name)) continue;
+                object val = null;
+                try { val = m.Invoke(repoObj, null); } catch { }
+                ExtractAbbrsFromAny(val, sink, visited, 2);
+            }
+        }
+
+        static bool LooksLikeGetterName(string n)
+        {
+            return n.StartsWith("Get", StringComparison.OrdinalIgnoreCase) ||
+                   n.StartsWith("All", StringComparison.OrdinalIgnoreCase) ||
+                   n.Equals("Teams", StringComparison.OrdinalIgnoreCase) ||
+                   n.Equals("Values", StringComparison.OrdinalIgnoreCase) ||
+                   n.Equals("List", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Recursively walk dictionaries/enumerables/objects and pull "abbr" strings or plausible codes.
+        static void ExtractAbbrsFromAny(object obj, List<string> sink, HashSet<object> visited, int depth)
+        {
+            if (obj == null || depth < 0) return;
+
+            // Avoid cycles
+            if (!obj.GetType().IsValueType)
+            {
+                if (visited.Contains(obj)) return;
+                visited.Add(obj);
+            }
+
+            // String?
+            if (obj is string s)
+            {
+                if (LooksLikeAbbr(s)) sink.Add(s);
+                return;
+            }
+
+            // IDictionary: take keys + recurse values
+            if (obj is IDictionary dict)
+            {
+                foreach (var key in dict.Keys)
+                    if (key is string ks && LooksLikeAbbr(ks)) sink.Add(ks);
+                foreach (var val in dict.Values)
+                    ExtractAbbrsFromAny(val, sink, visited, depth - 1);
+                return;
+            }
+
+            // IEnumerable: recurse
+            if (obj is IEnumerable seq)
+            {
+                foreach (var it in seq) ExtractAbbrsFromAny(it, sink, visited, depth - 1);
+                return;
+            }
+
+            // Object with "abbr"/"Abbr" property/field
+            var t = obj.GetType();
+            var ap = t.GetProperty("abbr") ?? t.GetProperty("Abbr") ?? t.GetProperty("id") ?? t.GetProperty("ID");
+            if (ap != null)
+            {
+                try
                 {
-                    var f = repoType.GetField(name, flags);
-                    if (f != null) { teamsEnumerable = f.GetValue(repoObj); if (teamsEnumerable != null) break; }
+                    var v = ap.GetValue(obj)?.ToString();
+                    if (!string.IsNullOrWhiteSpace(v) && LooksLikeAbbr(v)) sink.Add(v);
                 }
+                catch { }
             }
-
-            // Methods returning enumerable
-            if (teamsEnumerable == null)
+            var af = t.GetField("abbr") ?? t.GetField("Abbr") ?? t.GetField("id") ?? t.GetField("ID");
+            if (af != null)
             {
-                var methodNames = new[] { "GetTeams", "GetAllTeams", "GetAll", "Enumerate", "All" };
-                foreach (var name in methodNames)
+                try
                 {
-                    var m = repoType.GetMethod(name, flags, null, Type.EmptyTypes, null);
-                    if (m == null) continue;
-                    var ret = m.Invoke(repoObj, null);
-                    if (ret is IEnumerable) { teamsEnumerable = ret; break; }
+                    var v = af.GetValue(obj)?.ToString();
+                    if (!string.IsNullOrWhiteSpace(v) && LooksLikeAbbr(v)) sink.Add(v);
                 }
+                catch { }
             }
+        }
 
-            if (!(teamsEnumerable is IEnumerable seq)) return false;
-
-            foreach (var t in seq)
+        static bool LooksLikeAbbr(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            s = s.Trim();
+            // Typical: 2–4 letters (case-insensitive), allow one hyphen (e.g., "LA", "TB", "WAS", "BUF", "N-ATL")
+            if (s.Length < 2 || s.Length > 6) return false;
+            int letters = 0;
+            foreach (var c in s)
             {
-                var tt = t.GetType();
-                var ap = tt.GetProperty("abbr") ?? tt.GetProperty("Abbr") ?? tt.GetProperty("id") ?? tt.GetProperty("ID");
-                var af = tt.GetField("abbr") ?? tt.GetField("Abbr") ?? tt.GetField("id") ?? tt.GetField("ID");
-                var val = (string)(ap?.GetValue(t) ?? af?.GetValue(t));
-                if (!string.IsNullOrWhiteSpace(val)) outAbbrs.Add(val);
+                if (char.IsLetter(c)) letters++;
+                else if (c == '-' || c == '_') continue;
+                else return false;
             }
-            return outAbbrs.Count > 0;
+            return letters >= 2;
         }
 
         static List<string> TryGetAbbrsFromRosterService()
         {
             var result = new List<string>();
-            var rsType = Type.GetType("RosterService") ??
-                         AppDomain.CurrentDomain.GetAssemblies()
-                            .SelectMany(a => a.GetTypes())
-                            .FirstOrDefault(t => t.Name == "RosterService");
+            var rsType = FindTypeByName("RosterService");
             if (rsType == null) return result;
 
             var field = rsType.GetField("Rosters", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
@@ -343,6 +388,60 @@ namespace GG.Game
                 foreach (var k in keys) result.Add(k?.ToString());
 
             return result.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        static List<string> TryGetAbbrsFromTeamsJson()
+        {
+            try
+            {
+                var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
+                if (!File.Exists(path)) return new List<string>();
+                var txt = File.ReadAllText(path);
+                var m = Regex.Matches(txt, "\"abbr\"\\s*:\\s*\"([A-Za-z\\-_]+)\");
+                var list = new List<string>(m.Count);
+                foreach (Match mm in m) list.Add(mm.Groups[1].Value);
+                return list.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            }
+            catch { return new List<string>(); }
+        }
+
+        static Type FindTypeByName(string typeName)
+        {
+            var t = Type.GetType(typeName);
+            if (t != null) return t;
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    var found = asm.GetTypes().FirstOrDefault(x => x.Name == typeName);
+                    if (found != null) return found;
+                }
+                catch { }
+            }
+            return null;
+        }
+
+        static object GetSingleton(Type type)
+        {
+            var p = type.GetProperty("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetProperty("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetProperty("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (p != null) { try { return p.GetValue(null, null); } catch { } }
+
+            var f = type.GetField("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetField("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? type.GetField("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (f != null) { try { return f.GetValue(null); } catch { } }
+
+            return null;
+        }
+
+        // ReferenceEqualityComparer for the visited set
+        sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+        {
+            public static readonly ReferenceEqualityComparer Instance = new ReferenceEqualityComparer();
+            public new bool Equals(object x, object y) => ReferenceEquals(x, y);
+            public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
         }
     }
 }
