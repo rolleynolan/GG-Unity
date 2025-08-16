@@ -8,7 +8,7 @@ namespace GG.Infra
     public static class GGLog
     {
         private static readonly object _lock = new object();
-        private static string LogPath => global::GGPaths.Save("gg_log.txt");
+        private static string LogPath => Path.Combine(Application.persistentDataPath, "gg_log.txt");
 
         public static void Info(string msg)  => Write("INFO", msg, null);
         public static void Warn(string msg)  => Write("WARN", msg, null);
@@ -20,9 +20,8 @@ namespace GG.Infra
             if (level == "ERROR") Debug.LogError(line);
             else if (level == "WARN") Debug.LogWarning(line);
             else Debug.Log(line);
-
             try { lock (_lock) File.AppendAllText(LogPath, line + Environment.NewLine, Encoding.UTF8); }
-            catch { /* never crash on logging */ }
+            catch { }
         }
     }
 }

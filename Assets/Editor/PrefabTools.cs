@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-using UnityEditor; using UnityEngine;
+using UnityEditor; using UnityEngine; using System.IO;
 public static class PrefabTools {
   [MenuItem("GridironGM/Dev/Scan & Remove Missing Scripts")]
   public static void RemoveMissing() {
@@ -15,8 +15,8 @@ public static class PrefabTools {
 
   [MenuItem("GridironGM/Dev/Clear Season Save")]
   public static void ClearSeason() {
-    var p = GGPaths.Save(GGConventions.SeasonSaveFile);
-    if (System.IO.File.Exists(p)) { System.IO.File.Delete(p); Debug.Log($"[GG] Deleted {p}"); }
+    var p = Path.Combine(Application.persistentDataPath, GGConventions.SeasonSaveFile);
+    if (File.Exists(p)) { File.Delete(p); Debug.Log($"[GG] Deleted {p}"); }
     else Debug.Log("[GG] No season save found.");
   }
 }

@@ -1,5 +1,6 @@
 using System; using System.Collections; using System.Collections.Generic;
 using System.IO; using System.Linq; using System.Reflection; using System.Text.RegularExpressions;
+using UnityEngine;
 
 public interface ITeamProvider { List<string> GetAllTeamAbbrs(); }
 
@@ -17,7 +18,7 @@ public sealed class TeamProvider : ITeamProvider {
 
   List<string> FromJsonProps() {
     try {
-      var p = GGPaths.Streaming(GGConventions.TeamsJsonFile); if (!File.Exists(p)) return new();
+      var p = Path.Combine(Application.streamingAssetsPath, GGConventions.TeamsJsonFile); if (!File.Exists(p)) return new();
       var txt = File.ReadAllText(p);
       var ms = AbbrProp.Matches(txt);
       var list = new List<string>(ms.Count); foreach (Match m in ms) list.Add(m.Groups[1].Value);
@@ -26,7 +27,7 @@ public sealed class TeamProvider : ITeamProvider {
   }
   List<string> FromJsonKeys() {
     try {
-      var p = GGPaths.Streaming(GGConventions.TeamsJsonFile); if (!File.Exists(p)) return new();
+      var p = Path.Combine(Application.streamingAssetsPath, GGConventions.TeamsJsonFile); if (!File.Exists(p)) return new();
       var txt = File.ReadAllText(p);
       var ms = KeyObj.Matches(txt);
       var list = new List<string>(ms.Count);

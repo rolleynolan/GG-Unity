@@ -44,7 +44,7 @@ namespace GG.Bridge.Validation
             };
 
             var obj = JsonConvert.DeserializeObject<T>(json, settings);
-            GG.Infra.GGLog.Info($"Loaded JSON: {abs}");
+            GGLog.Info($"Loaded JSON: {abs}");
             return obj;
         }
     }
