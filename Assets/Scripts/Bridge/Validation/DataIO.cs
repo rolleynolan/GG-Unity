@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Paths = GG.Infra.GGPaths;
+using Log   = GG.Infra.GGLog;
 
 namespace GG.Bridge.Validation
 {
@@ -26,7 +28,7 @@ namespace GG.Bridge.Validation
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Empty path", nameof(path));
 
-            var abs = Path.IsPathRooted(path) ? path : GGPaths.Data(path);
+            var abs = Path.IsPathRooted(path) ? path : Paths.Data(path);
 
             try
             {
@@ -55,12 +57,12 @@ namespace GG.Bridge.Validation
                     obj = JsonUtility.FromJson<T>(json);
                 }
 
-                GGLog.Info($"Loaded JSON: {abs}");
+                Log.Info($"Loaded JSON: {abs}");
                 return obj;
             }
             catch (Exception ex)
             {
-                GGLog.Error($"Failed to load JSON: {abs}", ex);
+                Log.Error($"Failed to load JSON: {abs}", ex);
                 throw;
             }
         }
