@@ -2,7 +2,6 @@ using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
-using GG.Bridge.Repositories;
 
 namespace GG.UI.Schedule
 {
@@ -43,4 +42,3 @@ namespace GG.UI.Schedule
         }
     }
 }
-
