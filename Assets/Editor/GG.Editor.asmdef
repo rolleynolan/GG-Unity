@@ -1,0 +1,17 @@
+{
+  "name": "GG.Editor",
+  "references": [
+    "GUID:17d0f018-cd53-4c34-84c4-975204b28ae4"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
