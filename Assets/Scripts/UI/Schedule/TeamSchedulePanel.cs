@@ -18,7 +18,7 @@ namespace GG.UI.Schedule
                 var go = new GameObject("TeamScheduleText", typeof(RectTransform));
                 go.transform.SetParent(transform, false);
                 var t = go.AddComponent<TextMeshProUGUI>();
-                t.enableWordWrapping = false;
+                t.textWrappingMode = TextWrappingModes.NoWrap;
                 t.fontSize = 18;
                 content = t;
             }
@@ -29,14 +29,14 @@ namespace GG.UI.Schedule
         {
             if (ScheduleRepository.Current == null) { content.text = "No schedule."; return; }
             var sb = new StringBuilder();
-            foreach (var w in ScheduleRepository.Current.Weeks)
+            foreach (var w in ScheduleRepository.Current.weeks)
             {
-                var games = w.Games.Where(g => g.Home == TeamAbbr || g.Away == TeamAbbr).ToList();
+                var games = w.games.Where(g => g.home == TeamAbbr || g.away == TeamAbbr).ToList();
                 foreach (var g in games)
                 {
-                    var vs = (g.Home == TeamAbbr) ? $"vs {g.Away}" : $"@ {g.Home}";
-                    var score = g.Played ? $"{g.Score[g.Home]}-{g.Score[g.Away]}" : "—";
-                    sb.AppendLine($"W{w.Week} {vs}   {score}");
+                    var vs = (g.home == TeamAbbr) ? $"vs {g.away}" : $"@ {g.home}";
+                    var score = g.played ? $"{g.homePts}-{g.awayPts}" : "—";
+                    sb.AppendLine($"W{w.week} {vs}   {score}");
                 }
             }
             content.text = sb.Length == 0 ? "No games found." : sb.ToString();

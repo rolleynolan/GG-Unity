@@ -48,11 +48,10 @@ namespace GG.UI.Dashboard
 
             if (!ScheduleRepository.TryLoad(out _))
                 ScheduleRepository.AutoGenerateIfMissing(abbrs, 2026);
-            BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
 
             CreateStatusHud();
-
             WireButtons();
+            BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
             RefreshInteractivity();
 
         }
@@ -67,31 +66,39 @@ namespace GG.UI.Dashboard
         void OnSimGame()
         {
             ScheduleRepository.SimNextGameForTeam(selectedTeamAbbr);
-            RefreshInteractivity();
             BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
+            RefreshInteractivity();
         }
 
         void OnSimWeek()
         {
             ScheduleRepository.SimEntireWeek();
-            RefreshInteractivity();
             BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
+            RefreshInteractivity();
         }
 
         void OnSimSeason()
         {
-            while (ScheduleRepository.HasUnplayedThisWeek(selectedTeamAbbr, out _))
+            int guard = 256;
+            while (guard-- > 0 && ScheduleRepository.HasUnplayedThisWeek(selectedTeamAbbr, out _))
                 ScheduleRepository.SimEntireWeek();
-            RefreshInteractivity();
             BroadcastMessage("RefreshTeamSchedule", SendMessageOptions.DontRequireReceiver);
+            RefreshInteractivity();
         }
 
         void RefreshInteractivity()
         {
-            var hasGame = ScheduleRepository.HasUnplayedThisWeek(selectedTeamAbbr, out _);
+            bool hasGame = ScheduleRepository.HasUnplayedThisWeek(selectedTeamAbbr, out var next);
             if (simGameButton)   simGameButton.interactable   = hasGame;
             if (simWeekButton)   simWeekButton.interactable   = true;
             if (simSeasonButton) simSeasonButton.interactable = true;
+
+            var weekIdx = ScheduleRepository.CurrentWeekIndex() + 1;
+            if (statusHud)
+            {
+                var vs = hasGame ? (next.home == selectedTeamAbbr ? $"vs {next.away}" : $"@ {next.home}") : "—";
+                statusHud.text = $"Week {weekIdx} • Next: {vs}";
+            }
         }
 
         void CreateStatusHud()
