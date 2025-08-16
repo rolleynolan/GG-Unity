@@ -14,7 +14,9 @@ namespace GG.UI.Roster
             {
                 var go = new GameObject("RosterText", typeof(RectTransform));
                 go.transform.SetParent(transform, false);
-                content = go.AddComponent<TMP_Text>();
+                var t = go.AddComponent<TextMeshProUGUI>();
+                t.textWrappingMode = TextWrappingModes.NoWrap;
+                content = t;
             }
             // For now: simple placeholder. Later: read /data/league_state.json and list players.
             content.text = $"Roster for {TeamAbbr}\n(Connect to league_state.json to show players)";
