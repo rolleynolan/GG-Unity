@@ -116,10 +116,10 @@ namespace GG.Game
             }
 
             // fall back to scene-wide search (includes inactive)
-#if UNITY_2020_1_OR_NEWER
-            var all = UnityEngine.Object.FindObjectsOfType<Button>(true);
+#if UNITY_2023_1_OR_NEWER
+            var all = UnityEngine.Object.FindObjectsByType<Button>(FindObjectsSortMode.None);
 #else
-            var all = UnityEngine.Object.FindObjectsOfType<Button>();
+            var all = UnityEngine.Object.FindObjectsOfType<Button>(true);
 #endif
             foreach (var n in names)
             {
@@ -139,10 +139,10 @@ namespace GG.Game
                 if (t != null) return t;
             }
 
-#if UNITY_2020_1_OR_NEWER
-            var all = UnityEngine.Object.FindObjectsOfType<TMP_Text>(true);
+#if UNITY_2023_1_OR_NEWER
+            var all = UnityEngine.Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None);
 #else
-            var all = UnityEngine.Object.FindObjectsOfType<TMP_Text>();
+            var all = UnityEngine.Object.FindObjectsOfType<TMP_Text>(true);
 #endif
             foreach (var n in names)
             {
@@ -230,11 +230,11 @@ namespace GG.Game
 
         // Case-insensitive "abbr" property:  "abbr": "ATL"
         private static readonly Regex AbbrPropRegex =
-            new Regex(@"""abbr""\s*:\s*""([^"""]+)""", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            new Regex("\"abbr\"\\s*:\\s*\"([A-Za-z_-]+)\"", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Object keys like:  "ATL": { ... }
         private static readonly Regex KeyObjectRegex =
-            new Regex(@"^\s*""([A-Za-z0-9_-]{2,6})""\s*:\s*\{", RegexOptions.Multiline | RegexOptions.Compiled);
+            new Regex("^\\s*\"([A-Za-z0-9_-]{2,6})\"\\s*:\\s*\\{", RegexOptions.Multiline | RegexOptions.Compiled);
 
         private static List<string> LoadAllTeamAbbrs()
         {
