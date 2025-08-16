@@ -23,23 +23,29 @@ namespace GG.Game
 
         void Start()
         {
-            // Defer init until LeagueRepository (or a fallback) is ready
             StartCoroutine(BootstrapWhenReady());
         }
 
         IEnumerator BootstrapWhenReady()
         {
-            // Try for ~2 seconds to get a non-empty team list
+            // Try to proactively kick the repo if it exposes a Load() method.
+            TryInvokeRepoLoad();
+
+            // Wait up to 5s for a non-empty (preferably >1) team list.
             List<string> allAbbrs = null;
-            float timeout = 2f;
+            float timeout = 5f;
             while (timeout > 0f)
             {
                 allAbbrs = GetAllTeamAbbrs(silent: true);
-                if (allAbbrs != null && allAbbrs.Count > 0) break;
+                if (allAbbrs != null && allAbbrs.Count > 1) break;
 
-                // fallback source: try roster keys if available
-                allAbbrs = TryGetAbbrsFromRosterService();
-                if (allAbbrs != null && allAbbrs.Count > 0) break;
+                // fallback: dictionary keys on RosterService (if present)
+                var viaRoster = TryGetAbbrsFromRosterService();
+                if (viaRoster != null && viaRoster.Count > 1)
+                {
+                    allAbbrs = viaRoster;
+                    break;
+                }
 
                 timeout -= Time.unscaledDeltaTime;
                 yield return null;
@@ -115,7 +121,6 @@ namespace GG.Game
             }
         }
 
-        // Compute team overall from roster (reflection-friendly)
         static int TeamOverallFromRoster(string abbr)
         {
             var roster = TryGetRosterEnumerable(abbr);
@@ -143,7 +148,6 @@ namespace GG.Game
 
             object roster = null;
 
-            // Common static methods
             var methods = new[]
             {
                 "GetRosterForTeam", "GetRoster", "GetPlayersForTeam",
@@ -162,7 +166,6 @@ namespace GG.Game
                 }
             }
 
-            // Some services expose: Dictionary<string, List<Player>> Rosters
             if (roster == null)
             {
                 var field = rsType.GetField("Rosters", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
@@ -210,47 +213,115 @@ namespace GG.Game
 
         // --- Team list discovery ---
 
+        static void TryInvokeRepoLoad()
+        {
+            var repoType = Type.GetType("LeagueRepository") ??
+                           AppDomain.CurrentDomain.GetAssemblies()
+                                    .SelectMany(a => a.GetTypes())
+                                    .FirstOrDefault(t => t.Name == "LeagueRepository");
+            if (repoType == null) return;
+
+            // static Load()
+            var m = repoType.GetMethod("Load", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (m != null) { try { m.Invoke(null, null); } catch {} }
+
+            // instance Load() on Instance/Current
+            var inst = GetRepoInstance(repoType);
+            if (inst != null)
+            {
+                var mi = repoType.GetMethod("Load", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (mi != null) { try { mi.Invoke(inst, null); } catch {} }
+            }
+        }
+
+        static object GetRepoInstance(Type repoType)
+        {
+            // Common patterns: Instance, Current, Singleton
+            var p = repoType.GetProperty("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? repoType.GetProperty("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? repoType.GetProperty("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (p != null) return p.GetValue(null, null);
+
+            var f = repoType.GetField("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? repoType.GetField("Current",  BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+                 ?? repoType.GetField("Singleton",BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            if (f != null) return f.GetValue(null);
+
+            return null;
+        }
+
         static List<string> GetAllTeamAbbrs(bool silent = false)
         {
             var abbrs = new List<string>();
-
             var repoType = Type.GetType("LeagueRepository") ??
                            AppDomain.CurrentDomain.GetAssemblies()
                                     .SelectMany(a => a.GetTypes())
                                     .FirstOrDefault(t => t.Name == "LeagueRepository");
             if (repoType == null) return abbrs;
 
-            object teamsEnumerable = null;
-            var prop = repoType.GetProperty("Teams", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            if (prop != null) teamsEnumerable = prop.GetValue(null, null);
-            if (teamsEnumerable == null)
-            {
-                prop = repoType.GetProperty("AllTeams", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                if (prop != null) teamsEnumerable = prop.GetValue(null, null);
-            }
-            var field = repoType.GetField("Teams", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            if (teamsEnumerable == null && field != null) teamsEnumerable = field.GetValue(null);
+            // Try static containers first
+            if (TryExtractAbbrsFromRepo(repoType, /*instance*/ null, abbrs)) goto DONE;
 
-            if (teamsEnumerable is IEnumerable seq)
-            {
-                foreach (var t in seq)
-                {
-                    var tt = t.GetType();
-                    var abbrProp = tt.GetProperty("abbr") ?? tt.GetProperty("Abbr");
-                    var abbrField = tt.GetField("abbr") ?? tt.GetField("Abbr");
-                    var val = (string)(abbrProp?.GetValue(t) ?? abbrField?.GetValue(t));
-                    if (!string.IsNullOrWhiteSpace(val))
-                        abbrs.Add(val);
-                }
-            }
+            // Then instance-based repositories (Instance/Current/Singleton)
+            var inst = GetRepoInstance(repoType);
+            if (inst != null) TryExtractAbbrsFromRepo(repoType, inst, abbrs);
 
+        DONE:
             if (abbrs.Count == 0 && !silent)
                 Debug.Log("[DashboardHUD] LeagueRepository found but team list is empty (still loading?).");
-
             return abbrs.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         }
 
-        // Second fallback: pull keys from RosterService if it holds a dictionary of rosters
+        static bool TryExtractAbbrsFromRepo(Type repoType, object repoObj, List<string> outAbbrs)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic |
+                                 (repoObj == null ? BindingFlags.Static : BindingFlags.Instance);
+
+            object teamsEnumerable = null;
+
+            // Common props/fields that hold team collections
+            var propNames = new[] { "Teams", "AllTeams", "All", "List", "Values" };
+            foreach (var name in propNames)
+            {
+                var p = repoType.GetProperty(name, flags);
+                if (p != null) { teamsEnumerable = p.GetValue(repoObj, null); if (teamsEnumerable != null) break; }
+            }
+            if (teamsEnumerable == null)
+            {
+                var fieldNames = new[] { "Teams", "AllTeams", "All", "List", "Values" };
+                foreach (var name in fieldNames)
+                {
+                    var f = repoType.GetField(name, flags);
+                    if (f != null) { teamsEnumerable = f.GetValue(repoObj); if (teamsEnumerable != null) break; }
+                }
+            }
+
+            // Methods returning enumerable
+            if (teamsEnumerable == null)
+            {
+                var methodNames = new[] { "GetTeams", "GetAllTeams", "GetAll", "Enumerate", "All" };
+                foreach (var name in methodNames)
+                {
+                    var m = repoType.GetMethod(name, flags, null, Type.EmptyTypes, null);
+                    if (m == null) continue;
+                    var ret = m.Invoke(repoObj, null);
+                    if (ret is IEnumerable) { teamsEnumerable = ret; break; }
+                }
+            }
+
+            if (!(teamsEnumerable is IEnumerable seq)) return false;
+
+            foreach (var t in seq)
+            {
+                var tt = t.GetType();
+                var ap = tt.GetProperty("abbr") ?? tt.GetProperty("Abbr") ?? tt.GetProperty("id") ?? tt.GetProperty("ID");
+                var af = tt.GetField("abbr") ?? tt.GetField("Abbr") ?? tt.GetField("id") ?? tt.GetField("ID");
+                var val = (string)(ap?.GetValue(t) ?? af?.GetValue(t));
+                if (!string.IsNullOrWhiteSpace(val)) outAbbrs.Add(val);
+            }
+            return outAbbrs.Count > 0;
+        }
+
         static List<string> TryGetAbbrsFromRosterService()
         {
             var result = new List<string>();
@@ -275,4 +346,3 @@ namespace GG.Game
         }
     }
 }
-
