@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using Newtonsoft.Json;
 using GG.Infra;
@@ -9,9 +8,7 @@ namespace GG.Bridge.Validation
     {
         public static T LoadJson<T>(string relativePath)
         {
-            var abs = Path.GetFullPath(
-                Path.Combine(UnityEngine.Application.dataPath, "..", relativePath)
-            );
+            var abs = GGPaths.Project(relativePath);
             var json = File.ReadAllText(abs);
 
             var settings = new JsonSerializerSettings

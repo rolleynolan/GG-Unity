@@ -1,5 +1,5 @@
 using System;
-using GG.Bridge.Dto;   // <-- sees ContractDTO
+using GG.Bridge.Dto;
 
 namespace GG.Bridge.Validation
 {
