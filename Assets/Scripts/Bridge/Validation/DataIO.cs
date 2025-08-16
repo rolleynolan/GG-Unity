@@ -1,17 +1,29 @@
 using System;
 using System.IO;
-using UnityEngine;
+using Newtonsoft.Json;
+using GG.Infra;
 
-public static class DataIO {
-  public static T LoadJson<T>(string relativePath){
-    var path = GGPaths.Project(relativePath);
-    GGLog.Info($"LoadJson {path}");
-    try {
-      var txt = File.ReadAllText(path);
-      return JsonUtility.FromJson<T>(txt);
-    } catch (Exception ex) {
-      GGLog.Error($"LoadJson failed: {ex.Message}");
-      throw;
+namespace GG.Bridge.Validation
+{
+    internal static class DataIO
+    {
+        public static T LoadJson<T>(string relativePath)
+        {
+            var abs = Path.GetFullPath(
+                Path.Combine(UnityEngine.Application.dataPath, "..", relativePath)
+            );
+            var json = File.ReadAllText(abs);
+
+            var settings = new JsonSerializerSettings
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                MetadataPropertyHandling = MetadataPropertyHandling.Ignore
+            };
+
+            var obj = JsonConvert.DeserializeObject<T>(json, settings);
+            GGLog.Info($"Loaded JSON: {abs}");
+            return obj;
+        }
     }
-  }
 }
