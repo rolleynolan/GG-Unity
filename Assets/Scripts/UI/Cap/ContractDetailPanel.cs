@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using GG.Bridge.Dto;
 
 internal class ContractDetailPanel : MonoBehaviour {
   [SerializeField] TMP_Text content;
