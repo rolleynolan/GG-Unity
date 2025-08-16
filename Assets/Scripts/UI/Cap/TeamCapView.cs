@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using GG.Infra;
 using GG.Bridge.Validation;
 
 namespace GG.UI.Cap
