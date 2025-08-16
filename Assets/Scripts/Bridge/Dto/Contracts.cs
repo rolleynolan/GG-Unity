@@ -45,7 +45,6 @@ namespace GG.Bridge.Dto
         [JsonProperty("flags")] public Dictionary<string, bool> Flags = new();
         [JsonProperty("notes")] public List<string> Notes = new();
 
-        // Forward-compat: keep unknown fields instead of crashing
         [JsonExtensionData] public IDictionary<string, JToken> Extra { get; set; }
     }
 }
