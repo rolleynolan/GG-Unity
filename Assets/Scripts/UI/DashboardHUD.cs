@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
+using System.Collections;              // for IDictionary / IEnumerable
 using System.Collections.Generic;
-using System.IO;
+using System.IO;                       // File.ReadAllText
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;  // Regex
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -396,13 +396,20 @@ namespace GG.Game
             {
                 var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
                 if (!File.Exists(path)) return new List<string>();
+
                 var txt = File.ReadAllText(path);
-                var m = Regex.Matches(txt, "\"abbr\"\\s*:\\s*\"([A-Za-z\\-_]+)\");
-                var list = new List<string>(m.Count);
-                foreach (Match mm in m) list.Add(mm.Groups[1].Value);
+
+                // Verbatim string: "" inside becomes a single " in the pattern
+                var matches = Regex.Matches(txt, @"""abbr""\s*:\s*""([A-Za-z_-]+)"");
+
+                var list = new List<string>(matches.Count);
+                foreach (Match m in matches) list.Add(m.Groups[1].Value);
                 return list.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             }
-            catch { return new List<string>(); }
+            catch
+            {
+                return new List<string>();
+            }
         }
 
         static Type FindTypeByName(string typeName)
