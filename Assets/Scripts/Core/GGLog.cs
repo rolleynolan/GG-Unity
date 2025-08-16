@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Global lightweight logger (no namespace)
 public static class GGLog
 {
     public static void Info(string msg)  => Debug.Log(msg);

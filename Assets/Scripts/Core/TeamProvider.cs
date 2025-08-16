@@ -2,43 +2,29 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public interface ITeamProvider { List<string> GetAllTeamAbbrs(); }
+[System.Serializable] class __TP_Team { public string city; public string name; public string abbreviation; }
+[System.Serializable] class __TP_Root { public __TP_Team[] teams; }
 
-[System.Serializable] class _TP_Team { public string abbreviation; }
-[System.Serializable] class _TP_Root { public _TP_Team[] teams; }
-
-public sealed class TeamProvider : ITeamProvider
+public static class TeamProvider
 {
-    public List<string> GetAllTeamAbbrs()
+    public static List<string> GetAbbrs()
     {
         var list = new List<string>();
         try
         {
-            var path = GGPaths.Streaming(GGConventions.TeamsJsonFile);
+            var path = Path.Combine(Application.streamingAssetsPath, "teams.json");
             if (File.Exists(path))
             {
                 var json = File.ReadAllText(path);
-                var root = JsonUtility.FromJson<_TP_Root>(json);
+                var root = JsonUtility.FromJson<__TP_Root>(json);
                 if (root?.teams != null)
                     foreach (var t in root.teams)
                         if (!string.IsNullOrEmpty(t.abbreviation))
                             list.Add(t.abbreviation);
             }
         }
-        catch (System.Exception ex)
-        {
-            GGLog.Warn($"TeamProvider load failed ({ex.Message}).");
-        }
-
-        if (list.Count == 0)
-        {
-            list.AddRange(new[] { "ATL", "PHI", "DAL", "NYG" });
-            GGLog.Warn("TeamProvider: falling back to default ABBRs.");
-        }
-        else
-        {
-            GGLog.Info($"TeamProvider: loaded {list.Count} team ABBRs.");
-        }
+        catch { }
+        if (list.Count == 0) list.AddRange(new[] { "ATL", "PHI", "DAL", "NYG" });
         return list;
     }
 }

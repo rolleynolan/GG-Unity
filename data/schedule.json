@@ -1,0 +1,81 @@
+{
+  "api_version": "gg.v1",
+  "year": 2026,
+  "weeks": [
+    {
+      "week": 1,
+      "games": [
+        {
+          "game_id": "2026-W1-ATL-PHI",
+          "home": "ATL",
+          "away": "PHI",
+          "played": false,
+          "score": {
+            "ATL": 0,
+            "PHI": 0
+          }
+        },
+        {
+          "game_id": "2026-W1-DAL-NYG",
+          "home": "DAL",
+          "away": "NYG",
+          "played": false,
+          "score": {
+            "DAL": 0,
+            "NYG": 0
+          }
+        }
+      ]
+    },
+    {
+      "week": 2,
+      "games": [
+        {
+          "game_id": "2026-W2-ATL-DAL",
+          "home": "ATL",
+          "away": "DAL",
+          "played": false,
+          "score": {
+            "ATL": 0,
+            "DAL": 0
+          }
+        },
+        {
+          "game_id": "2026-W2-NYG-PHI",
+          "home": "NYG",
+          "away": "PHI",
+          "played": false,
+          "score": {
+            "NYG": 0,
+            "PHI": 0
+          }
+        }
+      ]
+    },
+    {
+      "week": 3,
+      "games": [
+        {
+          "game_id": "2026-W3-ATL-NYG",
+          "home": "ATL",
+          "away": "NYG",
+          "played": false,
+          "score": {
+            "ATL": 0,
+            "NYG": 0
+          }
+        },
+        {
+          "game_id": "2026-W3-PHI-DAL",
+          "home": "PHI",
+          "away": "DAL",
+          "played": false,
+          "score": {
+            "PHI": 0,
+            "DAL": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "api_version": "gg.v1",
+  "startYear": 2026,
+  "endYear": 2029,
+  "terms": [
+    {
+      "year": 2026,
+      "base": 5000000,
+      "signingProrated": 5000000,
+      "rosterBonus": 0,
+      "workoutBonus": 0,
+      "guaranteedBase": 5000000
+    },
+    {
+      "year": 2027,
+      "base": 6000000,
+      "signingProrated": 5000000,
+      "rosterBonus": 0,
+      "workoutBonus": 0,
+      "guaranteedBase": 3000000
+    }
+  ],
+  "guarantees": [],
+  "incentives": [],
+  "flags": {},
+  "notes": []
+}
