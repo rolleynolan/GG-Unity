@@ -27,7 +27,7 @@ namespace GG.UI.Dashboard
 
         void Awake()
         {
-            var abbrs = TeamDirectory.GetAbbrs();
+            var abbrs = new TeamProvider().GetAllTeamAbbrs();
             if (string.IsNullOrEmpty(selectedTeamAbbr)) selectedTeamAbbr = abbrs.Count > 0 ? abbrs[0] : "ATL";
             if (headerTeam) headerTeam.text = selectedTeamAbbr;
 
