@@ -10,6 +10,15 @@ public interface ITeamProvider
 
 public class TeamProvider : ITeamProvider
 {
+    public static string SelectedAbbr
+    {
+        get => PlayerPrefs.GetString(GGConventions.SelectedTeamKey, string.Empty);
+        set { PlayerPrefs.SetString(GGConventions.SelectedTeamKey, value); PlayerPrefs.Save(); }
+    }
+
+    public static string GetSelectedTeamAbbreviation() => SelectedAbbr;
+    public static void SetSelectedTeamAbbreviation(string abbr) => SelectedAbbr = abbr;
+
     [Serializable] private class Team { public string abbreviation; }
     [Serializable] private class Root { public Team[] teams; }
 
