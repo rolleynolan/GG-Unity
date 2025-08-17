@@ -27,9 +27,19 @@ namespace GG.Bridge.Validation
         /// </summary>
         public static T LoadJson<T>(string path)
         {
-            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Empty path", nameof(path));
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                Log.Warn("LoadJson called with empty path");
+                return default;
+            }
 
             var abs = Path.IsPathRooted(path) ? path : Paths.Data(path);
+
+            if (!File.Exists(abs))
+            {
+                Log.Warn($"JSON file not found: {abs}");
+                return default;
+            }
 
             try
             {
@@ -63,8 +73,8 @@ namespace GG.Bridge.Validation
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to load JSON: {abs}", ex);
-                throw;
+                Log.Warn($"Failed to load JSON: {abs} ({ex.Message})");
+                return default;
             }
         }
     }

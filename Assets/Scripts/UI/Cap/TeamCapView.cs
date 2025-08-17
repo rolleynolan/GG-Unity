@@ -56,6 +56,12 @@ namespace GG.UI.Cap
                 // Support either "cap/capsheet_YYYY.json" or "/data/cap/capsheet_YYYY.json"
                 var relative = $"cap/capsheet_{Year}.json";
                 var sheet = DataIO.LoadJson<CapSheet>(relative);
+                if (sheet == null || sheet.Rows == null)
+                {
+                    GGLog.Warn($"Cap sheet missing: {relative}");
+                    content.text = "Cap sheet not available.";
+                    return;
+                }
 
                 var list = new List<string>();
                 foreach (var r in sheet.Rows)
