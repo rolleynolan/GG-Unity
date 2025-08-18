@@ -19,7 +19,7 @@ namespace GG.UI.Dashboard
 
         static List<string> LoadTeamAbbrs()
         {
-            return new TeamProvider().GetAllTeamAbbrs();
+            return new List<string> { "ATL", "PHI", "DAL", "NYG" };
         }
 
 #if UNITY_EDITOR

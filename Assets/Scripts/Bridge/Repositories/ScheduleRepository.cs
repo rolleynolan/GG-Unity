@@ -10,7 +10,7 @@ public static class ScheduleRepository
 
     public static bool TryLoad(out string absPath)
     {
-        absPath = GGPaths.ScheduleFile();
+        absPath = GGPaths.ScheduleJson;
         if (!File.Exists(absPath)) return false;
         try
         {
@@ -108,7 +108,7 @@ public static class ScheduleRepository
 
     public static void Save()
     {
-        var abs = GGPaths.ScheduleFile();
+        var abs = GGPaths.ScheduleJson;
         var json = JsonUtility.ToJson(Current, true);
         File.WriteAllText(abs, json);
         GGLog.Info($"Saved schedule to {abs}");

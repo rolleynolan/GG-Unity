@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Paths = GG.Infra.GGPaths;
-using Log   = GG.Infra.GGLog;
-
+using static GGPaths;
+using static GGLog;
 
 namespace GG.Bridge.Validation
 {
@@ -29,15 +28,15 @@ namespace GG.Bridge.Validation
         {
             if (string.IsNullOrWhiteSpace(path))
             {
-                Log.Warn("LoadJson called with empty path");
+                Warn("LoadJson called with empty path");
                 return default;
             }
 
-            var abs = Path.IsPathRooted(path) ? path : Paths.Data(path);
+            var abs = Path.IsPathRooted(path) ? path : Path.Combine(DataRoot, path);
 
             if (!File.Exists(abs))
             {
-                Log.Warn($"JSON file not found: {abs}");
+                Warn($"JSON file not found: {abs}");
                 return default;
             }
 
@@ -68,15 +67,14 @@ namespace GG.Bridge.Validation
                     obj = JsonUtility.FromJson<T>(json);
                 }
 
-                Log.Info($"Loaded JSON: {abs}");
+                Info($"Loaded JSON: {abs}");
                 return obj;
             }
             catch (Exception ex)
             {
-                Log.Warn($"Failed to load JSON: {abs} ({ex.Message})");
+                Warn($"Failed to load JSON: {abs} ({ex.Message})");
                 return default;
             }
         }
     }
 }
-

@@ -4,33 +4,32 @@ namespace GG.Infra
 {
     public static class GGPaths
     {
-        public static string ProjectRoot => global::GGPaths.ProjectRoot;
-        public static string DataRoot => global::GGPaths.DataRoot;
+        public static string DataRoot      => global::GGPaths.DataRoot;
         public static string StreamingRoot => global::GGPaths.StreamingRoot;
-        public static string Json(string fileName) => global::GGPaths.Json(fileName);
+        public static string Json(string fileName)   => global::GGPaths.Json(fileName);
         public static string Config(string fileName) => global::GGPaths.Config(fileName);
-        public static string Data(string relative) => global::GGPaths.Data(relative);
-        public static string Streaming(string relative) => global::GGPaths.Streaming(relative);
-        public static string Save(string relative) => global::GGPaths.Save(relative);
-        public static string ScheduleFile() => global::GGPaths.ScheduleFile();
-        public static string ContractFile(string rel) => global::GGPaths.ContractFile(rel);
-        public static string CapSheetFile(int year) => global::GGPaths.CapSheetFile(year);
-        public const string TeamsJson = global::GGPaths.TeamsJson;
-        public const string RostersByTeamJson = global::GGPaths.RostersByTeamJson;
-        public const string ScheduleJson = global::GGPaths.ScheduleJson;
+        public static string TeamsJson         => global::GGPaths.TeamsJson;
+        public static string RostersByTeamJson => global::GGPaths.RostersByTeamJson;
+        public static string ScheduleJson      => global::GGPaths.ScheduleJson;
     }
 
     public static class GGLog
     {
-        public static void Info(string msg)  => global::GGLog.Info(msg);
-        public static void Warn(string msg)  => global::GGLog.Warn(msg);
-        public static void Error(string msg, System.Exception ex = null)
-            => global::GGLog.Error(msg, ex);
+        public static void Log(string m)   => global::GGLog.Log(m);
+        public static void Info(string m)  => global::GGLog.Info(m);
+        public static void Warn(string m)  => global::GGLog.Warn(m);
+        public static void Error(string m) => global::GGLog.Error(m);
     }
 
     public static class TeamProvider
     {
-        public static System.Collections.Generic.List<string> GetAbbrs()
-            => new global::TeamProvider().GetAllTeamAbbrs();
+        public static string SelectedAbbr
+        {
+            get => global::TeamProvider.SelectedAbbr;
+            set => global::TeamProvider.SelectedAbbr = value;
+        }
+
+        public static string GetSelectedTeamAbbreviation() => global::TeamProvider.GetSelectedTeamAbbreviation();
+        public static void   SetSelectedTeamAbbreviation(string abbr) => global::TeamProvider.SetSelectedTeamAbbreviation(abbr);
     }
 }
