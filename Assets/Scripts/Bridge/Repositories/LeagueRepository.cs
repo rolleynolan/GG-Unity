@@ -11,7 +11,6 @@ namespace GG.Bridge.Repositories
         public string abbreviation;
     }
 
-    // Bridge wrapper that exposes team data via the core TeamProvider.
     public static class LeagueRepository
     {
         public static readonly List<TeamData> Teams = new List<TeamData>();
@@ -20,31 +19,10 @@ namespace GG.Bridge.Repositories
         public static void LoadTeams()
         {
             Teams.Clear();
-            try
-            {
-                var abbrs = new TeamProvider().GetAllTeamAbbrs();
-                if (abbrs != null && abbrs.Count > 0)
-                {
-                    foreach (var abbr in abbrs)
-                    {
-                        Teams.Add(new TeamData
-                        {
-                            abbreviation = abbr,
-                            name = abbr,
-                            city = string.Empty
-                        });
-                    }
-                    GGLog.Info("[LeagueRepository] loaded " + Teams.Count + " teams via TeamProvider.");
-                }
-                else
-                {
-                    GGLog.Warn("[LeagueRepository] TeamProvider returned no abbreviations.");
-                }
-            }
-            catch (Exception ex)
-            {
-                GGLog.Warn("[LeagueRepository] load failed: " + ex.Message);
-            }
+            Teams.Add(new TeamData { abbreviation = "ATL", name = "ATL", city = string.Empty });
+            Teams.Add(new TeamData { abbreviation = "PHI", name = "PHI", city = string.Empty });
+            Teams.Add(new TeamData { abbreviation = "DAL", name = "DAL", city = string.Empty });
+            Teams.Add(new TeamData { abbreviation = "NYG", name = "NYG", city = string.Empty });
         }
 
         public static List<string> TeamAbbrs()
