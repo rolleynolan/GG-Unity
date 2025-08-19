@@ -1,5 +1,7 @@
+#if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
+using UnityEngine;
 
 public static class PrefabTools
 {
@@ -13,15 +15,18 @@ public static class PrefabTools
     [MenuItem("Tools/GG/Clear Season Save")]
     public static void ClearSeasonSave()
     {
-        var path = GGPaths(GGConventions.SeasonSaveFile);
+        // Same path GGPaths would give:
+        var path = Path.Combine(Application.persistentDataPath, "GGData", GGConventions.SeasonSaveFile);
+
         if (File.Exists(path))
         {
             File.Delete(path);
-            GGLog.Info($"Deleted season save at {path}");
+            Debug.Log($"[GG] Deleted season save at {path}");
         }
         else
         {
-            GGLog.Warning($"No season save found at {path}");
+            Debug.LogWarning($"[GG] No season save found at {path}");
         }
     }
 }
+#endif

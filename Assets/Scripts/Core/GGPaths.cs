@@ -13,6 +13,8 @@ public static class GGPaths
     /// </summary>
     public static string SaveRoot => Path.Combine(Application.persistentDataPath, "GGData");
 
+    public static string CombineSave(string file) => Path.Combine(SaveRoot, file);
+
     /// <summary>
     /// Root folder for streaming assets.
     /// </summary>
@@ -31,6 +33,8 @@ public static class GGPaths
     // Legacy helpers retained for backward compatibility
     public static string Json(string file) => Save(file);
     public static string Config(string file) => Streaming(file);
+    
+
 
     public static string TeamsJson => Streaming("config/teams.json");
     public static string RostersByTeamJson => Save("rosters_by_team.json");
