@@ -13,7 +13,7 @@ public static class PrefabTools
     [MenuItem("Tools/GG/Clear Season Save")]
     public static void ClearSeasonSave()
     {
-        var path = GGPaths.Json(GGConventions.SeasonSaveFile);
+        var path = GGPaths.Save(GGConventions.SeasonSaveFile);
         if (File.Exists(path))
         {
             File.Delete(path);
