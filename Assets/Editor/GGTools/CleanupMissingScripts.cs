@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -18,7 +19,7 @@ public static class GGCleanupTools
             }
             EditorSceneManager.MarkSceneDirty(scene);
         }
-        GGLog.Info($"[GGCleanup] Removed {total} missing script components from open scene(s).");
+        Debug.Log($"[GGCleanup] Removed {total} missing script components from open scene(s).");
     }
 
     [MenuItem("Tools/GG/Cleanup Missing Scripts In Project Prefabs")]
@@ -30,14 +31,13 @@ public static class GGCleanupTools
         {
             var path = AssetDatabase.GUIDToAssetPath(guids[i]);
             var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (!go)
-            {
-                continue;
-            }
+            if (!go) continue;
+
             total += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
             EditorUtility.SetDirty(go);
         }
         AssetDatabase.SaveAssets();
-        GGLog.Info($"[GGCleanup] Removed {total} missing script components from prefabs.");
+        Debug.Log($"[GGCleanup] Removed {total} missing script components from prefabs.");
     }
 }
+#endif

@@ -15,7 +15,7 @@ public static class PrefabTools
     [MenuItem("Tools/GG/Clear Season Save")]
     public static void ClearSeasonSave()
     {
-        // Same path GGPaths would give:
+        // Build the path directly, no GGPaths/GGLog dependency.
         var path = Path.Combine(Application.persistentDataPath, "GGData", GGConventions.SeasonSaveFile);
 
         if (File.Exists(path))
